@@ -37,4 +37,14 @@ export const signUpStyles = StyleSheet.create({
         color: '#4CAF50',
         fontSize: 16,
     },
+    // New styles for general error message
+    generalErrorContainer: {
+        width: '80%',
+        marginTop: 10,
+    },
+    generalErrorText: {
+        color: 'red',
+        fontSize: 14,
+        textAlign: 'center',
+    },
 });

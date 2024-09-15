@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, TextInput, TouchableOpacity, Text } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
+import axios from 'axios';
 
 import {
     StyledContainer,
@@ -10,34 +11,50 @@ import {
     PageTitle
 } from '../components/styles';
 import { loginStyles } from '../components/LoginStyles';
+import { loginUser, storeToken } from '../api/auth';
 
 const Login: React.FC = () => {
-    const [username, setUsername] = useState<string>('');
+    const [login, setLogin] = useState<string>('');
     const [password, setPassword] = useState<string>('');
-    const [usernameError, setUsernameError] = useState<string>('');
+    const [loginError, setLoginError] = useState<string>('');
     const [passwordError, setPasswordError] = useState<string>('');
+    const [generalError, setGeneralError] = useState<string>('');
     const navigation = useNavigation<StackNavigationProp<any>>();
 
     const validateInputs = (): boolean => {
         let isValid = true;
-        setUsernameError('');
+        setLoginError('');
         setPasswordError('');
+        setGeneralError('');
 
-        if (!username.trim()) {
-            setUsernameError('Username is required');
+        if (!login.trim()) {
+            setLoginError('Username or email is required');
             isValid = false;
         }
-        if (password.length < 6) {
-            setPasswordError('Password must be at least 6 characters long');
+        if (!password) {
+            setPasswordError('Password is required');
             isValid = false;
         }
         return isValid;
     };
 
-    const handleLogin = () => {
+    const handleLogin = async () => {
         if (validateInputs()) {
-            // Implement login logic here
-            console.log('Login attempted with:', username, password);
+            try {
+                const response = await loginUser(login, password);
+                if (response.customer_account && response.token) {
+                    await storeToken(response.token);
+                    navigation.navigate('Home');
+                } else {
+                    setGeneralError('An unexpected error occurred during login.');
+                }
+            } catch (error) {
+                if (axios.isAxiosError(error)) {
+                    setGeneralError(error.response?.data?.message || 'An unexpected error occurred. Please try again later.');
+                } else {
+                    setGeneralError('An unexpected error occurred. Please try again later.');
+                }
+            }
         }
     };
 
@@ -54,15 +71,15 @@ const Login: React.FC = () => {
                 <View style={loginStyles.inputContainer}>
                     <TextInput
                         style={loginStyles.input}
-                        placeholder="Username"
-                        value={username}
+                        placeholder="Username or Email"
+                        value={login}
                         onChangeText={(text) => {
-                            setUsername(text);
-                            setUsernameError('');
+                            setLogin(text);
+                            setLoginError('');
                         }}
                         autoCapitalize="none"
                     />
-                    {usernameError ? <Text style={loginStyles.errorText}>{usernameError}</Text> : null}
+                    {loginError ? <Text style={loginStyles.errorText}>{loginError}</Text> : null}
                     <TextInput
                         style={loginStyles.input}
                         placeholder="Password"
@@ -79,6 +96,8 @@ const Login: React.FC = () => {
                 <TouchableOpacity style={loginStyles.button} onPress={handleLogin}>
                     <Text style={loginStyles.buttonText}>Login</Text>
                 </TouchableOpacity>
+                
+                {generalError ? <Text style={loginStyles.errorText}>{generalError}</Text> : null}
                 
                 <TouchableOpacity style={loginStyles.signUpButton} onPress={handleSignUp}>
                     <Text style={loginStyles.signUpButtonText}>Sign Up</Text>
