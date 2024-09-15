@@ -2,9 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { removeToken, getUserInfo } from '../api/auth';
-import { StyledContainer, InnerContainer, PageTitle } from '../components/styles';
-import { homeStyles } from '../components/HomeStyles';
+import { removeToken } from '../utils/asyncStorage'; 
+import { getUserInfo } from '../api/userApi'; 
+import { StyledContainer, InnerContainer, PageTitle } from '../styles/commonStyles';
+import { homeStyles } from '../styles/HomeStyles';
 import ProtectedRoute from '../components/ProtectedRoute';
 
 interface UserInfo {
@@ -39,7 +40,7 @@ const Home: React.FC = () => {
     return (
         <StyledContainer>
             <InnerContainer>
-                <PageTitle>Welcome Home</PageTitle>
+                <PageTitle>Welcome!</PageTitle>
                 {userInfo && (
                     <View>
                         <Text>Full Name: {userInfo.fullName}</Text>

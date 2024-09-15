@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { View, TextInput, TouchableOpacity, Text } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { registerUser, storeToken } from '../api/auth';
+import { registerUser } from '../api/authApi';
+import { storeToken } from '../utils/asyncStorage'; // New import
 import axios from 'axios';
 
-import { StyledContainer, InnerContainer, PageLogo, PageTitle } from '../components/styles';
-import { signUpStyles } from '../components/SignUpStyles';
+import { StyledContainer, InnerContainer, PageLogo, PageTitle } from '../styles/commonStyles';
+import { signUpStyles } from '../styles/SignUpStyles';
 
 const SignUp: React.FC = () => {
   const [fullName, setFullName] = useState('');

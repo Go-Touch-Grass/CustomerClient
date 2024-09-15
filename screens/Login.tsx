@@ -9,9 +9,10 @@ import {
     InnerContainer,
     PageLogo,
     PageTitle
-} from '../components/styles';
-import { loginStyles } from '../components/LoginStyles';
-import { loginUser, storeToken } from '../api/auth';
+} from '../styles/commonStyles';
+import { loginStyles } from '../styles/LoginStyles';
+import { loginUser } from '../api/authApi';
+import { storeToken } from '../utils/asyncStorage';
 
 const Login: React.FC = () => {
     const [login, setLogin] = useState<string>('');

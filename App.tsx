@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { View, ActivityIndicator } from 'react-native';
+import { getToken } from './utils/asyncStorage'; // New import
 import Login from './screens/Login';
 import SignUp from './screens/SignUp';
 import Home from './screens/Home';
@@ -14,13 +15,12 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const bootstrapAsync = async () => {
-      let token;
       try {
-        token = await AsyncStorage.getItem('userToken');
+        const token = await getToken();
+        setUserToken(token);
       } catch (e) {
         // Restoring token failed
       }
-      setUserToken(token);
       setIsLoading(false);
     };
 
@@ -28,8 +28,11 @@ const App: React.FC = () => {
   }, []);
 
   if (isLoading) {
-    // You might want to render a loading screen here
-    return null;
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
   }
 
   return (
