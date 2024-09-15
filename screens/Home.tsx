@@ -1,9 +1,10 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { View, TouchableOpacity, Text, Animated, TouchableWithoutFeedback } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import MapView from 'react-native-maps';
+import MapView, { Region, Marker } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
+import * as Location from 'expo-location';
 import { StyledContainer } from '../styles/commonStyles';
 import { homeStyles } from '../styles/HomeStyles';
 import ProtectedRoute from '../components/ProtectedRoute';
@@ -14,6 +15,36 @@ const Home: React.FC = () => {
 	const navigation = useNavigation<StackNavigationProp<any>>();
 	const [menuVisible, setMenuVisible] = useState(false);
 	const menuAnimation = useRef(new Animated.Value(0)).current;
+	const [region, setRegion] = useState<Region | null>(null);
+	const [userLocation, setUserLocation] = useState<Location.LocationObject | null>(null);
+	const mapRef = useRef<MapView>(null);
+
+	useEffect(() => {
+		(async () => {
+			let { status } = await Location.requestForegroundPermissionsAsync();
+			if (status !== 'granted') {
+				console.log('Permission to access location was denied');
+				return;
+			}
+
+			let location = await Location.getCurrentPositionAsync({});
+			setRegion({
+				latitude: location.coords.latitude,
+				longitude: location.coords.longitude,
+				latitudeDelta: 0.0922,
+				longitudeDelta: 0.0421,
+			});
+			setUserLocation(location);
+
+			// Watch for location changes
+			Location.watchPositionAsync(
+				{ accuracy: Location.Accuracy.BestForNavigation, timeInterval: 1000, distanceInterval: 1 },
+				(newLocation) => {
+					setUserLocation(newLocation);
+				}
+			);
+		})();
+	}, []);
 
 	const toggleMenu = (visible: boolean) => {
 		setMenuVisible(visible);
@@ -45,6 +76,19 @@ const Home: React.FC = () => {
 		toggleMenu(false);
 		await removeToken();
 		navigation.replace('Login');
+	};
+
+	const centerOnUserLocation = async () => {
+		if (userLocation) {
+			const newRegion = {
+				latitude: userLocation.coords.latitude,
+				longitude: userLocation.coords.longitude,
+				latitudeDelta: 0.0922,
+				longitudeDelta: 0.0421,
+			};
+			setRegion(newRegion);
+			mapRef.current?.animateToRegion(newRegion, 1000);
+		}
 	};
 
 	const menuTranslateY = menuAnimation.interpolate({
@@ -87,15 +131,37 @@ const Home: React.FC = () => {
 					</TouchableWithoutFeedback>
 				</Animated.View>
 				<View style={homeStyles.mapContainer}>
-					<MapView
-						style={homeStyles.map}
-						initialRegion={{
-							latitude: 37.78825,
-							longitude: -122.4324,
-							latitudeDelta: 0.0922,
-							longitudeDelta: 0.0421,
-						}}
-					/>
+					{region && (
+						<MapView
+							ref={mapRef}
+							style={homeStyles.map}
+							region={region}
+						>
+							{userLocation && (
+								<Marker
+									coordinate={{
+										latitude: userLocation.coords.latitude,
+										longitude: userLocation.coords.longitude,
+									}}
+									title="You are here"
+									description="Your current location"
+									anchor={{ x: 0.5, y: 0.5 }}
+								>
+									<View style={homeStyles.markerContainer}>
+										<View style={homeStyles.markerBackground} />
+										{/* <View style={[homeStyles.markerDirection, { transform: [{ rotate: `${userLocation.coords.heading}deg` }] }]} /> */}
+										<View style={homeStyles.markerDot} />
+									</View>
+								</Marker>
+							)}
+						</MapView>
+					)}
+						<TouchableOpacity 
+							style={homeStyles.centerButton} 
+							onPress={centerOnUserLocation}
+						>
+							<Ionicons name="locate" size={24} color="black" />
+						</TouchableOpacity>
 				</View>
 			</StyledContainer>
 		</TouchableWithoutFeedback>
