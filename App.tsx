@@ -6,6 +6,7 @@ import { getToken } from './utils/asyncStorage'; // New import
 import Login from './screens/Login';
 import SignUp from './screens/SignUp';
 import Home from './screens/Home';
+import Profile from './screens/Profile';
 
 const Stack = createStackNavigator();
 
@@ -46,6 +47,7 @@ const App: React.FC = () => {
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="SignUp" component={SignUp} />
         <Stack.Screen name="Home" component={Home} />
+        <Stack.Screen name="Profile" component={Profile} />
       </Stack.Navigator>
     </NavigationContainer>
   );
