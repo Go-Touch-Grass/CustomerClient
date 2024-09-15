@@ -6,11 +6,11 @@ import {
     InnerContainer,
     PageLogo,
     PageTitle
-} from './../components/styles';
+} from '../components/styles';
 
-const Login = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+const Login: React.FC = () => {
+    const [email, setEmail] = useState<string>('');
+    const [password, setPassword] = useState<string>('');
 
     const handleLogin = () => {
         // Implement login logic here
@@ -47,7 +47,7 @@ const Login = () => {
             </InnerContainer>
         </StyledContainer>
     );
-}
+};
 
 const styles = StyleSheet.create({
     inputContainer: {
