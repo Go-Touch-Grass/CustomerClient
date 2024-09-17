@@ -58,3 +58,22 @@ export const deleteAccount = async (): Promise<void> => {
         throw error;
     }
 };
+
+export const changePassword = async (currentPassword: string, newPassword: string): Promise<void> => {
+    const token = await getToken();
+    if (!token) {
+        throw new Error('No token found');
+    }
+
+    try {
+        const response = await axiosInstance.post('auth/change-password', 
+            { currentPassword, newPassword },
+            {
+                headers: { Authorization: `Bearer ${token}` }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};

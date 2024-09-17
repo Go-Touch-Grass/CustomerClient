@@ -82,6 +82,10 @@ const Profile: React.FC = () => {
         );
     };
 
+    const handleChangePassword = () => {
+        navigation.navigate('ChangePassword');
+    };
+
     return (
         <StyledContainer>
             <TouchableOpacity style={profileStyles.backButton} onPress={handleBack}>
@@ -118,6 +122,9 @@ const Profile: React.FC = () => {
                 )}
                 <TouchableOpacity style={profileStyles.button} onPress={handleEditProfile}>
                     <Text style={profileStyles.buttonText}>Edit Profile</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={profileStyles.button} onPress={handleChangePassword}>
+                    <Text style={profileStyles.buttonText}>Change Password</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={profileStyles.logoutButton} onPress={handleLogout}>
                     <Text style={profileStyles.buttonText}>Logout</Text>

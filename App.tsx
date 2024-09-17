@@ -9,6 +9,7 @@ import Home from './screens/Home';
 import Profile from './screens/Profile';
 import EditProfile from './screens/EditProfile';
 const Stack = createStackNavigator();
+import ChangePassword from './screens/ChangePassword';
 
 const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -49,6 +50,7 @@ const App: React.FC = () => {
         <Stack.Screen name="Home" component={Home} />
         <Stack.Screen name="Profile" component={Profile} />
         <Stack.Screen name="EditProfile" component={EditProfile} />
+        <Stack.Screen name="ChangePassword" component={ChangePassword} />
       </Stack.Navigator>
     </NavigationContainer>
   );
