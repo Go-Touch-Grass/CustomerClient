@@ -61,4 +61,58 @@ export const profileStyles = StyleSheet.create({
     height: '100%',
     backgroundColor: '#4CAF50',
   },
+  inputContainer: {
+    width: '80%',
+    backgroundColor: Colors.secondary,
+    borderRadius: 10,
+    padding: 20,
+    marginBottom: 20,
+  },
+  input: {
+    backgroundColor: Colors.primary,
+    padding: 15,
+    borderRadius: 5,
+    fontSize: 16,
+    marginBottom: 10,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 5,
+    color: Colors.tertiary,
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 12,
+    marginTop: -5,
+    marginBottom: 10,
+  },
+  generalErrorContainer: {
+    width: '80%',
+    marginTop: 10,
+  },
+  generalErrorText: {
+    color: 'red',
+    fontSize: 14,
+    textAlign: 'center',
+  },
+  deleteButton: {
+    backgroundColor: '#FF0000',
+    padding: 15,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  deleteButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  logoutButton: {
+    backgroundColor: '#2E7D32', // Darker green
+    padding: 15,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginTop: 20,
+  },
 });

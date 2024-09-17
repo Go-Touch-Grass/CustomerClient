@@ -7,7 +7,7 @@ import Login from './screens/Login';
 import SignUp from './screens/SignUp';
 import Home from './screens/Home';
 import Profile from './screens/Profile';
-
+import EditProfile from './screens/EditProfile';
 const Stack = createStackNavigator();
 
 const App: React.FC = () => {
@@ -48,6 +48,7 @@ const App: React.FC = () => {
         <Stack.Screen name="SignUp" component={SignUp} />
         <Stack.Screen name="Home" component={Home} />
         <Stack.Screen name="Profile" component={Profile} />
+        <Stack.Screen name="EditProfile" component={EditProfile} />
       </Stack.Navigator>
     </NavigationContainer>
   );

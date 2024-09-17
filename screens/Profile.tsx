@@ -8,16 +8,18 @@ import { getUserInfo } from '../api/userApi';
 import { StyledContainer, InnerContainer, PageTitle } from '../styles/commonStyles';
 import { profileStyles } from '../styles/ProfileStyles';
 import ProtectedRoute from '../components/ProtectedRoute';
+import { deleteAccount } from '../api/userApi';
+import { Alert } from 'react-native';
 
 interface UserInfo {
     id: string;
-    fullName: string;
+    full_name: string;
     email: string;
     username: string;
     exp: number;
-    currentLevel: number;
-    xpForNextLevel: number;
-    xpProgress: number;
+    current_level: number;
+    xp_for_next_level: number;
+    xp_progress: number;
 }
 
 const Profile: React.FC = () => {
@@ -36,7 +38,13 @@ const Profile: React.FC = () => {
         };
 
         fetchUserInfo();
-    }, []);
+
+        const unsubscribe = navigation.addListener('focus', () => {
+            fetchUserInfo();
+        });
+
+        return unsubscribe;
+    }, [navigation]);
 
     const handleLogout = async () => {
         await removeToken();
@@ -45,6 +53,33 @@ const Profile: React.FC = () => {
 
     const handleBack = () => {
         navigation.goBack();
+    };
+
+    const handleEditProfile = () => {
+        navigation.navigate('EditProfile', { userInfo });
+    };
+
+    const handleDeleteAccount = async () => {
+        Alert.alert(
+            'Delete Account',
+            'Are you sure you want to delete your account? This action cannot be undone.',
+            [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                    text: 'Delete',
+                    style: 'destructive',
+                    onPress: async () => {
+                        try {
+                            await deleteAccount();
+                            await removeToken();
+                            navigation.replace('Login');
+                        } catch (error: any) {
+                            Alert.alert('Error', error.response?.data?.message || 'Failed to delete account');
+                        }
+                    },
+                },
+            ]
+        );
     };
 
     return (
@@ -81,7 +116,10 @@ const Profile: React.FC = () => {
                         </View>
                     </>
                 )}
-                <TouchableOpacity style={profileStyles.button} onPress={handleLogout}>
+                <TouchableOpacity style={profileStyles.button} onPress={handleEditProfile}>
+                    <Text style={profileStyles.buttonText}>Edit Profile</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={profileStyles.logoutButton} onPress={handleLogout}>
                     <Text style={profileStyles.buttonText}>Logout</Text>
                 </TouchableOpacity>
             </InnerContainer>
