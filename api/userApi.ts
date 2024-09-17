@@ -1,7 +1,18 @@
 import axiosInstance from './authApi';
 import { getToken } from '../utils/asyncStorage';
 
-export const getUserInfo = async () => {
+interface UserInfo {
+    id: string;
+    fullName: string;
+    email: string;
+    username: string;
+    exp: number;
+    currentLevel: number;
+    xpForNextLevel: number;
+    xpProgress: number;
+}
+
+export const getUserInfo = async (): Promise<UserInfo> => {
     const token = await getToken();
     if (!token) {
         throw new Error('No token found');

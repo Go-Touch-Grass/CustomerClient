@@ -40,4 +40,25 @@ export const profileStyles = StyleSheet.create({
     color: '#4CAF50',
     fontSize: 24,
   },
+  progressContainer: {
+    backgroundColor: Colors.secondary,
+    borderRadius: 10,
+    padding: 20,
+    marginBottom: 20,
+  },
+  progressText: {
+    fontSize: 16,
+    marginBottom: 10,
+    color: Colors.tertiary,
+  },
+  progressBarContainer: {
+    height: 20,
+    backgroundColor: '#e0e0e0',
+    borderRadius: 10,
+    overflow: 'hidden',
+  },
+  progressBar: {
+    height: '100%',
+    backgroundColor: '#4CAF50',
+  },
 });

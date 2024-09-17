@@ -10,9 +10,14 @@ import { profileStyles } from '../styles/ProfileStyles';
 import ProtectedRoute from '../components/ProtectedRoute';
 
 interface UserInfo {
+    id: string;
     fullName: string;
     email: string;
     username: string;
+    exp: number;
+    currentLevel: number;
+    xpForNextLevel: number;
+    xpProgress: number;
 }
 
 const Profile: React.FC = () => {
@@ -50,11 +55,31 @@ const Profile: React.FC = () => {
             <InnerContainer>
                 <PageTitle>Profile</PageTitle>
                 {userInfo && (
-                    <View style={profileStyles.infoContainer}>
-                        <Text style={profileStyles.infoText}>Full Name: {userInfo.fullName}</Text>
-                        <Text style={profileStyles.infoText}>Email: {userInfo.email}</Text>
-                        <Text style={profileStyles.infoText}>Username: {userInfo.username}</Text>
-                    </View>
+                    <>
+                        <View style={profileStyles.infoContainer}>
+                            <Text style={profileStyles.infoText}>Full Name: {userInfo.fullName}</Text>
+                            <Text style={profileStyles.infoText}>Email: {userInfo.email}</Text>
+                            <Text style={profileStyles.infoText}>Username: {userInfo.username}</Text>
+                            <Text style={profileStyles.infoText}>Total EXP: {userInfo.exp}</Text>
+                            <Text style={profileStyles.infoText}>Level: {userInfo.currentLevel}</Text>
+                            <Text style={profileStyles.infoText}> EXP needed for next level: {userInfo.xpForNextLevel}</Text>
+                            <Text style={profileStyles.infoText}> EXP earned in current level: {userInfo.xpProgress}</Text>
+                        </View>
+                        <View style={profileStyles.progressContainer}>
+                            <Text style={profileStyles.progressText}>Level Progress</Text>
+                            <View style={profileStyles.progressBarContainer}>
+                                <View
+                                    style={[
+                                        profileStyles.progressBar,
+                                        { width: `${(userInfo.xpProgress / userInfo.xpForNextLevel) * 100}%` },
+                                    ]}
+                                />
+                            </View>
+                            <Text style={profileStyles.progressText}>
+                                {userInfo.xpProgress} / {userInfo.xpForNextLevel} XP
+                            </Text>
+                        </View>
+                    </>
                 )}
                 <TouchableOpacity style={profileStyles.button} onPress={handleLogout}>
                     <Text style={profileStyles.buttonText}>Logout</Text>
