@@ -19,6 +19,8 @@
     "username-or-email": "用户名或电子邮件",
     "password" : "密码",
     "login": "登录",
+    "username-or-email-is-required" : "需要用户名或电子邮件",
+    "password-required" : "需要密码",
 
     "sign-up" : "报名",
     "create-account": "创建帐户",

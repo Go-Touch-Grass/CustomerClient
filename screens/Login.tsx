@@ -31,11 +31,11 @@ const Login: React.FC = () => {
         setGeneralError('');
 
         if (!login.trim()) {
-            setLoginError('Username or email is required');
+            setLoginError(t('username-or-email-is-required'));
             isValid = false;
         }
         if (!password) {
-            setPasswordError('Password is required');
+            setPasswordError(t('password-required'));
             isValid = false;
         }
         return isValid;

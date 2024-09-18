@@ -19,6 +19,8 @@
     "username-or-email": "Username or Email",
     "password": "Password",
     "login": "Login",
+    "username-or-email-is-required" : "Username or email is required",
+    "password-required" : "Password is required",
 
     "sign-up" : "Sign Up",
     "create-account": "Create Account",
