@@ -1,0 +1,52 @@
+{
+    "profile" : "Profile",
+    "logout" : "Logout",
+    "change-language" : "Change Language",
+    "language-preference" : "Language Preference",
+
+    "full-name": "Full Name",
+    "email" : "Email",
+    "username": "Username",
+    "total-exp" : "Total EXP",
+    "level" : "Level",
+    "exp-needed-for-next-level" : "EXP needed for next level",
+    "exp-earned-in-current-level" : "EXP earned in current level",
+    "level-progress" : "Level Progress",
+    "edit-profile" : "Edit Profile",
+    "change-password" : "Change Password",
+
+    "go-touch-grass": "Go Touch Grass",
+    "username-or-email": "Username or Email",
+    "password": "Password",
+    "login": "Login",
+
+    "sign-up" : "Sign Up",
+    "create-account": "Create Account",
+    "confirm-password" : "Confirm Password",
+    "already-have-an-account-login-instead" : "Already have an account? Login",
+
+    "full-name-is-required" : "Full name is required",
+    "username-is-required" : "Username is required",
+    "email-is-required" : "Email is required",
+    "email-is-invalid" : "Email is invalid",
+    "save-changes": "Save Changes",
+    "delete-account": "Delete Account",
+    "delete-confirmation":"Are you sure you want to delete your account? This action cannot be undone.",
+    "success" : "Success",
+    "profile-updated-successfully" : "Profile updated successfully",
+    "cancel" : "Cancel",
+    "delete" : "Delete",
+
+    "current-password" : "Current Password",
+    "new-password": "New Password",
+    "confirm-new-password": "Confirm New Password",
+    "current-password-is-required" : "Current password is required",
+    "new-password-six-characters" : "New password must be at least 6 characters long",
+    "passwords-do-not-match" : "Passwords do not match",
+    "password-changed-successfully" : "Password changed successfully",
+    "current-password-incorrect" : "Current password is incorrect",
+    "failed-to-change-password" : "Failed to change password",
+    "unexpected-error-occured" : "An unexpected error occurred. Please try again later."
+
+
+}

@@ -10,6 +10,7 @@ import { profileStyles } from '../styles/ProfileStyles';
 import ProtectedRoute from '../components/ProtectedRoute';
 import { deleteAccount } from '../api/userApi';
 import { Alert } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 interface UserInfo {
     id: string;
@@ -23,6 +24,7 @@ interface UserInfo {
 }
 
 const Profile: React.FC = () => {
+    const { t } = useTranslation();
     const navigation = useNavigation<StackNavigationProp<any>>();
     const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
 
@@ -92,20 +94,20 @@ const Profile: React.FC = () => {
                 <Ionicons name="arrow-back" style={profileStyles.backIcon} />
             </TouchableOpacity>
             <InnerContainer>
-                <PageTitle>Profile</PageTitle>
+                <PageTitle>{t('profile')}</PageTitle>
                 {userInfo && (
                     <>
                         <View style={profileStyles.infoContainer}>
-                            <Text style={profileStyles.infoText}>Full Name: {userInfo.fullName}</Text>
-                            <Text style={profileStyles.infoText}>Email: {userInfo.email}</Text>
-                            <Text style={profileStyles.infoText}>Username: {userInfo.username}</Text>
-                            <Text style={profileStyles.infoText}>Total EXP: {userInfo.exp}</Text>
-                            <Text style={profileStyles.infoText}>Level: {userInfo.currentLevel}</Text>
-                            <Text style={profileStyles.infoText}> EXP needed for next level: {userInfo.xpForNextLevel}</Text>
-                            <Text style={profileStyles.infoText}> EXP earned in current level: {userInfo.xpProgress}</Text>
+                            <Text style={profileStyles.infoText}>{t('full-name')}: {userInfo.fullName}</Text>
+                            <Text style={profileStyles.infoText}>{t('email')}: {userInfo.email}</Text>
+                            <Text style={profileStyles.infoText}>{t('username')}: {userInfo.username}</Text>
+                            <Text style={profileStyles.infoText}>{t('total-exp')}: {userInfo.exp}</Text>
+                            <Text style={profileStyles.infoText}>{t('level')}: {userInfo.currentLevel}</Text>
+                            <Text style={profileStyles.infoText}> {t('exp-needed-for-next-level')}: {userInfo.xpForNextLevel}</Text>
+                            <Text style={profileStyles.infoText}>{t('exp-earned-in-current-level')} : {userInfo.xpProgress}</Text>
                         </View>
                         <View style={profileStyles.progressContainer}>
-                            <Text style={profileStyles.progressText}>Level Progress</Text>
+                            <Text style={profileStyles.progressText}>{t('level-progress')}</Text>
                             <View style={profileStyles.progressBarContainer}>
                                 <View
                                     style={[
@@ -121,13 +123,13 @@ const Profile: React.FC = () => {
                     </>
                 )}
                 <TouchableOpacity style={profileStyles.button} onPress={handleEditProfile}>
-                    <Text style={profileStyles.buttonText}>Edit Profile</Text>
+                    <Text style={profileStyles.buttonText}>{t('edit-profile')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={profileStyles.button} onPress={handleChangePassword}>
-                    <Text style={profileStyles.buttonText}>Change Password</Text>
+                    <Text style={profileStyles.buttonText}>{t('change-password')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={profileStyles.logoutButton} onPress={handleLogout}>
-                    <Text style={profileStyles.buttonText}>Logout</Text>
+                    <Text style={profileStyles.buttonText}>{t('logout')}</Text>
                 </TouchableOpacity>
             </InnerContainer>
         </StyledContainer>

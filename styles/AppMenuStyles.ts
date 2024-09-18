@@ -14,6 +14,6 @@ export const appMenuStyles = StyleSheet.create({
   },
   drawerItemText: {
     fontSize: 16,
-    color: Colors.brand,
+    color: Colors.brand, 
   },
 });

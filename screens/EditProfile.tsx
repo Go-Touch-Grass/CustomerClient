@@ -8,6 +8,7 @@ import { StyledContainer, InnerContainer, PageTitle } from '../styles/commonStyl
 import { profileStyles } from '../styles/ProfileStyles';
 import ProtectedRoute from '../components/ProtectedRoute';
 import { removeToken } from '../utils/asyncStorage';
+import { useTranslation } from 'react-i18next';
 
 interface EditProfileProps {
     route: {
@@ -22,6 +23,7 @@ interface EditProfileProps {
 }
 
 const EditProfile: React.FC<EditProfileProps> = ({ route }) => {
+    const { t } = useTranslation();
     const navigation = useNavigation<StackNavigationProp<any>>();
     const { userInfo } = route.params;
     const [fullName, setFullName] = useState(userInfo.fullName);
@@ -43,20 +45,20 @@ const EditProfile: React.FC<EditProfileProps> = ({ route }) => {
         const newErrors = { ...errors };
 
         if (!fullName.trim()) {
-            newErrors.fullName = 'Full name is required';
+            newErrors.fullName = t('full-name-is-required');
             isValid = false;
         }
 
         if (!username.trim()) {
-            newErrors.username = 'Username is required';
+            newErrors.username = t('username-is-required');
             isValid = false;
         }
 
         if (!email.trim()) {
-            newErrors.email = 'Email is required';
+            newErrors.email = t('email-is-required');
             isValid = false;
         } else if (!/\S+@\S+\.\S+/.test(email)) {
-            newErrors.email = 'Email is invalid';
+            newErrors.email = t('email-is-invalid');
             isValid = false;
         }
 
@@ -68,7 +70,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ route }) => {
         if (validateInputs()) {
             try {
                 const updatedInfo = await editProfile({ fullName, email, username });
-                Alert.alert('Success', 'Profile updated successfully');
+                Alert.alert(t('success'), t('profile-updated-successfully'));
                 navigation.navigate('Profile', { updatedInfo });
             } catch (error: any) {
                 setErrors({
@@ -81,12 +83,12 @@ const EditProfile: React.FC<EditProfileProps> = ({ route }) => {
 
     const handleDeleteAccount = async () => {
         Alert.alert(
-            'Delete Account',
-            'Are you sure you want to delete your account? This action cannot be undone.',
+            t('delete-account'),
+            t('delete-confirmation'),
             [
-                { text: 'Cancel', style: 'cancel' },
+                { text: t('cancel'), style: 'cancel' },
                 {
-                    text: 'Delete',
+                    text: t('delete'),
                     style: 'destructive',
                     onPress: async () => {
                         try {
@@ -111,9 +113,9 @@ const EditProfile: React.FC<EditProfileProps> = ({ route }) => {
                 <Ionicons name="arrow-back" style={profileStyles.backIcon} />
             </TouchableOpacity>
             <InnerContainer>
-                <PageTitle>Edit Profile</PageTitle>
+                <PageTitle>{t('edit-profile')}</PageTitle>
                 <View style={profileStyles.inputContainer}>
-                    <Text style={profileStyles.label}>Full Name:</Text>
+                    <Text style={profileStyles.label}>{t('full-name')}:</Text>
                     <TextInput
                         style={profileStyles.input}
                         value={fullName}
@@ -125,7 +127,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ route }) => {
                     />
                     {errors.fullName ? <Text style={profileStyles.errorText}>{errors.fullName}</Text> : null}
 
-                    <Text style={profileStyles.label}>Email:</Text>
+                    <Text style={profileStyles.label}>{t('email')}:</Text>
                     <TextInput
                         style={profileStyles.input}
                         value={email}
@@ -138,7 +140,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ route }) => {
                     />
                     {errors.email ? <Text style={profileStyles.errorText}>{errors.email}</Text> : null}
 
-                    <Text style={profileStyles.label}>Username:</Text>
+                    <Text style={profileStyles.label}>{t('username')}:</Text>
                     <TextInput
                         style={profileStyles.input}
                         value={username}
@@ -151,10 +153,10 @@ const EditProfile: React.FC<EditProfileProps> = ({ route }) => {
                     {errors.username ? <Text style={profileStyles.errorText}>{errors.username}</Text> : null}
                 </View>
                 <TouchableOpacity style={profileStyles.button} onPress={handleSave}>
-                    <Text style={profileStyles.buttonText}>Save Changes</Text>
+                    <Text style={profileStyles.buttonText}>{t('save-changes')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={profileStyles.deleteButton} onPress={handleDeleteAccount}>
-                    <Text style={profileStyles.deleteButtonText}>Delete Account</Text>
+                    <Text style={profileStyles.deleteButtonText}>{t('delete-account')}</Text>
                 </TouchableOpacity>
                 {errors.general ? (
                     <View style={profileStyles.generalErrorContainer}>

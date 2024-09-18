@@ -3,6 +3,7 @@ import { View, TextInput, TouchableOpacity, Text } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 
 import {
     StyledContainer,
@@ -15,6 +16,7 @@ import { loginUser } from '../api/authApi';
 import { storeToken } from '../utils/asyncStorage';
 
 const Login: React.FC = () => {
+    const { t } = useTranslation();
     const [login, setLogin] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     const [loginError, setLoginError] = useState<string>('');
@@ -67,12 +69,12 @@ const Login: React.FC = () => {
         <StyledContainer>
             <InnerContainer>
                 <PageLogo resizeMode="cover" source={require('./../assets/gardensbtb.png')} />
-                <PageTitle>Go Touch Grass</PageTitle>
+                <PageTitle>{t('go-touch-grass')}</PageTitle>
                 
                 <View style={loginStyles.inputContainer}>
                     <TextInput
                         style={loginStyles.input}
-                        placeholder="Username or Email"
+                        placeholder={t('username-or-email')}
                         value={login}
                         onChangeText={(text) => {
                             setLogin(text);
@@ -83,7 +85,7 @@ const Login: React.FC = () => {
                     {loginError ? <Text style={loginStyles.errorText}>{loginError}</Text> : null}
                     <TextInput
                         style={loginStyles.input}
-                        placeholder="Password"
+                        placeholder={t('password')}
                         value={password}
                         onChangeText={(text) => {
                             setPassword(text);
@@ -95,13 +97,13 @@ const Login: React.FC = () => {
                 </View>
                 
                 <TouchableOpacity style={loginStyles.button} onPress={handleLogin}>
-                    <Text style={loginStyles.buttonText}>Login</Text>
+                    <Text style={loginStyles.buttonText}>{t('login')}</Text>
                 </TouchableOpacity>
                 
                 {generalError ? <Text style={loginStyles.errorText}>{generalError}</Text> : null}
                 
                 <TouchableOpacity style={loginStyles.signUpButton} onPress={handleSignUp}>
-                    <Text style={loginStyles.signUpButtonText}>Sign Up</Text>
+                    <Text style={loginStyles.signUpButtonText}>{t('sign-up')}</Text>
                 </TouchableOpacity>
             </InnerContainer>
         </StyledContainer>

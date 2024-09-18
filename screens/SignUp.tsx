@@ -8,8 +8,10 @@ import axios from 'axios';
 
 import { StyledContainer, InnerContainer, PageLogo, PageTitle } from '../styles/commonStyles';
 import { signUpStyles } from '../styles/SignUpStyles';
+import { useTranslation } from 'react-i18next';
 
 const SignUp: React.FC = () => {
+  const { t } = useTranslation();
   const [fullName, setFullName] = useState('');
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
@@ -93,12 +95,12 @@ const SignUp: React.FC = () => {
     <StyledContainer>
       <InnerContainer>
         <PageLogo resizeMode="cover" source={require('./../assets/gardensbtb.png')} />
-        <PageTitle>Create Account</PageTitle>
+        <PageTitle>{t('create-account')}</PageTitle>
 
         <View style={signUpStyles.inputContainer}>
           <TextInput
             style={signUpStyles.input}
-            placeholder="Full Name"
+            placeholder={t('full-name')}
             value={fullName}
             onChangeText={(text) => {
               setFullName(text);
@@ -109,7 +111,7 @@ const SignUp: React.FC = () => {
 
           <TextInput
             style={signUpStyles.input}
-            placeholder="Username"
+            placeholder={t('username')}
             value={username}
             onChangeText={(text) => {
               setUsername(text);
@@ -121,7 +123,7 @@ const SignUp: React.FC = () => {
 
           <TextInput
             style={signUpStyles.input}
-            placeholder="Email"
+            placeholder={t('email')}
             value={email}
             onChangeText={(text) => {
               setEmail(text);
@@ -134,7 +136,7 @@ const SignUp: React.FC = () => {
 
           <TextInput
             style={signUpStyles.input}
-            placeholder="Password"
+            placeholder={t('password')}
             value={password}
             onChangeText={(text) => {
               setPassword(text);
@@ -146,7 +148,7 @@ const SignUp: React.FC = () => {
 
           <TextInput
             style={signUpStyles.input}
-            placeholder="Confirm Password"
+            placeholder={t('confirm-password')}
             value={confirmPassword}
             onChangeText={(text) => {
               setConfirmPassword(text);
@@ -158,7 +160,7 @@ const SignUp: React.FC = () => {
         </View>
 
         <TouchableOpacity style={signUpStyles.button} onPress={handleSignUp}>
-          <Text style={signUpStyles.buttonText}>Sign Up</Text>
+          <Text style={signUpStyles.buttonText}>{t('sign-up')}</Text>
         </TouchableOpacity>
 
         {errors.general ? (
@@ -168,7 +170,7 @@ const SignUp: React.FC = () => {
         ) : null}
 
         <TouchableOpacity style={signUpStyles.loginButton} onPress={handleLogin}>
-          <Text style={signUpStyles.loginButtonText}>Already have an account? Login</Text>
+          <Text style={signUpStyles.loginButtonText}>{t('already-have-an-account-login-instead')}</Text>
         </TouchableOpacity>
       </InnerContainer>
     </StyledContainer>

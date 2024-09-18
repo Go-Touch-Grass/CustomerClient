@@ -10,8 +10,10 @@ import { homeStyles } from '../styles/HomeStyles';
 import ProtectedRoute from '../components/ProtectedRoute';
 import { Colors } from '../styles/commonStyles';
 import { removeToken } from '../utils/asyncStorage';
+import { useTranslation } from 'react-i18next';
 
 const Home: React.FC = () => {
+	const { t } = useTranslation();
 	const navigation = useNavigation<StackNavigationProp<any>>();
 	const [menuVisible, setMenuVisible] = useState(false);
 	const menuAnimation = useRef(new Animated.Value(0)).current;
@@ -72,6 +74,11 @@ const Home: React.FC = () => {
 		navigation.navigate('Profile');
 	};
 
+	const navigateToChangeLanguage = () => {
+		toggleMenu(false);
+		navigation.navigate('Change Language');
+	};
+
 	const handleLogout = async () => {
 		toggleMenu(false);
 		await removeToken();
@@ -122,10 +129,13 @@ const Home: React.FC = () => {
 					<TouchableWithoutFeedback>
 						<View>
 							<TouchableOpacity style={homeStyles.menuItem} onPress={navigateToProfile}>
-								<Text style={homeStyles.menuItemText}>Profile</Text>
+								<Text style={homeStyles.menuItemText}>{t('profile')}</Text>
+							</TouchableOpacity>
+							<TouchableOpacity style={homeStyles.menuItem} onPress={navigateToChangeLanguage}>
+								<Text style={homeStyles.menuItemText}>{t('change-language')}</Text>
 							</TouchableOpacity>
 							<TouchableOpacity style={homeStyles.menuItem} onPress={handleLogout}>
-								<Text style={homeStyles.menuItemText}>Logout</Text>
+								<Text style={homeStyles.menuItemText}>{t('logout')}</Text>
 							</TouchableOpacity>
 						</View>
 					</TouchableWithoutFeedback>

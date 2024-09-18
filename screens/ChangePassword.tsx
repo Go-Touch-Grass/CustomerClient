@@ -8,8 +8,10 @@ import { StyledContainer, InnerContainer, PageTitle } from '../styles/commonStyl
 import { profileStyles } from '../styles/ProfileStyles';
 import ProtectedRoute from '../components/ProtectedRoute';
 import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 
 const ChangePassword: React.FC = () => {
+    const { t } = useTranslation();
     const navigation = useNavigation<StackNavigationProp<any>>();
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
@@ -30,17 +32,17 @@ const ChangePassword: React.FC = () => {
         const newErrors = { ...errors };
 
         if (!currentPassword.trim()) {
-            newErrors.currentPassword = 'Current password is required';
+            newErrors.currentPassword = t('current-password-is-required');
             isValid = false;
         }
 
         if (newPassword.length < 6) {
-            newErrors.newPassword = 'New password must be at least 6 characters long';
+            newErrors.newPassword = t('new-password-six-characters');
             isValid = false;
         }
 
         if (newPassword !== confirmNewPassword) {
-            newErrors.confirmNewPassword = 'Passwords do not match';
+            newErrors.confirmNewPassword = t('passwords-do-not-match');
             isValid = false;
         }
 
@@ -52,25 +54,25 @@ const ChangePassword: React.FC = () => {
         if (validateInputs()) {
             try {
                 await changePassword(currentPassword, newPassword);
-                Alert.alert('Success', 'Password changed successfully');
+                Alert.alert(t('success'), t('password-changed-successfully'));
                 navigation.goBack();
             } catch (error) {
                 if (axios.isAxiosError(error)) {
                     if (error.response?.status === 401) {
                         setErrors({
                             ...errors,
-                            currentPassword: 'Current password is incorrect',
+                            currentPassword: t('current-password-incorrect'),
                         });
                     } else {
                         setErrors({
                             ...errors,
-                            general: error.response?.data?.message || 'Failed to change password',
+                            general: error.response?.data?.message || t('failed-to-change-password'),
                         });
                     }
                 } else {
                     setErrors({
                         ...errors,
-                        general: 'An unexpected error occurred. Please try again later.',
+                        general: t('unexpected-error-occured'),
                     });
                 }
             }
@@ -83,9 +85,9 @@ const ChangePassword: React.FC = () => {
                 <Ionicons name="arrow-back" style={profileStyles.backIcon} />
             </TouchableOpacity>
             <InnerContainer>
-                <PageTitle>Change Password</PageTitle>
+                <PageTitle>{t('change-password')}</PageTitle>
                 <View style={profileStyles.inputContainer}>
-                    <Text style={profileStyles.label}>Current Password:</Text>
+                    <Text style={profileStyles.label}>{t('current-password')}:</Text>
                     <TextInput
                         style={profileStyles.input}
                         value={currentPassword}
@@ -93,12 +95,12 @@ const ChangePassword: React.FC = () => {
                             setCurrentPassword(text);
                             setErrors({ ...errors, currentPassword: '', general: '' });
                         }}
-                        placeholder="Current Password"
+                        placeholder={t('current-password')}
                         secureTextEntry
                     />
                     {errors.currentPassword ? <Text style={profileStyles.errorText}>{errors.currentPassword}</Text> : null}
 
-                    <Text style={profileStyles.label}>New Password:</Text>
+                    <Text style={profileStyles.label}>{t('new-password')}:</Text>
                     <TextInput
                         style={profileStyles.input}
                         value={newPassword}
@@ -106,12 +108,12 @@ const ChangePassword: React.FC = () => {
                             setNewPassword(text);
                             setErrors({ ...errors, newPassword: '', confirmNewPassword: '', general: '' });
                         }}
-                        placeholder="New Password"
+                        placeholder={t('new-password')}
                         secureTextEntry
                     />
                     {errors.newPassword ? <Text style={profileStyles.errorText}>{errors.newPassword}</Text> : null}
 
-                    <Text style={profileStyles.label}>Confirm New Password:</Text>
+                    <Text style={profileStyles.label}>{t('confirm-new-password')}:</Text>
                     <TextInput
                         style={profileStyles.input}
                         value={confirmNewPassword}
@@ -119,13 +121,13 @@ const ChangePassword: React.FC = () => {
                             setConfirmNewPassword(text);
                             setErrors({ ...errors, confirmNewPassword: '', general: '' });
                         }}
-                        placeholder="Confirm New Password"
+                        placeholder={t('confirm-new-password')}
                         secureTextEntry
                     />
                     {errors.confirmNewPassword ? <Text style={profileStyles.errorText}>{errors.confirmNewPassword}</Text> : null}
                 </View>
                 <TouchableOpacity style={profileStyles.button} onPress={handleChangePassword}>
-                    <Text style={profileStyles.buttonText}>Change Password</Text>
+                    <Text style={profileStyles.buttonText}>{t('change-password')}</Text>
                 </TouchableOpacity>
                 {errors.general ? (
                     <View style={profileStyles.generalErrorContainer}>
