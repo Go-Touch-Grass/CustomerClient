@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, TextInput, TouchableOpacity, Text } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, TextInput, TouchableOpacity, Text, KeyboardAvoidingView, Platform, ScrollView, Keyboard } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { registerUser } from '../api/authApi';
@@ -91,89 +91,112 @@ const SignUp: React.FC = () => {
     navigation.navigate('Login');
   };
 
+  const scrollViewRef = useRef<ScrollView>(null);
+
+  const handleScroll = () => {
+    if (scrollViewRef.current) {
+      scrollViewRef.current.scrollToEnd({ animated: true });
+    }
+  };
+
   return (
-    <StyledContainer>
-      <InnerContainer>
-        <PageLogo resizeMode="cover" source={require('./../assets/gardensbtb.png')} />
-        <PageTitle>{t('create-account')}</PageTitle>
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={{ flex: 1 }}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 30 : 0}
+    >
+      <ScrollView 
+        ref={scrollViewRef}
+        contentContainerStyle={{ flexGrow: 1 }}
+        keyboardShouldPersistTaps="handled"
+        onContentSizeChange={handleScroll}
+      >
+        <TouchableOpacity activeOpacity={1} onPress={Keyboard.dismiss} style={{ flex: 1 }}>
+          <StyledContainer>
+            <InnerContainer>
+              <PageLogo resizeMode="cover" source={require('./../assets/gardensbtb.png')} />
+              <PageTitle>{t('create-account')}</PageTitle>
 
-        <View style={signUpStyles.inputContainer}>
-          <TextInput
-            style={signUpStyles.input}
-            placeholder={t('full-name')}
-            value={fullName}
-            onChangeText={(text) => {
-              setFullName(text);
-              setErrors({ ...errors, fullName: '' });
-            }}
-          />
-          {errors.fullName ? <Text style={signUpStyles.errorText}>{errors.fullName}</Text> : null}
+              <View style={signUpStyles.inputContainer}>
+                <TextInput
+                  style={signUpStyles.input}
+                  placeholder={t('full-name')}
+                  value={fullName}
+                  onChangeText={(text) => {
+                    setFullName(text);
+                    setErrors({ ...errors, fullName: '' });
+                  }}
+                />
+                {errors.fullName ? <Text style={signUpStyles.errorText}>{errors.fullName}</Text> : null}
 
-          <TextInput
-            style={signUpStyles.input}
-            placeholder={t('username')}
-            value={username}
-            onChangeText={(text) => {
-              setUsername(text);
-              setErrors({ ...errors, username: '' });
-            }}
-            autoCapitalize="none"
-          />
-          {errors.username ? <Text style={signUpStyles.errorText}>{errors.username}</Text> : null}
+                <TextInput
+                  style={signUpStyles.input}
+                  placeholder={t('username')}
+                  value={username}
+                  onChangeText={(text) => {
+                    setUsername(text);
+                    setErrors({ ...errors, username: '' });
+                  }}
+                  autoCapitalize="none"
+                />
+                {errors.username ? <Text style={signUpStyles.errorText}>{errors.username}</Text> : null}
 
-          <TextInput
-            style={signUpStyles.input}
-            placeholder={t('email')}
-            value={email}
-            onChangeText={(text) => {
-              setEmail(text);
-              setErrors({ ...errors, email: '' });
-            }}
-            keyboardType="email-address"
-            autoCapitalize="none"
-          />
-          {errors.email ? <Text style={signUpStyles.errorText}>{errors.email}</Text> : null}
+                <TextInput
+                  style={signUpStyles.input}
+                  placeholder={t('email')}
+                  value={email}
+                  onChangeText={(text) => {
+                    setEmail(text);
+                    setErrors({ ...errors, email: '' });
+                  }}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                />
+                {errors.email ? <Text style={signUpStyles.errorText}>{errors.email}</Text> : null}
 
-          <TextInput
-            style={signUpStyles.input}
-            placeholder={t('password')}
-            value={password}
-            onChangeText={(text) => {
-              setPassword(text);
-              setErrors({ ...errors, password: '', confirmPassword: '' });
-            }}
-            secureTextEntry
-          />
-          {errors.password ? <Text style={signUpStyles.errorText}>{errors.password}</Text> : null}
+                <TextInput
+                  style={signUpStyles.input}
+                  placeholder={t('password')}
+                  value={password}
+                  onChangeText={(text) => {
+                    setPassword(text);
+                    setErrors({ ...errors, password: '', confirmPassword: '' });
+                  }}
+                  secureTextEntry
+                />
+                {errors.password ? <Text style={signUpStyles.errorText}>{errors.password}</Text> : null}
 
-          <TextInput
-            style={signUpStyles.input}
-            placeholder={t('confirm-password')}
-            value={confirmPassword}
-            onChangeText={(text) => {
-              setConfirmPassword(text);
-              setErrors({ ...errors, confirmPassword: '' });
-            }}
-            secureTextEntry
-          />
-          {errors.confirmPassword ? <Text style={signUpStyles.errorText}>{errors.confirmPassword}</Text> : null}
-        </View>
+                <TextInput
+                  style={signUpStyles.input}
+                  placeholder={t('confirm-password')}
+                  value={confirmPassword}
+                  onChangeText={(text) => {
+                    setConfirmPassword(text);
+                    setErrors({ ...errors, confirmPassword: '' });
+                  }}
+                  secureTextEntry
+                />
+                {errors.confirmPassword ? <Text style={signUpStyles.errorText}>{errors.confirmPassword}</Text> : null}
+              </View>
 
-        <TouchableOpacity style={signUpStyles.button} onPress={handleSignUp}>
-          <Text style={signUpStyles.buttonText}>{t('sign-up')}</Text>
+              <TouchableOpacity style={signUpStyles.button} onPress={handleSignUp}>
+                <Text style={signUpStyles.buttonText}>{t('sign-up')}</Text>
+              </TouchableOpacity>
+
+              {errors.general ? (
+                <View style={signUpStyles.generalErrorContainer}>
+                  <Text style={signUpStyles.generalErrorText}>{errors.general}</Text>
+                </View>
+              ) : null}
+
+              <TouchableOpacity style={signUpStyles.loginButton} onPress={handleLogin}>
+                <Text style={signUpStyles.loginButtonText}>{t('already-have-an-account-login-instead')}</Text>
+              </TouchableOpacity>
+            </InnerContainer>
+          </StyledContainer>
         </TouchableOpacity>
-
-        {errors.general ? (
-          <View style={signUpStyles.generalErrorContainer}>
-            <Text style={signUpStyles.generalErrorText}>{errors.general}</Text>
-          </View>
-        ) : null}
-
-        <TouchableOpacity style={signUpStyles.loginButton} onPress={handleLogin}>
-          <Text style={signUpStyles.loginButtonText}>{t('already-have-an-account-login-instead')}</Text>
-        </TouchableOpacity>
-      </InnerContainer>
-    </StyledContainer>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
