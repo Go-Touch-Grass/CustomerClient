@@ -1,13 +1,5 @@
 import axios from 'axios';
-// For Adriel's computer :3
-// export const API_URL = "http://192.168.10.146:8080/";
-
-// For Tian Hui's Android Emulator 
-// export const API_URL = "http://10.0.2.2:8080/";
-
-// For Tian Hui's computer
-export const API_URL = "http://192.168.80.153:8080/";
-
+import { API_URL } from '@env';
 
 const axiosInstance = axios.create({
     baseURL: API_URL,
