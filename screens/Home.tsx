@@ -79,6 +79,10 @@ const Home: React.FC = () => {
 		navigation.navigate('Change Language');
 	};
 
+	const navigateToEditAvatar = () => {
+		navigation.navigate('EditAvatar')
+	}
+
 	const handleLogout = async () => {
 		toggleMenu(false);
 		await removeToken();
@@ -172,6 +176,9 @@ const Home: React.FC = () => {
 						>
 							<Ionicons name="locate" size={24} color="black" />
 						</TouchableOpacity>
+						<TouchableOpacity style={homeStyles.editAvatarButton} onPress={navigateToEditAvatar}>
+  						<Text style={homeStyles.editAvatarButtonText}>{t('edit-avatar')}</Text>
+					</TouchableOpacity>
 				</View>
 			</StyledContainer>
 		</TouchableWithoutFeedback>

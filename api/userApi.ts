@@ -10,6 +10,8 @@ interface UserInfo {
     currentLevel: number;
     xpForNextLevel: number;
     xpProgress: number;
+    avatarGender: string;
+    avatarCustomization: string;
 }
 
 export const getUserInfo = async (): Promise<UserInfo> => {

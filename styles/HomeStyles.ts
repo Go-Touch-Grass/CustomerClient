@@ -96,4 +96,26 @@ export const homeStyles = StyleSheet.create({
         borderWidth: 3,
         borderColor: 'white',
     },
+    editAvatarButton: {
+        position: 'absolute', // Keep the button positioned absolutely
+        left: 20, // Position it 20 units from the left edge of the screen
+        top: '50%', // Center it vertically
+        transform: [{ translateY: -25 }], // Adjust to vertically center the button (half of the button's height)
+        backgroundColor: Colors.primary, // Use your primary color
+        borderRadius: 30, // Rounded corners
+        paddingVertical: 10, // Vertical padding
+        paddingHorizontal: 15, // Horizontal padding
+        elevation: 5, // Shadow for Android
+        shadowColor: '#000', // Shadow color for iOS
+        shadowOffset: { width: 0, height: 2 }, // Shadow offset for iOS
+        shadowOpacity: 0.3, // Shadow opacity for iOS
+        shadowRadius: 4, // Shadow radius for iOS
+        alignItems: 'center', // Center text horizontally
+      },
+    
+      editAvatarButtonText: {
+        color: '#fff', // White text color
+        fontSize: 16, // Font size
+        fontWeight: 'bold', // Bold text
+      },
 });
