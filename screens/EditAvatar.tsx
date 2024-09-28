@@ -1,49 +1,42 @@
-// EditAvatar.tsx
-import React, { useEffect, useState } from 'react';
-import { View, Text, Button, StyleSheet, TouchableOpacity } from 'react-native';
-import { useTranslation } from 'react-i18next';
+import React from 'react';
+import { View, Button } from 'react-native';
+import WebView from 'react-native-webview';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { updateAvatarUrl, getUserId } from '../api/userApi';
 
-const EditAvatar = ({ navigation, route }) => {
-    const { t } = useTranslation();
-    const { currentAvatar } = route.params; // Get current avatar data from route params
-    const [customization, setCustomization] = useState(currentAvatar.customization);
+const EDIT_READY_PLAYER_ME_URL = 'https://readyplayer.me/avatar/editor';
 
-    const handleCustomization = (type, item) => {
-        setCustomization(prev => {
-            const items = prev[type].includes(item) ? prev[type].filter(i => i !== item) : [...prev[type], item];
-            return { ...prev, [type]: items };
-        });
-    };
+const EditAvatar: React.FC = () => {
+  const navigation = useNavigation<StackNavigationProp<any>>();
 
-    const handleSubmit = () => {
-        // Update avatar data (to backend or local state)
-        console.log({ customization });
-        navigation.navigate('Home');
-    };
+  const handleAvatarUrl = async (url: string) => {
+    const avatarUrl = url.split('?')[0];
+    const userId = await getUserId(); 
+  
+    try {
+      await updateAvatarUrl(userId, avatarUrl);
+      navigation.navigate('Home');
 
-    return (
-        <View style={styles.container}>
-            <Text>{t('edit_avatar')}</Text>
-            {/* Display current customization options */}
-            <Text>{t('current_hats')}: {customization.hats.join(', ')}</Text>
-            <Text>{t('current_upperWear')}: {customization.upperWear.join(', ')}</Text>
-            <Text>{t('current_lowerWear')}: {customization.lowerWear.join(', ')}</Text>
+    } catch (error) {
+      console.error('Failed to update avatar:', error);
+    }
+  };
 
-            <Button title="Add Hat" onPress={() => handleCustomization('hats', 'Hat1')} />
-            <Button title="Add Upper Wear" onPress={() => handleCustomization('upperWear', 'Shirt1')} />
-            <Button title="Add Lower Wear" onPress={() => handleCustomization('lowerWear', 'Pants1')} />
-
-            <Button title={t('update_avatar')} onPress={handleSubmit} />
-        </View>
-    );
+  return (
+    <View style={{ flex: 1 }}>
+      <WebView
+        source={{ uri: EDIT_READY_PLAYER_ME_URL }}
+        onNavigationStateChange={(navState) => {
+          const { url } = navState;
+          if (url.includes('https://readyplayer.me/avatar')) {
+            handleAvatarUrl(url);
+          }
+        }}
+      />
+      <Button title="Save Changes" onPress={() => navigation.navigate('Home')} />
+    </View>
+  );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-});
 
 export default EditAvatar;

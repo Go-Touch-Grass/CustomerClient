@@ -3,7 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { View, ActivityIndicator } from 'react-native';
 import { I18nextProvider } from 'react-i18next';
-import { getToken } from './utils/asyncStorage'; // New import
+import { getToken } from './utils/asyncStorage'; 
 import '@formatjs/intl-pluralrules';
 import Login from './screens/Login';
 import SignUp from './screens/SignUp';
