@@ -12,10 +12,6 @@ interface UserInfo {
     xpProgress: number;
 }
 
-interface Avatarinfo {
-    avtarUrl: string;
-}
-
 export const getUserInfo = async (): Promise<UserInfo> => {
     const token = await getToken();
     if (!token) {
@@ -82,51 +78,4 @@ export const changePassword = async (currentPassword: string, newPassword: strin
     }
 };
 
-export const getUserId = async (): Promise<string> => {
-    const token = await getToken();
-    if (!token) {
-        throw new Error('No token found');
-    }
-
-    try {
-        const response = await axiosInstance.get('auth/getUserId', {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-        return response.data;
-    } catch (error) {
-        throw error;
-    }
-};
-
-export const getAvatarUrl = async (): Promise<Avatarinfo> => {
-    const token = await getToken();
-    if (!token) {
-        throw new Error('No token found');
-    }
-
-    try {
-        const response = await axiosInstance.get('auth/getAvatarUrl', {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-        return response.data;
-    } catch (error) {
-        throw error;
-    }
-};
-
-export const updateAvatarUrl = async (userId: string, avatarUrl: string) => {
-    const token = await getToken();
-    if (!token) {
-      throw new Error('No token found');
-    }
-  
-    try {
-      const response = await axiosInstance.put('auth/avatar', { userId, avatarUrl }, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
-  };
   

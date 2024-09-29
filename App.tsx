@@ -12,7 +12,7 @@ import Profile from './screens/Profile';
 import EditProfile from './screens/EditProfile';
 import ChangeLanguage from './screens/ChangeLanguage';
 import CreateAvatar from './screens/CreateAvatar';
-import EditAvatar from './screens/EditAvatar';
+//import EditAvatar from './screens/EditAvatar';
 import i18n from './services/i18next';
 
 const Stack = createStackNavigator();
@@ -62,7 +62,7 @@ const App: React.FC = () => {
           <Stack.Screen name="Profile" component={Profile} />
           <Stack.Screen name="EditProfile" component={EditProfile} />
           <Stack.Screen name="ChangePassword" component={ChangePassword} />
-          <Stack.Screen name="EditAvatar" component={EditAvatar} />
+      
         </Stack.Navigator>
       </NavigationContainer>
     </I18nextProvider>

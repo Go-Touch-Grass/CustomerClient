@@ -1,41 +1,68 @@
-import React, { useEffect } from 'react';
-import { View, Button, Text } from 'react-native';
-import WebView from 'react-native-webview';
+import React, { useEffect, useState } from 'react';
+import { View, Text, Button, StyleSheet } from 'react-native';
+import { WebView } from 'react-native-webview';
+import { createGuestAccount } from '../api/rpmAPI';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { updateAvatarUrl, getUserId } from '../api/userApi';
 
-const READY_PLAYER_ME_URL = 'https://readyplayer.me/avatar';
-
-const CreateAvatar: React.FC = () => {
+const CreateAvatar = () => {
+  const [guestUserId, setGuestUserId] = useState(null);
   const navigation = useNavigation<StackNavigationProp<any>>();
 
-  const handleAvatarUrl = async (url: string) => {
-    const avatarUrl = url.split('?')[0];
-    const userId = await getUserId();
-  
-    try {
-      await updateAvatarUrl(userId, avatarUrl);
-      navigation.navigate('Home');
-    } catch (error) {
-      console.error('Failed to Create avatar:', error);
-    }
+  useEffect(() => {
+    const initializeGuestAccount = async () => {
+      try {
+        const guestAccount = await createGuestAccount();
+        setGuestUserId(guestAccount.data.id); // Save the guest user ID
+        console.log('Guest account created:', guestAccount);
+      } catch (error) {
+        console.error('Error creating guest account:', error);
+      }
+    };
+
+    initializeGuestAccount();
+  }, []);
+
+  const handleFinish = async () => {
+    // You can add logic here to save relevant details if needed
+    // For example, you might want to save the guestUserId and applicationId in your app state or AsyncStorage
+
+    // Navigate to Home screen
+    navigation.navigate('Home');
   };
 
   return (
-    <View style={{ flex: 1 }}>
-      <WebView
-        source={{ uri: READY_PLAYER_ME_URL }}
-        onNavigationStateChange={(navState) => {
-          const { url } = navState;
-          if (url.includes('https://readyplayer.me/avatar')) {
-            handleAvatarUrl(url);
-          }
-        }}
+    <View style={styles.container}>
+      <Text style={styles.title}>Create Your Avatar</Text>
+      <WebView 
+        source={{ uri: `https://avatar.readyplayer.me/?userId=${guestUserId}&applicationId=66f4fea70b01ac5ee87a4d79` }} 
+        style={styles.webView} 
       />
-      <Button title="Finish" onPress={() => navigation.navigate('Home')} />
+      <View style={styles.finishButtonContainer}>
+        <Button title="Finish Creating Avatar" onPress={handleFinish} />
+      </View>
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginVertical: 20,
+  },
+  webView: {
+    flex: 1,
+    borderRadius: 10,
+  },
+  finishButtonContainer: {
+    marginTop: 20,
+  },
+});
 
 export default CreateAvatar;

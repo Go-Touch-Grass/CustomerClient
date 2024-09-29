@@ -1,39 +1,59 @@
 import { StyleSheet } from 'react-native';
-// Styles for the component
-export const CreateAvatarStyles = StyleSheet.create({
+
+export const createAvatarStyles = StyleSheet.create({
     container: {
         flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
+        flexDirection: 'row',
+        padding: 20,
+        backgroundColor: '#f5f5f5', // Light gray background
     },
     avatarContainer: {
-        position: 'relative',
-        width: 100, // Width of the avatar
-        height: 150, // Height of the avatar
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#fff', // White background for the avatar viewer
+        borderRadius: 10,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.5,
+        elevation: 5, // Android shadow
+        marginRight: 20,
     },
-    sprite: {
-        position: 'absolute',
-        width: '100%',
-        height: '100%',
+    inventoryContainer: {
+        flex: 1,
+        alignItems: 'center',
     },
-    collectableContainer: {
+    button: {
+        backgroundColor: '#007BFF', // Blue color for the button
+        padding: 15,
+        borderRadius: 5,
+        marginTop: 20,
+        alignItems: 'center',
+        width: '80%',
+    },
+    buttonText: {
+        color: '#fff', // White text for the button
+        fontWeight: 'bold',
+        fontSize: 16,
+    },
+    filterContainer: {
         flexDirection: 'row',
-        flexWrap: 'wrap',
         justifyContent: 'space-around',
-        marginVertical: 20,
+        width: '100%',
+        marginBottom: 15,
     },
-    collectable: {
-        width: 50, // Size of the collectable images
+    inventoryItem: {
+        width: 50,
         height: 50,
         margin: 5,
-    },
-    createAvatarButton: {
-        backgroundColor: '#6200ee',
-        padding: 10,
+        borderWidth: 1,
+        borderColor: '#ddd', // Light border around inventory items
         borderRadius: 5,
-    },
-    createAvatarText: {
-        color: '#fff',
-        fontWeight: 'bold',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 });
