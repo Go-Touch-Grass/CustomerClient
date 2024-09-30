@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, TouchableOpacity, Text, Animated, TouchableWithoutFeedback } from 'react-native';
+import { View, TouchableOpacity, Text, Animated, TouchableWithoutFeedback, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import MapView, { Region, Marker } from 'react-native-maps';
@@ -7,10 +7,12 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { StyledContainer } from '../styles/commonStyles';
 import { homeStyles } from '../styles/HomeStyles';
+import { CreateAvatarStyles } from '../styles/CreateAvatarStyles';
 import ProtectedRoute from '../components/ProtectedRoute';
 import { Colors } from '../styles/commonStyles';
 import { removeToken } from '../utils/asyncStorage';
 import { useTranslation } from 'react-i18next';
+import { getAvatarDetails } from '../api/avatarApi';
 
 const Home: React.FC = () => {
 	const { t } = useTranslation();
@@ -20,6 +22,7 @@ const Home: React.FC = () => {
 	const [region, setRegion] = useState<Region | null>(null);
 	const [userLocation, setUserLocation] = useState<Location.LocationObject | null>(null);
 	const mapRef = useRef<MapView>(null);
+	const [avatar, setAvatar] = useState('');
 
 	useEffect(() => {
 		(async () => {
@@ -45,8 +48,12 @@ const Home: React.FC = () => {
 					setUserLocation(newLocation);
 				}
 			);
+			const avatarData = await getAvatarDetails();
+			setAvatar(avatarData.avatar);
+
 		})();
 	}, []);
+
 
 	const toggleMenu = (visible: boolean) => {
 		setMenuVisible(visible);
@@ -173,6 +180,16 @@ const Home: React.FC = () => {
 							<Ionicons name="locate" size={24} color="black" />
 						</TouchableOpacity>
 				</View>
+				<View style={CreateAvatarStyles.avatarContainer}>
+                    {avatar ? (
+                        <Image source={{ uri: avatar }} style={CreateAvatarStyles.avatarImage} />
+                    ) : (
+                        <Text style={{ textAlign: 'center' }}>{t('no-avatar')}</Text>
+                    )}
+                    <TouchableOpacity onPress={navigateToEditAvatar}>
+                        <Text style={{ color: Colors.primary }}>{t('edit-avatar')}</Text>
+                    </TouchableOpacity>
+                </View>
 			</StyledContainer>
 		</TouchableWithoutFeedback>
 	);
