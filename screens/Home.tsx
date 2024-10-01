@@ -81,6 +81,11 @@ const Home: React.FC = () => {
 		navigation.navigate('Profile');
 	};
 
+	const navigateToEditAvatar = () => {
+		toggleMenu(false);
+		navigation.navigate('EditAvatar');
+	};
+
 	const navigateToChangeLanguage = () => {
 		toggleMenu(false);
 		navigation.navigate('Change Language');
