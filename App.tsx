@@ -3,20 +3,25 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { View, ActivityIndicator } from 'react-native';
 import { I18nextProvider } from 'react-i18next';
-import { getToken } from './utils/asyncStorage'; // New import
 import '@formatjs/intl-pluralrules';
+
+// Import screens
 import Login from './screens/Login';
 import SignUp from './screens/SignUp';
 import Home from './screens/Home';
 import Profile from './screens/Profile';
 import EditProfile from './screens/EditProfile';
 import ChangeLanguage from './screens/ChangeLanguage';
+import ChangePassword from './screens/ChangePassword';
+import CreateAvatar from './screens/CreateAvatar';
+import EditAvatar from './screens/EditAvatar';
+import TestAvatarScreen from './screens/TestAvatarScreen';
+
+// Import utilities and services
+import { getToken } from './utils/asyncStorage';
 import i18n from './services/i18next';
 
 const Stack = createStackNavigator();
-import ChangePassword from './screens/ChangePassword';
-import CreateAvatar from './screens/CreateAvatar';
-import EditAvatar from './screens/CreateAvatar';
 
 const App: React.FC = () => {
   
@@ -63,6 +68,7 @@ const App: React.FC = () => {
           <Stack.Screen name="EditProfile" component={EditProfile} />
           <Stack.Screen name="ChangePassword" component={ChangePassword} />
           <Stack.Screen name="EditAvatar" component={EditAvatar} />
+          <Stack.Screen name="TestAvatar" component={TestAvatarScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </I18nextProvider>

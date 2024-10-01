@@ -14,6 +14,12 @@ import { removeToken } from '../utils/asyncStorage';
 import { useTranslation } from 'react-i18next';
 import { getAvatarDetails } from '../api/avatarApi';
 
+// Define the AvatarInfo interface
+interface AvatarInfo {
+    avatar: string;
+    customization: Record<string, any>;
+}
+
 const Home: React.FC = () => {
 	const { t } = useTranslation();
 	const navigation = useNavigation<StackNavigationProp<any>>();
@@ -23,6 +29,7 @@ const Home: React.FC = () => {
 	const [userLocation, setUserLocation] = useState<Location.LocationObject | null>(null);
 	const mapRef = useRef<MapView>(null);
 	const [avatar, setAvatar] = useState('');
+	const [avatarDetails, setAvatarDetails] = useState<AvatarInfo | null>(null);
 
 	useEffect(() => {
 		(async () => {
@@ -48,9 +55,18 @@ const Home: React.FC = () => {
 					setUserLocation(newLocation);
 				}
 			);
-			const avatarData = await getAvatarDetails();
-			setAvatar(avatarData.avatar);
 
+			// Fetch avatar details
+			const fetchAvatarDetails = async () => {
+				try {
+					const details = await getAvatarDetails();
+					setAvatarDetails(details);
+				} catch (error) {
+					console.error('Failed to fetch avatar details:', error);
+				}
+			};
+
+			fetchAvatarDetails();
 		})();
 	}, []);
 
@@ -81,11 +97,6 @@ const Home: React.FC = () => {
 		navigation.navigate('Profile');
 	};
 
-	const navigateToEditAvatar = () => {
-		toggleMenu(false);
-		navigation.navigate('EditAvatar');
-	};
-
 	const navigateToChangeLanguage = () => {
 		toggleMenu(false);
 		navigation.navigate('Change Language');
@@ -110,9 +121,14 @@ const Home: React.FC = () => {
 		}
 	};
 
+	const navigateToCreateAvatar = () => {
+		toggleMenu(false);
+		navigation.navigate('CreateAvatar');
+	};
+
 	const menuTranslateY = menuAnimation.interpolate({
 		inputRange: [0, 1],
-		outputRange: [-50, 0], // Reduced distance for faster appearance
+		outputRange: [-50, 0],
 	});
 
 	return (
@@ -128,10 +144,10 @@ const Home: React.FC = () => {
 						<Ionicons name="menu" size={24} color={Colors.primary} />
 					</TouchableOpacity>
 				</View>
-				<Animated.View 
+				<Animated.View
 					style={[
-						homeStyles.menu, 
-						{ 
+						homeStyles.menu,
+						{
 							transform: [{ translateY: menuTranslateY }],
 							opacity: menuAnimation,
 							display: menuVisible ? 'flex' : 'none'
@@ -146,12 +162,17 @@ const Home: React.FC = () => {
 							<TouchableOpacity style={homeStyles.menuItem} onPress={navigateToChangeLanguage}>
 								<Text style={homeStyles.menuItemText}>{t('change-language')}</Text>
 							</TouchableOpacity>
+							<TouchableOpacity style={homeStyles.menuItem} onPress={navigateToCreateAvatar}>
+								<Text style={homeStyles.menuItemText}>{t('create-avatar')}</Text>
+							</TouchableOpacity>
 							<TouchableOpacity style={homeStyles.menuItem} onPress={handleLogout}>
 								<Text style={homeStyles.menuItemText}>{t('logout')}</Text>
 							</TouchableOpacity>
 						</View>
 					</TouchableWithoutFeedback>
 				</Animated.View>
+
+
 				<View style={homeStyles.mapContainer}>
 					{region && (
 						<MapView
@@ -170,31 +191,43 @@ const Home: React.FC = () => {
 									anchor={{ x: 0.5, y: 0.5 }}
 								>
 									<View style={homeStyles.markerContainer}>
-										<View style={homeStyles.markerBackground} />
-										{/* <View style={[homeStyles.markerDirection, { transform: [{ rotate: `${userLocation.coords.heading}deg` }] }]} /> */}
-										<View style={homeStyles.markerDot} />
+										{avatarDetails ? (
+											<Image 
+												source={{ uri: avatarDetails.avatar }}
+												style={homeStyles.avatarImage}
+											/>
+										) : (
+											<View style={homeStyles.markerBackground}>
+												<View style={homeStyles.markerDot} />
+											</View>
+										)}
 									</View>
 								</Marker>
 							)}
 						</MapView>
 					)}
-						<TouchableOpacity 
-							style={homeStyles.centerButton} 
-							onPress={centerOnUserLocation}
-						>
-							<Ionicons name="locate" size={24} color="black" />
-						</TouchableOpacity>
+					<TouchableOpacity
+						style={homeStyles.centerButton}
+						onPress={centerOnUserLocation}
+					>
+						<Ionicons name="locate" size={24} color="black" />
+					</TouchableOpacity>
+				</View>
+				{/* Avatar Container */}
+				<View style={CreateAvatarStyles.avatarContainer}>
+					{avatarDetails ? (
+						<Image source={{ uri: avatarDetails.avatar }} style={CreateAvatarStyles.avatarImage} />
+					) : (
+						<Text style={{ textAlign: 'center' }}>{t('no-avatar')}</Text>
+					)}
 				</View>
 				<View style={CreateAvatarStyles.avatarContainer}>
-                    {avatar ? (
-                        <Image source={{ uri: avatar }} style={CreateAvatarStyles.avatarImage} />
-                    ) : (
-                        <Text style={{ textAlign: 'center' }}>{t('no-avatar')}</Text>
-                    )}
-                    <TouchableOpacity onPress={navigateToEditAvatar}>
-                        <Text style={{ color: Colors.primary }}>{t('edit-avatar')}</Text>
-                    </TouchableOpacity>
-                </View>
+					{avatar ? (
+						<Image source={{ uri: avatar }} style={CreateAvatarStyles.avatarImage} />
+					) : (
+						<Text style={{ textAlign: 'center' }}>{t('no-avatar')}</Text>
+					)}
+				</View>
 			</StyledContainer>
 		</TouchableWithoutFeedback>
 	);

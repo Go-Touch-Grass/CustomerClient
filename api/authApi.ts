@@ -2,7 +2,8 @@ import axios from 'axios';
 import { API_URL } from '@env';
 
 const axiosInstance = axios.create({
-    baseURL: API_URL,
+    // baseURL: API_URL,
+    baseURL: 'http://10.0.2.2:8080/',
     headers: {
         'Content-Type': 'application/json',
     },

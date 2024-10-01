@@ -96,4 +96,24 @@ export const homeStyles = StyleSheet.create({
         borderWidth: 3,
         borderColor: 'white',
     },
+    avatarImage: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+    },
+    avatarOverlay: {
+        position: 'absolute',
+        bottom: 20,
+        left: 20,
+        backgroundColor: 'rgba(255, 255, 255, 0.8)',
+        borderRadius: 40,
+        padding: 5,
+        zIndex: 1000,
+    },
+    noAvatarText: {
+        fontSize: 16,
+        color: Colors.primary,
+        textAlign: 'center',
+        padding: 10,
+    },
 });

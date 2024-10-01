@@ -23,8 +23,15 @@ export const getAvatarDetails = async (): Promise<AvatarInfo> => {
 };
 
 export const createAvatar = async (avatar: string, customization: Record<string, any>) => {
+    const token = await getToken();
+    if (!token) {
+        throw new Error('No token found');
+    }
+
     try {
-        const response = await axiosInstance.post('auth/avatar', { avatar, customization });
+        const response = await axiosInstance.post('auth/avatar', { avatar, customization }, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
         return response.data;
     } catch (error) {
         throw error;

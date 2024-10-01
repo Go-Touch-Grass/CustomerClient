@@ -48,7 +48,7 @@
     "password-changed-successfully" : "Password changed successfully",
     "current-password-incorrect" : "Current password is incorrect",
     "failed-to-change-password" : "Failed to change password",
-    "unexpected-error-occured" : "An unexpected error occurred. Please try again later."
-
-
+    "unexpected-error-occured" : "An unexpected error occurred. Please try again later.",
+    "create-avatar": "Create Avatar",
+    "no-avatar": "No Avatar"
 }

@@ -48,5 +48,8 @@
     "password-changed-successfully" : "密码修改成功",
     "current-password-incorrect" : "当前密码不正确",
     "failed-to-change-password" : "更改密码失败",
-    "unexpected-error-occured" : "发生意外错误。请稍后重试。"
+    "unexpected-error-occured" : "发生意外错误。请稍后重试。",
+
+    "create-avatar": "创建头像",
+    "no-avatar": "没有头像"
 }

@@ -4,7 +4,6 @@ import { createAvatar } from '../api/avatarApi';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { CreateAvatarStyles } from '../styles/CreateAvatarStyles';
-import { storeToken } from '../utils/asyncStorage'; // New import
 
 interface Item {
     name: string;
@@ -26,7 +25,7 @@ const lowerWear: Item[] = [
     { name: 'Purple Pants', image: require('../assets/sprites/purple_pants.png') }
 ];
 
-const CreateAvatar = () => {
+const CreateAvatar = ({ route, navigation }) => {
     const [avatar, setAvatar] = useState(''); // Placeholder for base avatar
     const [customization, setCustomization] = useState<{
         hat: Item | null;
@@ -39,19 +38,27 @@ const CreateAvatar = () => {
     });
 
     const [selectedCategory, setSelectedCategory] = useState('');
-    const navigation = useNavigation<StackNavigationProp<any>>();
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleCreateAvatar = async () => {
+        setIsLoading(true);
         try {
-            
             const response = await createAvatar(avatar, customization);
-            if (response.customer_account && response.token) {
-                await storeToken(response.token);
-                Alert.alert('Avatar created successfully');
-                navigation.navigate('Home');
+            Alert.alert('Success', 'Avatar created successfully');
+            if (route.params?.onAvatarCreated) {
+                await route.params.onAvatarCreated();
             }
+            navigation.replace('Home');
         } catch (error) {
-            Alert.alert('Error creating avatar', error.message);
+            if (error.response && error.response.status === 401) {
+                Alert.alert('Error', 'You are not authorized. Please log in again.');
+                // Optionally, navigate to the login screen
+                // navigation.navigate('Login');
+            } else {
+                Alert.alert('Error', error.message || 'Failed to create avatar');
+            }
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -109,8 +116,14 @@ const CreateAvatar = () => {
             {renderWardrobeItems()}
 
             {/* Create Avatar Button */}
-            <TouchableOpacity style={CreateAvatarStyles.finishButton} onPress={handleCreateAvatar}>
-                <Text style={CreateAvatarStyles.finishButtonText}>Finish Creating Avatar</Text>
+            <TouchableOpacity 
+                style={CreateAvatarStyles.finishButton} 
+                onPress={handleCreateAvatar}
+                disabled={isLoading}
+            >
+                <Text style={CreateAvatarStyles.finishButtonText}>
+                    {isLoading ? 'Creating...' : 'Finish Creating Avatar'}
+                </Text>
             </TouchableOpacity>
         </View>
     );
