@@ -15,6 +15,8 @@ import i18n from './services/i18next';
 
 const Stack = createStackNavigator();
 import ChangePassword from './screens/ChangePassword';
+import CreateAvatar from './screens/CreateAvatar';
+import EditAvatar from './screens/CreateAvatar';
 
 const App: React.FC = () => {
   
@@ -54,11 +56,13 @@ const App: React.FC = () => {
         >
           <Stack.Screen name="Login" component={Login} />
           <Stack.Screen name="SignUp" component={SignUp} />
+          <Stack.Screen name="CreateAvatar" component={CreateAvatar} />
           <Stack.Screen name="Home" component={Home} />
           <Stack.Screen name="Change Language" component={ChangeLanguage} />
           <Stack.Screen name="Profile" component={Profile} />
           <Stack.Screen name="EditProfile" component={EditProfile} />
           <Stack.Screen name="ChangePassword" component={ChangePassword} />
+          <Stack.Screen name="EditAvatar" component={EditAvatar} />
         </Stack.Navigator>
       </NavigationContainer>
     </I18nextProvider>

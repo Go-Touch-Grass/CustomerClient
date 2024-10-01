@@ -70,7 +70,7 @@ const SignUp: React.FC = () => {
         const response = await registerUser(fullName, username, email, password);
         if (response.customer_account && response.token) {
           await storeToken(response.token);
-          navigation.replace('Home');
+          navigation.replace('CreateAvatar');
         } else {
           setErrors({ ...errors, general: "An unexpected error occurred during registration." });
         }
