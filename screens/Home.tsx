@@ -79,9 +79,9 @@ const Home: React.FC = () => {
     navigation.navigate('Change Language');
   };
 
-  const navigateToTestAvatar = () => {
+  const navigateToGetAvatar = () => {
     toggleMenu(false);
-    navigation.navigate('TestAvatar');
+    navigation.navigate('GetAvatar');
   };
 
   const handleLogout = async () => {
@@ -141,18 +141,15 @@ const Home: React.FC = () => {
               <TouchableOpacity style={homeStyles.menuItem} onPress={navigateToProfile}>
                 <Text style={homeStyles.menuItemText}>{t('profile')}</Text>
               </TouchableOpacity>
+              <TouchableOpacity style={homeStyles.menuItem} onPress={navigateToGetAvatar}>
+                <Text style={homeStyles.menuItemText}>Get Avatar</Text>
+              </TouchableOpacity>
               <TouchableOpacity style={homeStyles.menuItem} onPress={navigateToChangeLanguage}>
                 <Text style={homeStyles.menuItemText}>{t('change-language')}</Text>
               </TouchableOpacity>
-              {/* <TouchableOpacity style={homeStyles.menuItem} onPress={navigateToCreateAvatar}>
-                <Text style={homeStyles.menuItemText}>{t('create-avatar')}</Text>
-              </TouchableOpacity> */}
               <TouchableOpacity style={homeStyles.menuItem} onPress={handleLogout}>
                 <Text style={homeStyles.menuItemText}>{t('logout')}</Text>
               </TouchableOpacity>
-              {/* <TouchableOpacity style={homeStyles.menuItem} onPress={navigateToTestAvatar}>
-                <Text style={homeStyles.menuItemText}>{t('test-avatar')}</Text>
-              </TouchableOpacity> */}
             </View>
           </TouchableWithoutFeedback>
         </Animated.View>

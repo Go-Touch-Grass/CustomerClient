@@ -14,7 +14,7 @@ import EditProfile from './screens/EditProfile';
 import ChangeLanguage from './screens/ChangeLanguage';
 import ChangePassword from './screens/ChangePassword';
 import CreateAvatar from './screens/CreateAvatar';
-import TestAvatarScreen from './screens/TestAvatarScreen';
+import GetAvatar from './screens/GetAvatar';
 
 // Import utilities and services
 import { getToken } from './utils/asyncStorage';
@@ -66,7 +66,7 @@ const App: React.FC = () => {
           <Stack.Screen name="Profile" component={Profile} />
           <Stack.Screen name="EditProfile" component={EditProfile} />
           <Stack.Screen name="ChangePassword" component={ChangePassword} />
-          <Stack.Screen name="TestAvatar" component={TestAvatarScreen} />
+          <Stack.Screen name="GetAvatar" component={GetAvatar} />
         </Stack.Navigator>
       </NavigationContainer>
     </I18nextProvider>

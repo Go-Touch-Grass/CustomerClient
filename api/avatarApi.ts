@@ -16,9 +16,15 @@ export interface Item {
   filepath: string;
 }
 
-interface AvatarInfo {
-  avatar: string;
-  customization: Record<string, any>;
+// Update the AvatarInfo interface to match the backend response
+export interface AvatarInfo {
+  id: number;
+  avatarType: AvatarType;
+  customer?: { id: number };
+  business?: { id: number };
+  hat?: Item;
+  shirt?: Item;
+  bottom?: Item;
 }
 
 export enum AvatarType {
@@ -26,36 +32,57 @@ export enum AvatarType {
   TOURIST = 'tourist',
 }
 
-export const getAvatarDetails = async (): Promise<AvatarInfo> => {
+export const getAvatarById = async (id: number): Promise<AvatarInfo> => {
   const token = await getToken();
   if (!token) {
     throw new Error('No token found');
   }
 
   try {
-    const response = await axiosInstance.get('/auth/avatar', {
+    const response = await axiosInstance.get(`/api/avatars/${id}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-
-    if (response.status !== 200) {
-      throw new Error(`Server responded with status ${response.status}`);
-    }
-
     return response.data;
   } catch (error: any) {
-    if (error.response) {
-      console.error('Error response:', error.response.data);
-      console.error('Error status:', error.response.status);
-      throw new Error(`Server error: ${error.response.data.message || 'Unknown error'}`);
-    } else if (error.request) {
-      // The request was made but no response was received
-      console.error('No response received:', error.request);
-      throw new Error('No response from server');
-    } else {
-      // Something happened in setting up the request that triggered an Error
-      console.error('Error', error.message);
-      throw error;
-    }
+    console.error('Error fetching avatar:', error);
+    throw handleApiError(error);
+  }
+};
+
+export const updateAvatar = async (
+  avatarId: number,
+  updatedInfo: { hatId?: number; shirtId?: number; bottomId?: number }
+): Promise<AvatarInfo> => {
+  const token = await getToken();
+  if (!token) {
+    throw new Error('No token found');
+  }
+
+  try {
+    const response = await axiosInstance.put(`/api/avatars/${avatarId}`, updatedInfo, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error('Error updating avatar:', error);
+    throw handleApiError(error);
+  }
+};
+
+export const getAvatarByCustomerId = async (customerId: number): Promise<AvatarInfo> => {
+  const token = await getToken();
+  if (!token) {
+    throw new Error('No token found');
+  }
+
+  try {
+    const response = await axiosInstance.get(`/api/avatars/customer/${customerId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error('Error fetching avatar by customer ID:', error);
+    throw handleApiError(error);
   }
 };
 
@@ -76,11 +103,7 @@ export const getItems = async (): Promise<Item[]> => {
     return response.data;
   } catch (error: any) {
     console.error('Error fetching items:', error);
-    if (error.response) {
-      console.error('Error response:', error.response.data);
-      console.error('Error status:', error.response.status);
-    }
-    throw error;
+    throw handleApiError(error);
   }
 };
 
@@ -89,7 +112,7 @@ export const createAvatar = async (
   hatId: number | null,
   shirtId: number | null,
   bottomId: number | null,
-) => {
+): Promise<{ avatar: AvatarInfo; avatarId: number }> => {
   const token = await getToken();
   if (!token) {
     throw new Error('No token found');
@@ -111,22 +134,20 @@ export const createAvatar = async (
     return response.data;
   } catch (error) {
     console.error('Error creating avatar:', error);
-    throw error;
+    throw handleApiError(error);
   }
 };
 
-export const updateAvatar = async (avatarId: number, updatedInfo: Partial<AvatarInfo>): Promise<AvatarInfo> => {
-  const token = await getToken();
-  if (!token) {
-    throw new Error('No token found');
+function handleApiError(error: any): Error {
+  if (error.response) {
+    console.error('Error response:', error.response.data);
+    console.error('Error status:', error.response.status);
+    return new Error(`Server error: ${error.response.data.message || 'Unknown error'}`);
+  } else if (error.request) {
+    console.error('No response received:', error.request);
+    return new Error('No response from server');
+  } else {
+    console.error('Error', error.message);
+    return error;
   }
-
-  try {
-    const response = await axiosInstance.put(`/api/avatars/${avatarId}`, updatedInfo, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
-};
+}
