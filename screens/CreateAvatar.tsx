@@ -11,11 +11,11 @@ const CreateAvatar = ({ route, navigation }) => {
   const [customization, setCustomization] = useState<{
     [ItemType.HAT]: Item | null;
     [ItemType.SHIRT]: Item | null;
-    [ItemType.BOTTOMS]: Item | null;
+    [ItemType.BOTTOM]: Item | null;
   }>({
     [ItemType.HAT]: null,
     [ItemType.SHIRT]: null,
-    [ItemType.BOTTOMS]: null,
+    [ItemType.BOTTOM]: null,
   });
 
   const [selectedCategory, setSelectedCategory] = useState('');
@@ -24,7 +24,7 @@ const CreateAvatar = ({ route, navigation }) => {
 
   useEffect(() => {
     fetchItems();
-   // const url = axiosInstance.defaults.baseURL || '';
+    // const url = axiosInstance.defaults.baseURL || '';
     //setBaseUrl(url);
   }, []);
 
@@ -46,7 +46,7 @@ const CreateAvatar = ({ route, navigation }) => {
         avatarType,
         customization[ItemType.HAT]?.id || null,
         customization[ItemType.SHIRT]?.id || null,
-        customization[ItemType.BOTTOMS]?.id || null,
+        customization[ItemType.BOTTOM]?.id || null,
       );
 
       Alert.alert('Success', 'Avatar created successfully');
@@ -66,21 +66,14 @@ const CreateAvatar = ({ route, navigation }) => {
   };
 
   const handleSelectItem = (item: Item) => {
-    console.log('Selected item:', item);
     setCustomization((prev) => {
       const newState = { ...prev, [item.type]: item };
-      console.log('New customization state:', newState);
       return newState;
     });
   };
 
-
   const renderWardrobeItems = () => {
-    console.log('Selected category:', selectedCategory);
-    console.log('All items:', items);
     const categoryItems = items.filter((item) => item.type === selectedCategory);
-    console.log('Filtered items:', categoryItems);
-
     return (
       <ScrollView horizontal>
         {categoryItems.map((item) => (
@@ -109,8 +102,8 @@ const CreateAvatar = ({ route, navigation }) => {
         {customization[ItemType.SHIRT] && (
           <Image source={{ uri: customization[ItemType.SHIRT].filepath }} style={CreateAvatarStyles.upperWear} />
         )}
-        {customization[ItemType.BOTTOMS] && (
-          <Image source={{ uri: customization[ItemType.BOTTOMS].filepath }} style={CreateAvatarStyles.lowerWear} />
+        {customization[ItemType.BOTTOM] && (
+          <Image source={{ uri: customization[ItemType.BOTTOM].filepath }} style={CreateAvatarStyles.lowerWear} />
         )}
       </View>
 
@@ -121,7 +114,10 @@ const CreateAvatar = ({ route, navigation }) => {
         <TouchableOpacity style={CreateAvatarStyles.categoryButton} onPress={() => setSelectedCategory(ItemType.SHIRT)}>
           <Text style={CreateAvatarStyles.categoryButtonText}>Upper Wear</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={CreateAvatarStyles.categoryButton} onPress={() => setSelectedCategory(ItemType.BOTTOMS)}>
+        <TouchableOpacity
+          style={CreateAvatarStyles.categoryButton}
+          onPress={() => setSelectedCategory(ItemType.BOTTOM)}
+        >
           <Text style={CreateAvatarStyles.categoryButtonText}>Lower Wear</Text>
         </TouchableOpacity>
       </View>

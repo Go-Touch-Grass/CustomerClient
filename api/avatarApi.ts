@@ -5,7 +5,7 @@ import { getToken } from '../utils/asyncStorage';
 export enum ItemType {
   HAT = 'hat',
   SHIRT = 'shirt',
-  BOTTOMS = 'bottoms'
+  BOTTOM = 'bottom'
 }
 
 // Update the Item interface to match the backend entity

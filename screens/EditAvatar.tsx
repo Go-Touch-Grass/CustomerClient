@@ -16,11 +16,11 @@ const EditAvatar = () => {
   const [customization, setCustomization] = useState<{
     [ItemType.HAT]: Item | null;
     [ItemType.SHIRT]: Item | null;
-    [ItemType.BOTTOMS]: Item | null;
+    [ItemType.BOTTOM]: Item | null;
   }>({
     [ItemType.HAT]: null,
     [ItemType.SHIRT]: null,
-    [ItemType.BOTTOMS]: null,
+    [ItemType.BOTTOM]: null,
   });
 
   const navigation = useNavigation<StackNavigationProp<any>>();
@@ -68,8 +68,7 @@ const EditAvatar = () => {
         shirtId: avatar.shirt?.id,
         bottomId: avatar.bottom?.id,
       };
-      //const filteredInfo = Object.fromEntries(Object.entries(updatedInfo).filter(([_, v]) => v !== undefined));
-      
+
       await updateAvatar(avatar.id, updatedInfo);
       Alert.alert('Success', 'Avatar updated successfully');
       navigation.replace('Home');
@@ -82,12 +81,10 @@ const EditAvatar = () => {
   };
 
   const handleSelectItem = (item: Item) => {
-    console.log('Selected item:', item);
-
     setCustomization((prev) => ({
-        ...prev,
-        [item.type]: item, 
-      }));
+      ...prev,
+      [item.type]: item,
+    }));
 
     setAvatar((prevAvatar) => {
       if (!prevAvatar) return null;
@@ -135,15 +132,9 @@ const EditAvatar = () => {
       <View style={CreateAvatarStyles.avatarContainer}>
         <Image source={require('../assets/sprites/avatar_base.png')} style={CreateAvatarStyles.avatar} />
 
-        {avatar.hat && (
-          <Image source={{ uri: avatar.hat.filepath }} style={CreateAvatarStyles.hat} />
-        )}
-        {avatar.shirt && (
-          <Image source={{ uri: avatar.shirt.filepath }} style={CreateAvatarStyles.upperWear} />
-        )}
-        {avatar.bottom && (
-          <Image source={{ uri: avatar.bottom.filepath }} style={CreateAvatarStyles.lowerWear} />
-        )}
+        {avatar.hat && <Image source={{ uri: avatar.hat.filepath }} style={CreateAvatarStyles.hat} />}
+        {avatar.shirt && <Image source={{ uri: avatar.shirt.filepath }} style={CreateAvatarStyles.upperWear} />}
+        {avatar.bottom && <Image source={{ uri: avatar.bottom.filepath }} style={CreateAvatarStyles.lowerWear} />}
       </View>
     );
   };
@@ -153,11 +144,7 @@ const EditAvatar = () => {
       <Text style={CreateAvatarStyles.title}>Edit Your Avatar</Text>
 
       <View style={CreateAvatarStyles.avatarContainer}>
-        {isLoading ? (
-          <ActivityIndicator size="large" color="#00AB41" />
-        ) : (
-          renderAvatar()
-        )}
+        {isLoading ? <ActivityIndicator size="large" color="#00AB41" /> : renderAvatar()}
       </View>
 
       <View style={CreateAvatarStyles.categorySelection}>
@@ -167,7 +154,10 @@ const EditAvatar = () => {
         <TouchableOpacity style={CreateAvatarStyles.categoryButton} onPress={() => setSelectedCategory(ItemType.SHIRT)}>
           <Text style={CreateAvatarStyles.categoryButtonText}>Upper Wear</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={CreateAvatarStyles.categoryButton} onPress={() => setSelectedCategory(ItemType.BOTTOMS)}>
+        <TouchableOpacity
+          style={CreateAvatarStyles.categoryButton}
+          onPress={() => setSelectedCategory(ItemType.BOTTOM)}
+        >
           <Text style={CreateAvatarStyles.categoryButtonText}>Lower Wear</Text>
         </TouchableOpacity>
       </View>
@@ -179,9 +169,7 @@ const EditAvatar = () => {
         onPress={handleUpdateAvatar}
         disabled={isSaving} // Disable while saving
       >
-        <Text style={CreateAvatarStyles.finishButtonText}>
-          {isSaving ? 'Saving...' : 'Save Changes'}
-        </Text>
+        <Text style={CreateAvatarStyles.finishButtonText}>{isSaving ? 'Saving...' : 'Save Changes'}</Text>
       </TouchableOpacity>
     </View>
   );
