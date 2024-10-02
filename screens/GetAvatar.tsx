@@ -39,13 +39,13 @@ const GetAvatar = () => {
         <Image source={require('../assets/sprites/avatar_base.png')} style={CreateAvatarStyles.avatar} />
 
         {avatar.hat && (
-          <Image source={{ uri: `${baseUrl}${avatar.hat.filepath}` }} style={CreateAvatarStyles.hat} />
+          <Image source={{ uri: avatar.hat.filepath}} style={CreateAvatarStyles.hat} />
         )}
         {avatar.shirt && (
-          <Image source={{ uri: `${baseUrl}${avatar.shirt.filepath}` }} style={CreateAvatarStyles.upperWear} />
+          <Image source={{ uri: avatar.shirt.filepath }} style={CreateAvatarStyles.upperWear} />
         )}
         {avatar.bottom && (
-          <Image source={{ uri: `${baseUrl}${avatar.bottom.filepath}` }} style={CreateAvatarStyles.lowerWear} />
+          <Image source={{ uri: avatar.bottom.filepath} } style={CreateAvatarStyles.lowerWear} />
         )}
       </View>
     );

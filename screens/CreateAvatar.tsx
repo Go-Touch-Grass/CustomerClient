@@ -20,12 +20,12 @@ const CreateAvatar = ({ route, navigation }) => {
 
   const [selectedCategory, setSelectedCategory] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [baseUrl, setBaseUrl] = useState('');
+  //const [baseUrl, setBaseUrl] = useState('');
 
   useEffect(() => {
     fetchItems();
-    const url = axiosInstance.defaults.baseURL || '';
-    setBaseUrl(url);
+   // const url = axiosInstance.defaults.baseURL || '';
+    //setBaseUrl(url);
   }, []);
 
   const fetchItems = async () => {
@@ -74,6 +74,7 @@ const CreateAvatar = ({ route, navigation }) => {
     });
   };
 
+
   const renderWardrobeItems = () => {
     console.log('Selected category:', selectedCategory);
     console.log('All items:', items);
@@ -85,7 +86,7 @@ const CreateAvatar = ({ route, navigation }) => {
         {categoryItems.map((item) => (
           <TouchableOpacity key={item.id} onPress={() => handleSelectItem(item)}>
             <Image
-              source={{ uri: `${baseUrl}${item.filepath}` }}
+              source={{ uri: item.filepath }}
               style={CreateAvatarStyles.wearItem}
               onError={(error) => console.error(`Error loading item image (${item.type}):`, error.nativeEvent.error)}
             />
@@ -103,13 +104,13 @@ const CreateAvatar = ({ route, navigation }) => {
         <Image source={require('../assets/sprites/avatar_base.png')} style={CreateAvatarStyles.avatar} />
 
         {customization[ItemType.HAT] && (
-          <Image source={{ uri: `${baseUrl}${customization[ItemType.HAT].filepath}` }} style={CreateAvatarStyles.hat} />
+          <Image source={{ uri: customization[ItemType.HAT].filepath }} style={CreateAvatarStyles.hat} />
         )}
         {customization[ItemType.SHIRT] && (
-          <Image source={{ uri: `${baseUrl}${customization[ItemType.SHIRT].filepath}` }} style={CreateAvatarStyles.upperWear} />
+          <Image source={{ uri: customization[ItemType.SHIRT].filepath }} style={CreateAvatarStyles.upperWear} />
         )}
         {customization[ItemType.BOTTOMS] && (
-          <Image source={{ uri: `${baseUrl}${customization[ItemType.BOTTOMS].filepath}` }} style={CreateAvatarStyles.lowerWear} />
+          <Image source={{ uri: customization[ItemType.BOTTOMS].filepath }} style={CreateAvatarStyles.lowerWear} />
         )}
       </View>
 
