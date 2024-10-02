@@ -6,16 +6,15 @@ import { getUserInfo } from '../api/userApi';
 import { CreateAvatarStyles } from '../styles/CreateAvatarStyles';
 import axiosInstance from '../api/authApi';
 import { StackNavigationProp } from '@react-navigation/stack';
+
 const GetAvatar = () => {
   const [avatar, setAvatar] = useState<AvatarInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [baseUrl, setBaseUrl] = useState('');
+
   const navigation = useNavigation<StackNavigationProp<any>>();
 
   useEffect(() => {
     fetchAvatarDetails();
-    const url = axiosInstance.defaults.baseURL || '';
-    setBaseUrl(url);
   }, []);
 
   const fetchAvatarDetails = async () => {

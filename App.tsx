@@ -15,7 +15,7 @@ import ChangeLanguage from './screens/ChangeLanguage';
 import ChangePassword from './screens/ChangePassword';
 import CreateAvatar from './screens/CreateAvatar';
 import GetAvatar from './screens/GetAvatar';
-
+import EditAvatar from './screens/EditAvatar';
 // Import utilities and services
 import { getToken } from './utils/asyncStorage';
 import i18n from './services/i18next';
@@ -67,6 +67,7 @@ const App: React.FC = () => {
           <Stack.Screen name="EditProfile" component={EditProfile} />
           <Stack.Screen name="ChangePassword" component={ChangePassword} />
           <Stack.Screen name="GetAvatar" component={GetAvatar} />
+          <Stack.Screen name="EditAvatar" component={EditAvatar} />
         </Stack.Navigator>
       </NavigationContainer>
     </I18nextProvider>

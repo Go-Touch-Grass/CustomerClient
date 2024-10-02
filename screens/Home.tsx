@@ -84,6 +84,11 @@ const Home: React.FC = () => {
     navigation.navigate('GetAvatar');
   };
 
+  const navigateToEditAvatar = () => {
+    toggleMenu(false);
+    navigation.navigate('EditAvatar');
+  };
+
   const handleLogout = async () => {
     toggleMenu(false);
     await removeToken();
@@ -143,6 +148,9 @@ const Home: React.FC = () => {
               </TouchableOpacity>
               <TouchableOpacity style={homeStyles.menuItem} onPress={navigateToGetAvatar}>
                 <Text style={homeStyles.menuItemText}>Get Avatar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={homeStyles.menuItem} onPress={navigateToEditAvatar}>
+                <Text style={homeStyles.menuItemText}>Edit Avatar</Text>
               </TouchableOpacity>
               <TouchableOpacity style={homeStyles.menuItem} onPress={navigateToChangeLanguage}>
                 <Text style={homeStyles.menuItemText}>{t('change-language')}</Text>
