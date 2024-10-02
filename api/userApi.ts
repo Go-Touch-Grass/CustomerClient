@@ -77,3 +77,18 @@ export const changePassword = async (currentPassword: string, newPassword: strin
         throw error;
     }
 };
+
+export const updateCustomerAvatar = async (avatarId: number): Promise<void> => {
+    const token = await getToken();
+    if (!token) {
+        throw new Error('No token found');
+    }
+
+    try {
+        await axiosInstance.post('auth/update-avatar', { avatarId }, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+    } catch (error) {
+        throw error;
+    }
+};

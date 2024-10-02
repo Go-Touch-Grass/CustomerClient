@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, StyleSheet, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, Image, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { getAvatarDetails } from '../api/avatarApi';
 import { AvatarInfo } from '../types/avatar';
 
@@ -7,6 +8,7 @@ const TestAvatarScreen: React.FC = () => {
   const [avatarInfo, setAvatarInfo] = useState<AvatarInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const navigation = useNavigation();
 
   useEffect(() => {
     fetchAvatarDetails();
@@ -17,11 +19,22 @@ const TestAvatarScreen: React.FC = () => {
       const details = await getAvatarDetails();
       setAvatarInfo(details);
     } catch (err) {
-      setError('Failed to fetch avatar details');
-      Alert.alert('Error', 'Failed to fetch avatar details');
+      const errorMessage = err.message || 'Failed to fetch avatar details';
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleGoHome = () => {
+    navigation.navigate('Home');
+  };
+
+  const renderImage = (source: string | null) => {
+    if (!source) return null;
+    return typeof source === 'string' ? (
+      <Image source={{ uri: source }} style={styles.avatar} />
+    ) : null;
   };
 
   if (isLoading) {
@@ -36,6 +49,9 @@ const TestAvatarScreen: React.FC = () => {
     return (
       <View style={styles.container}>
         <Text style={styles.errorText}>{error}</Text>
+        <TouchableOpacity style={styles.button} onPress={handleGoHome}>
+          <Text style={styles.buttonText}>Go to Home</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -45,17 +61,11 @@ const TestAvatarScreen: React.FC = () => {
       <Text style={styles.title}>Avatar Details</Text>
       {avatarInfo && (
         <View style={styles.avatarContainer}>
-          <Image source={{ uri: avatarInfo.avatar }} style={styles.avatar} />
+          {renderImage(avatarInfo.avatar)}
           <View style={styles.customizationContainer}>
-            {avatarInfo.customization.hat && (
-              <Image source={{ uri: avatarInfo.customization.hat }} style={styles.hat} />
-            )}
-            {avatarInfo.customization.upperWear && (
-              <Image source={{ uri: avatarInfo.customization.upperWear }} style={styles.upperWear} />
-            )}
-            {avatarInfo.customization.lowerWear && (
-              <Image source={{ uri: avatarInfo.customization.lowerWear }} style={styles.lowerWear} />
-            )}
+            {renderImage(avatarInfo.customization?.hat)}
+            {renderImage(avatarInfo.customization?.upperWear)}
+            {renderImage(avatarInfo.customization?.lowerWear)}
           </View>
         </View>
       )}
@@ -115,6 +125,20 @@ const styles = StyleSheet.create({
   errorText: {
     color: 'red',
     fontSize: 16,
+    marginBottom: 20,
+    textAlign: 'center',
+    paddingHorizontal: 20,
+  },
+  button: {
+    backgroundColor: '#007AFF',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 5,
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 
