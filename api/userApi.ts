@@ -44,7 +44,7 @@ export const editProfile = async (updatedInfo: Partial<UserInfo>): Promise<UserI
     }
 };
 
-export const deleteAccount = async (): Promise<void> => {
+export const deleteAccount = async (password: string): Promise<void> => {
     const token = await getToken();
     if (!token) {
         throw new Error('No token found');
@@ -52,7 +52,8 @@ export const deleteAccount = async (): Promise<void> => {
 
     try {
         await axiosInstance.delete('auth/profile/delete', {
-            headers: { Authorization: `Bearer ${token}` }
+            headers: { Authorization: `Bearer ${token}` },
+            data: { password }
         });
     } catch (error) {
         throw error;

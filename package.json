@@ -28,6 +28,7 @@
     "react-native-drawer": "^2.5.1",
     "react-native-gesture-handler": "^2.16.1",
     "react-native-maps": "^1.14.0",
+    "react-native-modal": "^13.0.1",
     "react-native-reanimated": "^3.10.1",
     "styled-components": "^6.1.13"
   },
