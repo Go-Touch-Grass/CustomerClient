@@ -52,29 +52,33 @@ const App: React.FC = () => {
   }
 
   return (
-    <I18nextProvider i18n={i18n}>
-      <NavigationContainer>
-        <Stack.Navigator
-          screenOptions={{
-            headerShown: false,
-          }}
-          initialRouteName={userToken ? 'Home' : 'Login'}
-        >
-          <Stack.Screen name="Login" component={Login} />
-          <Stack.Screen name="SignUp" component={SignUp} />
-          <Stack.Screen name="verifyOTP" component={verifyOTP} />
-          <Stack.Screen name="CreateAvatar" component={CreateAvatar} />
-          <Stack.Screen name="Home" component={Home} />
-          <Stack.Screen name="Change Language" component={ChangeLanguage} />
-          <Stack.Screen name="Profile" component={Profile} />
-          <Stack.Screen name="EditProfile" component={EditProfile} />
-          <Stack.Screen name="ChangePassword" component={ChangePassword} />
-          <Stack.Screen name="GetAvatar" component={GetAvatar} />
-          <Stack.Screen name="EditAvatar" component={EditAvatar} />
 
-        </Stack.Navigator>
-      </NavigationContainer>
-    </I18nextProvider>
+    <StripeProvider publishableKey="pk_test_51Q4z0HQA4DV7K9th7CJIMBmLCVDZi7RH3B1TtjEWfehCb8Ik5xM2j0zj0W1XaS837K47brkxSDLSUnc3zOOLzS2s00F3or1KLh">
+      <I18nextProvider i18n={i18n}>
+        <NavigationContainer>
+          <Stack.Navigator
+            screenOptions={{
+              headerShown: false,
+            }}
+            initialRouteName={userToken ? 'Home' : 'Login'}
+          >
+            <Stack.Screen name="Login" component={Login} />
+            <Stack.Screen name="SignUp" component={SignUp} />
+            <Stack.Screen name="Home" component={Home} />
+            <Stack.Screen name="Change Language" component={ChangeLanguage} />
+            <Stack.Screen name="Profile" component={Profile} />
+            <Stack.Screen name="EditProfile" component={EditProfile} />
+            <Stack.Screen name="ChangePassword" component={ChangePassword} />
+            <Stack.Screen name="Store" component={Store} />
+            <Stack.Screen name="GetAvatar" component={GetAvatar} />
+            <Stack.Screen name="EditAvatar" component={EditAvatar} />
+            <Stack.Screen name="verifyOTP" component={verifyOTP} />
+            <Stack.Screen name="CreateAvatar" component={CreateAvatar} />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </I18nextProvider>
+    </StripeProvider>
+
   );
 };
 
