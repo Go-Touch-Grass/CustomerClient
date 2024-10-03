@@ -28,6 +28,16 @@ const CreateAvatar = ({ route, navigation }) => {
     //setBaseUrl(url);
   }, []);
 
+  useEffect(() => {
+    if (items.length > 0) {
+      const baseItem = items.find(item => item.type === ItemType.BASE && item.id === 1);
+      if (baseItem) {
+        // Set the base item, but don't include it in the customization state
+        // as customers shouldn't be able to change it
+      }
+    }
+  }, [items]);
+
   const fetchItems = async () => {
     try {
       const fetchedItems = await getItems();
@@ -44,6 +54,7 @@ const CreateAvatar = ({ route, navigation }) => {
       const avatarType = AvatarType.TOURIST;
       const response = await createAvatar(
         avatarType,
+        1, // Always use base item with id 1 for customers
         customization[ItemType.HAT]?.id || null,
         customization[ItemType.SHIRT]?.id || null,
         customization[ItemType.BOTTOM]?.id || null,
