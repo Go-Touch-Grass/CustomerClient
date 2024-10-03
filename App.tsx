@@ -8,6 +8,7 @@ import '@formatjs/intl-pluralrules';
 // Import screens
 import Login from './screens/Login';
 import SignUp from './screens/SignUp';
+import verifyOTP from './screens/verifyOTP';
 import Home from './screens/Home';
 import Profile from './screens/Profile';
 import EditProfile from './screens/EditProfile';
@@ -16,6 +17,7 @@ import ChangePassword from './screens/ChangePassword';
 import CreateAvatar from './screens/CreateAvatar';
 import GetAvatar from './screens/GetAvatar';
 import EditAvatar from './screens/EditAvatar';
+
 // Import utilities and services
 import { getToken } from './utils/asyncStorage';
 import i18n from './services/i18next';
@@ -23,7 +25,7 @@ import i18n from './services/i18next';
 const Stack = createStackNavigator();
 
 const App: React.FC = () => {
-  
+
   const [isLoading, setIsLoading] = useState(true);
   const [userToken, setUserToken] = useState<string | null>(null);
 
@@ -60,6 +62,7 @@ const App: React.FC = () => {
         >
           <Stack.Screen name="Login" component={Login} />
           <Stack.Screen name="SignUp" component={SignUp} />
+          <Stack.Screen name="verifyOTP" component={verifyOTP} />
           <Stack.Screen name="CreateAvatar" component={CreateAvatar} />
           <Stack.Screen name="Home" component={Home} />
           <Stack.Screen name="Change Language" component={ChangeLanguage} />
@@ -68,6 +71,7 @@ const App: React.FC = () => {
           <Stack.Screen name="ChangePassword" component={ChangePassword} />
           <Stack.Screen name="GetAvatar" component={GetAvatar} />
           <Stack.Screen name="EditAvatar" component={EditAvatar} />
+
         </Stack.Navigator>
       </NavigationContainer>
     </I18nextProvider>

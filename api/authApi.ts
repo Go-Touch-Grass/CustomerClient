@@ -3,7 +3,9 @@ import { API_URL } from '@env';
 
 const axiosInstance = axios.create({
     // baseURL: API_URL
-    baseURL: 'http://192.168.10.146:8080/',
+    //baseURL: 'http://192.168.10.146:8080/',
+    // JY URL
+    baseURL: 'http://192.168.1.115:8080/',
     headers: {
         'Content-Type': 'application/json',
     },
