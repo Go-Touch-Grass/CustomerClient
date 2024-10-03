@@ -28,32 +28,16 @@ const Home: React.FC = () => {
         console.log('Permission to access location was denied');
         return;
       }
-      useEffect(() => {
-        (async () => {
-          let { status } = await Location.requestForegroundPermissionsAsync();
-          if (status !== 'granted') {
-            console.log('Permission to access location was denied');
-            return;
-          }
 
-          let location = await Location.getCurrentPositionAsync({});
-          setRegion({
-            latitude: location.coords.latitude,
-            longitude: location.coords.longitude,
-            latitudeDelta: 0.0922,
-            longitudeDelta: 0.0421,
-          });
-          setUserLocation(location);
+      let location = await Location.getCurrentPositionAsync({});
+      setRegion({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+        latitudeDelta: 0.0922,
+        longitudeDelta: 0.0421,
+      });
+      setUserLocation(location);
 
-          // Watch for location changes
-          Location.watchPositionAsync(
-            { accuracy: Location.Accuracy.BestForNavigation, timeInterval: 1000, distanceInterval: 1 },
-            (newLocation) => {
-              setUserLocation(newLocation);
-            },
-          );
-        })();
-      }, []);
       // Watch for location changes
       Location.watchPositionAsync(
         { accuracy: Location.Accuracy.BestForNavigation, timeInterval: 1000, distanceInterval: 1 },
