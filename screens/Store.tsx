@@ -51,7 +51,7 @@ const Store: React.FC = () => {
   const initializePaymentSheet = async () => {
     if (itemIndex) {
       const { clientSecret } = await axiosInstance
-        .post('api/payment/create-payment-intent', {
+        .post('/api/payment/create-payment-intent', {
           amount: options[itemIndex].price * 100, //in cents
           currency: 'sgd',
         })

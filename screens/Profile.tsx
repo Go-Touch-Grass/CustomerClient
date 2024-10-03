@@ -23,7 +23,6 @@ interface UserInfo {
   xp_progress: number;
 
   gem_balance: number;
-
 }
 
 const Profile: React.FC = () => {
@@ -64,7 +63,6 @@ const Profile: React.FC = () => {
     navigation.navigate('EditProfile', { userInfo });
   };
 
-
   const handleDeleteAccount = async () => {
     Alert.alert('Delete Account', 'Are you sure you want to delete your account? This action cannot be undone.', [
       { text: 'Cancel', style: 'cancel' },
@@ -84,14 +82,9 @@ const Profile: React.FC = () => {
     ]);
   };
 
-  const handleChangePassword = () => {
-    navigation.navigate('ChangePassword');
-  };
-
   const navigateToStore = () => {
     navigation.navigate('Store');
   };
-
 
   const handleChangePassword = () => {
     navigation.navigate('ChangePassword');
@@ -123,7 +116,6 @@ const Profile: React.FC = () => {
                 {t('level')}: {userInfo.currentLevel}
               </Text>
               <Text style={profileStyles.infoText}>
-
                 {t('exp-needed-for-next-level')}: {userInfo.xpForNextLevel}
               </Text>
               <Text style={profileStyles.infoText}>
@@ -131,7 +123,6 @@ const Profile: React.FC = () => {
               </Text>
 
               <Text style={profileStyles.infoText}>Gem Balance : {userInfo.gem_balance}</Text>
-
             </View>
             <View style={profileStyles.progressContainer}>
               <Text style={profileStyles.progressText}>{t('level-progress')}</Text>
