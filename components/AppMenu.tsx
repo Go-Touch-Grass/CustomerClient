@@ -7,38 +7,36 @@ import { removeToken } from '../utils/asyncStorage';
 import { useTranslation } from 'react-i18next';
 
 const AppMenu: React.FC = () => {
-    const { t } = useTranslation();
+  const { t } = useTranslation();
 
-    const navigation = useNavigation<StackNavigationProp<any>>();
+  const navigation = useNavigation<StackNavigationProp<any>>();
 
+  const navigateToProfile = () => {
+    navigation.navigate('Profile');
+  };
 
-    const navigateToProfile = () => {
-        navigation.navigate('Profile');
-    };
+  const navigateToChangeLanguage = () => {
+    navigation.navigate('Change Language');
+  };
 
-    const navigateToChangeLanguage = () => {
-        navigation.navigate('Change Language');
-    };
+  const handleLogout = async () => {
+    await removeToken();
+    navigation.replace('Login');
+  };
 
-    const handleLogout = async () => {
-        await removeToken();
-        navigation.replace('Login');
-    };
-
-    return (
-        <View style={appMenuStyles.drawerContent}>
-            <TouchableOpacity style={appMenuStyles.drawerItem} onPress={navigateToProfile}>
-                <Text style={appMenuStyles.drawerItemText}>{t('profile')}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-                style={appMenuStyles.drawerItem} onPress={navigateToChangeLanguage}
->                   <Text style={appMenuStyles.drawerItemText}>{t('change-language')}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={appMenuStyles.drawerItem} onPress={handleLogout}>
-                <Text style={appMenuStyles.drawerItemText}>{t('logout')}</Text>
-            </TouchableOpacity>
-        </View>
-    );
+  return (
+    <View style={appMenuStyles.drawerContent}>
+      <TouchableOpacity style={appMenuStyles.drawerItem} onPress={navigateToProfile}>
+        <Text style={appMenuStyles.drawerItemText}>{t('profile')}</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={appMenuStyles.drawerItem} onPress={navigateToChangeLanguage}>
+        <Text style={appMenuStyles.drawerItemText}>{t('change-language')}</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={appMenuStyles.drawerItem} onPress={handleLogout}>
+        <Text style={appMenuStyles.drawerItemText}>{t('logout')}</Text>
+      </TouchableOpacity>
+    </View>
+  );
 };
 
 export default AppMenu;
