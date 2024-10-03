@@ -21,8 +21,10 @@ import EditAvatar from './screens/EditAvatar';
 // Import utilities and services
 import { getToken } from './utils/asyncStorage';
 import i18n from './services/i18next';
+import { StripeProvider } from '@stripe/stripe-react-native';
 
 const Stack = createStackNavigator();
+import Store from './screens/Store';
 
 const App: React.FC = () => {
 

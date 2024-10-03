@@ -3,6 +3,7 @@ import { getToken } from '../utils/asyncStorage';
 
 // Add this enum to match the backend ItemType
 export enum ItemType {
+  BASE = 'base',
   HAT = 'hat',
   SHIRT = 'shirt',
   BOTTOM = 'bottom'
@@ -109,6 +110,7 @@ export const getItems = async (): Promise<Item[]> => {
 
 export const createAvatar = async (
   avatarType: AvatarType,
+  baseId: 1 | null,
   hatId: number | null,
   shirtId: number | null,
   bottomId: number | null,
@@ -123,6 +125,7 @@ export const createAvatar = async (
       '/api/avatars',
       {
         avatarType,
+        baseId,
         hatId,
         shirtId,
         bottomId,
