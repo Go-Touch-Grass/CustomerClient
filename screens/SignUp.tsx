@@ -70,7 +70,8 @@ const SignUp: React.FC = () => {
         const response = await registerUser(fullName, username, email, password);
         if (response.customer_account && response.token) {
           await storeToken(response.token);
-          navigation.replace('CreateAvatar', { customerId: response.customer_account.id });
+          navigation.replace('verifyOTP', { userId: response.customer_account.id });
+          //navigation.replace('CreateAvatar', { customerId: response.customer_account.id });
         } else {
           setErrors({ ...errors, general: "An unexpected error occurred during registration." });
         }
@@ -100,12 +101,12 @@ const SignUp: React.FC = () => {
   };
 
   return (
-    <KeyboardAvoidingView 
+    <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={{ flex: 1 }}
       keyboardVerticalOffset={Platform.OS === "ios" ? 30 : 0}
     >
-      <ScrollView 
+      <ScrollView
         ref={scrollViewRef}
         contentContainerStyle={{ flexGrow: 1 }}
         keyboardShouldPersistTaps="handled"

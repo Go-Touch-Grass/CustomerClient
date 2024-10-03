@@ -9,6 +9,7 @@ import { profileStyles } from '../styles/ProfileStyles';
 import ProtectedRoute from '../components/ProtectedRoute';
 import { removeToken } from '../utils/asyncStorage';
 import { useTranslation } from 'react-i18next';
+import Modal from 'react-native-modal';
 
 interface EditProfileProps {
     route: {
@@ -35,6 +36,9 @@ const EditProfile: React.FC<EditProfileProps> = ({ route }) => {
         username: '',
         general: '',
     });
+    const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+    const [deletePassword, setDeletePassword] = useState('');
+    const [deletePasswordError, setDeletePasswordError] = useState('');
 
     const handleBack = () => {
         navigation.goBack();
@@ -81,30 +85,30 @@ const EditProfile: React.FC<EditProfileProps> = ({ route }) => {
         }
     };
 
-    const handleDeleteAccount = async () => {
-        Alert.alert(
-            t('delete-account'),
-            t('delete-confirmation'),
-            [
-                { text: t('cancel'), style: 'cancel' },
-                {
-                    text: t('delete'),
-                    style: 'destructive',
-                    onPress: async () => {
-                        try {
-                            await deleteAccount();
-                            await removeToken();
-                            navigation.replace('Login');
-                        } catch (error: any) {
-                            setErrors({
-                                ...errors,
-                                general: error.response?.data?.message || 'Failed to delete account',
-                            });
-                        }
-                    },
-                },
-            ]
-        );
+    const handleDeleteAccount = () => {
+        setIsDeleteModalVisible(true);
+    };
+
+    const closeDeleteModal = () => {
+        setIsDeleteModalVisible(false);
+        setDeletePassword('');
+        setDeletePasswordError('');
+    };
+
+    const confirmDeleteAccount = async () => {
+        if (!deletePassword.trim()) {
+            setDeletePasswordError(t('password-required'));
+            return;
+        }
+
+        try {
+            await deleteAccount(deletePassword);
+            await removeToken();
+            closeDeleteModal();
+            navigation.replace('Login');
+        } catch (error: any) {
+            setDeletePasswordError(error.response?.data?.message || t('failed-to-delete-account'));
+        }
     };
 
     return (
@@ -164,6 +168,31 @@ const EditProfile: React.FC<EditProfileProps> = ({ route }) => {
                     </View>
                 ) : null}
             </InnerContainer>
+            <Modal isVisible={isDeleteModalVisible} onBackdropPress={closeDeleteModal}>
+                <View style={profileStyles.modalContainer}>
+                    <Text style={profileStyles.modalTitle}>{t('delete-account')}</Text>
+                    <Text style={profileStyles.modalText}>{t('delete-confirmation')}</Text>
+                    <TextInput
+                        style={profileStyles.input}
+                        value={deletePassword}
+                        onChangeText={(text) => {
+                            setDeletePassword(text);
+                            setDeletePasswordError('');
+                        }}
+                        placeholder={t('enter-password')}
+                        secureTextEntry
+                    />
+                    {deletePasswordError ? <Text style={profileStyles.errorText}>{deletePasswordError}</Text> : null}
+                    <View style={profileStyles.modalButtonContainer}>
+                        <TouchableOpacity style={profileStyles.modalCancelButton} onPress={closeDeleteModal}>
+                            <Text style={profileStyles.modalCancelButtonText}>{t('cancel')}</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={profileStyles.modalDeleteButton} onPress={confirmDeleteAccount}>
+                            <Text style={profileStyles.modalButtonText}>{t('delete')}</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
         </StyledContainer>
     );
 };
