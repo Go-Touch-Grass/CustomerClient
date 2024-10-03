@@ -28,9 +28,15 @@
     "react-native-drawer": "^2.5.1",
     "react-native-gesture-handler": "^2.16.1",
     "react-native-maps": "^1.14.0",
+
+    "react-native-paper": "^5.12.5",
+
     "react-native-modal": "^13.0.1",
+
     "react-native-reanimated": "^3.10.1",
-    "styled-components": "^6.1.13"
+    "react-native-select-dropdown": "^4.0.1",
+    "styled-components": "^6.1.13",
+    "@stripe/stripe-react-native": "0.37.2"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

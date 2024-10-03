@@ -28,16 +28,32 @@ const Home: React.FC = () => {
         console.log('Permission to access location was denied');
         return;
       }
+      useEffect(() => {
+        (async () => {
+          let { status } = await Location.requestForegroundPermissionsAsync();
+          if (status !== 'granted') {
+            console.log('Permission to access location was denied');
+            return;
+          }
 
-      let location = await Location.getCurrentPositionAsync({});
-      setRegion({
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-        latitudeDelta: 0.0922,
-        longitudeDelta: 0.0421,
-      });
-      setUserLocation(location);
+          let location = await Location.getCurrentPositionAsync({});
+          setRegion({
+            latitude: location.coords.latitude,
+            longitude: location.coords.longitude,
+            latitudeDelta: 0.0922,
+            longitudeDelta: 0.0421,
+          });
+          setUserLocation(location);
 
+          // Watch for location changes
+          Location.watchPositionAsync(
+            { accuracy: Location.Accuracy.BestForNavigation, timeInterval: 1000, distanceInterval: 1 },
+            (newLocation) => {
+              setUserLocation(newLocation);
+            },
+          );
+        })();
+      }, []);
       // Watch for location changes
       Location.watchPositionAsync(
         { accuracy: Location.Accuracy.BestForNavigation, timeInterval: 1000, distanceInterval: 1 },
@@ -113,6 +129,11 @@ const Home: React.FC = () => {
     navigation.navigate('CreateAvatar');
   };
 
+  const navigateToStore = () => {
+    toggleMenu(false);
+    navigation.navigate('Store');
+  };
+
   const menuTranslateY = menuAnimation.interpolate({
     inputRange: [0, 1],
     outputRange: [-50, 0],
@@ -151,6 +172,9 @@ const Home: React.FC = () => {
               </TouchableOpacity>
               <TouchableOpacity style={homeStyles.menuItem} onPress={navigateToEditAvatar}>
                 <Text style={homeStyles.menuItemText}>Edit Avatar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={homeStyles.menuItem} onPress={navigateToStore}>
+                <Text style={homeStyles.menuItemText}>Store</Text>
               </TouchableOpacity>
               <TouchableOpacity style={homeStyles.menuItem} onPress={navigateToChangeLanguage}>
                 <Text style={homeStyles.menuItemText}>{t('change-language')}</Text>
