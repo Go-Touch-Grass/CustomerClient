@@ -4,6 +4,10 @@
     "strict": true,
     "typeRoots": ["./types"]
   },
-  "include": ["env.d.ts","./api/**/*.ts"]
-
+  "include": [
+    "env.d.ts",
+    "./api/**/*.ts",
+    "./screens/Store.tsx",
+    "App.tsx"
+  ]
 }

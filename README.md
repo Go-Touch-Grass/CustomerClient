@@ -5,6 +5,7 @@
 1. Install the necessary packages by running `npm install`
 2. Create a `.env` file in the root directory using `.env.example` as an example
 3. In the `.env` file, input your local machine's IP Address (e.g. 192.168.XX.XXX). Do NOT include the "http://" or the port number (in `api/authApi.ts`, it is assumed that CommonBackend is running on port 8080)
+4. In the `.env` file, add the Stripe publishable key according to the `.env.example`. Refer to the "Secret List" Google Doc on our shared Google Drive folder
 
 ## If you are running on Expo Go (Physical Mobile Device):
 

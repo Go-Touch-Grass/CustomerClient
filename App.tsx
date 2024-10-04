@@ -22,6 +22,7 @@ import EditAvatar from './screens/EditAvatar';
 import { getToken } from './utils/asyncStorage';
 import i18n from './services/i18next';
 import { StripeProvider } from '@stripe/stripe-react-native';
+import { STRIPE_PUBLISHABLE_KEY } from '@env';
 
 const Stack = createStackNavigator();
 import Store from './screens/Store';
@@ -55,7 +56,7 @@ const App: React.FC = () => {
 
   return (
 
-    <StripeProvider publishableKey="pk_test_51Q4z0HQA4DV7K9th7CJIMBmLCVDZi7RH3B1TtjEWfehCb8Ik5xM2j0zj0W1XaS837K47brkxSDLSUnc3zOOLzS2s00F3or1KLh">
+    <StripeProvider publishableKey={STRIPE_PUBLISHABLE_KEY}>
       <I18nextProvider i18n={i18n}>
         <NavigationContainer>
           <Stack.Navigator
