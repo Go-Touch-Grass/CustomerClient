@@ -65,7 +65,6 @@ const Store: React.FC = () => {
 
         const { error } = await initPaymentSheet({
           paymentIntentClientSecret: clientSecret,
-          customFlow: true,
           merchantDisplayName: 'Go Touch Grass',
         });
 
@@ -110,7 +109,7 @@ const Store: React.FC = () => {
     const { error } = await presentPaymentSheet();
 
     if (error) {
-      console.error('Error presenting payment sheet:', error);
+      console.error('Error submitting payment sheet:', error);
     } else {
       console.log('Payment sheet for itemIndex', itemIndex, 'submitted');
       
