@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { Colors } from './commonStyles';
 
 export const ChangeLanguageStyles = StyleSheet.create({
   languageListContainer: {
@@ -22,14 +23,13 @@ export const ChangeLanguageStyles = StyleSheet.create({
     padding: 10,
   },
   backIcon: {
-    color: '#4CAF50',
+    color: Colors.green,
     fontSize: 24,
   },
   languagesList: {
     flex: 1,
     justifyContent: 'center',
-    padding: 10,
-    backgroundColor: '#6258e8',
+    padding: 10
   },
   languageButton: {
     padding: 10,

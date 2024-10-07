@@ -4,7 +4,7 @@ import { Colors } from './commonStyles';
 export const appMenuStyles = StyleSheet.create({
   drawerContent: {
     flex: 1,
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.white,
     paddingTop: 40,
   },
   drawerItem: {
@@ -14,6 +14,6 @@ export const appMenuStyles = StyleSheet.create({
   },
   drawerItemText: {
     fontSize: 16,
-    color: Colors.brand, 
+    color: Colors.black, 
   },
 });

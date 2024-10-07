@@ -233,7 +233,7 @@ const Home: React.FC = () => {
         )}
         <View style={homeStyles.menuContainer}>
           <TouchableOpacity style={homeStyles.menuButton} onPress={handleMenuPress}>
-            <Ionicons name="menu" size={24} color={Colors.primary} />
+            <Ionicons name="menu" size={24} color={Colors.white} />
           </TouchableOpacity>
         </View>
         <AppMenu

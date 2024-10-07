@@ -1,19 +1,23 @@
 import styled from 'styled-components/native';
 import Constants from 'expo-constants';
+import { StyleSheet } from 'react-native';
 
 const StatusBarHeight = Constants.statusBarHeight;
 
 export const Colors = {
-  primary: '#ffffff',
+  white: '#ffffff',
   secondary: '#E5E7EB',
-  tertiary: '#1F2937',
+  tertiary: '#06402B',
   darkLight: '#9CA3AF',
-  brand: '#000000',
-  green: '#10B981',
+  black: '#000000',
+  green: '#4CAF50',
   red: '#EF4444',
+  lightGreen: '#a0d995',
+  lightGray: '#d0d0d0',
+  gray: '#a0a0a0',
 };
 
-const { primary, brand } = Colors;
+const { white: primary, black: brand } = Colors;
 
 export const StyledContainer = styled.View`
   flex: 1;
@@ -40,3 +44,12 @@ export const PageTitle = styled.Text`
   color: ${brand};
   padding: 10px;
 `;
+
+export const commonStyles = StyleSheet.create({
+  errorText: {
+    color: Colors.red,
+    fontSize: 14,
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+});

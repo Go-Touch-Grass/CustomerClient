@@ -16,7 +16,7 @@ export const homeStyles = StyleSheet.create({
     },
     menuButton: {
         padding: 20,
-        backgroundColor: '#4CAF50',
+        backgroundColor: Colors.green,
         borderRadius: 5,
         alignItems: 'center',
         shadowColor: '#000',
@@ -34,7 +34,7 @@ export const homeStyles = StyleSheet.create({
         position: 'absolute',
         top: 135,
         left: 35,
-        backgroundColor: Colors.primary,
+        backgroundColor: Colors.white,
         borderRadius: 5,
         padding: 10,
         shadowColor: '#000',
@@ -53,7 +53,7 @@ export const homeStyles = StyleSheet.create({
     },
     menuItemText: {
         fontSize: 18,
-        color: Colors.brand,
+        color: Colors.black,
     },
     mapContainer: {
         ...StyleSheet.absoluteFillObject,
@@ -112,7 +112,7 @@ export const homeStyles = StyleSheet.create({
     },
     noAvatarText: {
         fontSize: 16,
-        color: Colors.primary,
+        color: Colors.white,
         textAlign: 'center',
         padding: 10,
     },

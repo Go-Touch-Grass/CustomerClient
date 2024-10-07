@@ -17,7 +17,8 @@ import ChangePassword from './screens/ChangePassword';
 import CreateAvatar from './screens/CreateAvatar';
 import GetAvatar from './screens/GetAvatar';
 import EditAvatar from './screens/EditAvatar';
-
+import Social from './screens/Social';
+import Friends from './screens/Friends';
 // Import utilities and services
 import { getToken } from './utils/asyncStorage';
 import i18n from './services/i18next';
@@ -27,7 +28,6 @@ const Stack = createStackNavigator();
 import Store from './screens/Store';
 
 const App: React.FC = () => {
-
   const [isLoading, setIsLoading] = useState(true);
   const [userToken, setUserToken] = useState<string | null>(null);
 
@@ -54,7 +54,6 @@ const App: React.FC = () => {
   }
 
   return (
-
     <StripeProvider publishableKey="pk_test_51Q4z0HQA4DV7K9th7CJIMBmLCVDZi7RH3B1TtjEWfehCb8Ik5xM2j0zj0W1XaS837K47brkxSDLSUnc3zOOLzS2s00F3or1KLh">
       <I18nextProvider i18n={i18n}>
         <NavigationContainer>
@@ -76,11 +75,12 @@ const App: React.FC = () => {
             <Stack.Screen name="EditAvatar" component={EditAvatar} />
             <Stack.Screen name="verifyOTP" component={verifyOTP} />
             <Stack.Screen name="CreateAvatar" component={CreateAvatar} />
+            <Stack.Screen name="Social" component={Social} />
+            <Stack.Screen name="Friends" component={Friends} />
           </Stack.Navigator>
         </NavigationContainer>
       </I18nextProvider>
     </StripeProvider>
-
   );
 };
 
