@@ -11,6 +11,7 @@ import ProtectedRoute from '../components/ProtectedRoute';
 import { Colors } from '../styles/commonStyles';
 import { removeToken } from '../utils/asyncStorage';
 import { useTranslation } from 'react-i18next';
+import AppMenu from '../components/AppMenu';
 
 const Home: React.FC = () => {
   const { t } = useTranslation();
@@ -136,39 +137,12 @@ const Home: React.FC = () => {
             <Ionicons name="menu" size={24} color={Colors.primary} />
           </TouchableOpacity>
         </View>
-        <Animated.View
-          style={[
-            homeStyles.menu,
-            {
-              transform: [{ translateY: menuTranslateY }],
-              opacity: menuAnimation,
-              display: menuVisible ? 'flex' : 'none',
-            },
-          ]}
-        >
-          <TouchableWithoutFeedback>
-            <View>
-              <TouchableOpacity style={homeStyles.menuItem} onPress={navigateToProfile}>
-                <Text style={homeStyles.menuItemText}>{t('profile')}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={homeStyles.menuItem} onPress={navigateToGetAvatar}>
-                <Text style={homeStyles.menuItemText}>Get Avatar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={homeStyles.menuItem} onPress={navigateToEditAvatar}>
-                <Text style={homeStyles.menuItemText}>Edit Avatar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={homeStyles.menuItem} onPress={navigateToStore}>
-                <Text style={homeStyles.menuItemText}>Store</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={homeStyles.menuItem} onPress={navigateToChangeLanguage}>
-                <Text style={homeStyles.menuItemText}>{t('change-language')}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={homeStyles.menuItem} onPress={handleLogout}>
-                <Text style={homeStyles.menuItemText}>{t('logout')}</Text>
-              </TouchableOpacity>
-            </View>
-          </TouchableWithoutFeedback>
-        </Animated.View>
+        <AppMenu
+          visible={menuVisible}
+          menuAnimation={menuAnimation}
+          toggleMenu={toggleMenu}
+          navigation={navigation}
+        />
 
         <View style={homeStyles.mapContainer}>
           {region && (
