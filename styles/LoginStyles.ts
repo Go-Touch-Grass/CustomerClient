@@ -1,17 +1,18 @@
 import { StyleSheet } from 'react-native';
+import { Colors, commonStyles } from './commonStyles';
 
 export const loginStyles = StyleSheet.create({
     inputContainer: {
         width: '80%',
     },
     input: {
-        backgroundColor: '#f0f0f0',
+        backgroundColor: Colors.secondary,
         padding: 15,
         borderRadius: 5,
         marginBottom: 10,
     },
     button: {
-        backgroundColor: '#4CAF50',
+        backgroundColor: Colors.green,
         padding: 15,
         borderRadius: 5,
         width: '80%',
@@ -31,17 +32,16 @@ export const loginStyles = StyleSheet.create({
         alignItems: 'center',
         marginTop: 10,
         borderWidth: 1,
-        borderColor: '#4CAF50',
+        borderColor: Colors.green,
     },
     signUpButtonText: {
-        color: '#4CAF50',
+        color: Colors.green,
         fontSize: 16,
         fontWeight: 'bold',
     },
     errorText: {
-        color: 'red',
+        ...commonStyles.errorText,
         fontSize: 12,
         marginTop: 5,
-        marginBottom: 10,
     },
 });

@@ -56,6 +56,9 @@ const AppMenu: React.FC<AppMenuProps> = ({ visible, menuAnimation, toggleMenu, n
           <TouchableOpacity style={homeStyles.menuItem} onPress={() => navigateTo('Store')}>
             <Text style={homeStyles.menuItemText}>Store</Text>
           </TouchableOpacity>
+          <TouchableOpacity style={homeStyles.menuItem} onPress={() => navigateTo('Social')}>
+            <Text style={homeStyles.menuItemText}>{t('social')}</Text>
+          </TouchableOpacity>
           <TouchableOpacity style={homeStyles.menuItem} onPress={() => navigateTo('Change Language')}>
             <Text style={homeStyles.menuItemText}>{t('change-language')}</Text>
           </TouchableOpacity>

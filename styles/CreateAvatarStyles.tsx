@@ -1,7 +1,7 @@
 // HomeStyles.ts
 
 import { StyleSheet } from 'react-native';
-
+import { Colors } from './commonStyles';
 
 export const CreateAvatarStyles = StyleSheet.create({
     
@@ -58,7 +58,7 @@ export const CreateAvatarStyles = StyleSheet.create({
         marginVertical: 10,
     },
     categoryButton: {
-        backgroundColor: '#00AB41', // Change to your preferred color
+        backgroundColor: Colors.green,
         padding: 10,
         borderRadius: 5,
         flex: 1,
@@ -79,13 +79,13 @@ export const CreateAvatarStyles = StyleSheet.create({
     },
     equippedItem: {
         borderWidth: 2,
-        borderColor: '#00AB41', // Use your preferred color for highlighting
+        borderColor: Colors.green,
         borderRadius: 5,
         width: 54, // Slightly larger than the wearItem to account for the border
         height: 54, // Slightly larger than the wearItem to account for the border
     },
     finishButton: {
-        backgroundColor: '#06402B', // Change to your preferred color
+        backgroundColor: Colors.tertiary,
         padding: 15,
         borderRadius: 8,
         alignItems: 'center',

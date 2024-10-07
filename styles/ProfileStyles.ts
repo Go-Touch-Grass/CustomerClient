@@ -18,7 +18,7 @@ export const profileStyles = StyleSheet.create({
     color: Colors.tertiary,
   },
   button: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: Colors.green,
     padding: 15,
     borderRadius: 5,
     alignItems: 'center',
@@ -37,7 +37,7 @@ export const profileStyles = StyleSheet.create({
     padding: 10,
   },
   backIcon: {
-    color: '#4CAF50',
+    color: Colors.green,
     fontSize: 24,
   },
   progressContainer: {
@@ -59,7 +59,7 @@ export const profileStyles = StyleSheet.create({
   },
   progressBar: {
     height: '100%',
-    backgroundColor: '#4CAF50',
+    backgroundColor: Colors.green,
   },
   inputContainer: {
     width: '80%',
@@ -69,7 +69,7 @@ export const profileStyles = StyleSheet.create({
     marginBottom: 20,
   },
   input: {
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.white,
     padding: 15,
     borderRadius: 5,
     fontSize: 16,
@@ -97,7 +97,7 @@ export const profileStyles = StyleSheet.create({
     textAlign: 'center',
   },
   deleteButton: {
-    backgroundColor: '#FF0000',
+    backgroundColor: Colors.red,
     padding: 15,
     borderRadius: 5,
     alignItems: 'center',
@@ -109,14 +109,14 @@ export const profileStyles = StyleSheet.create({
     fontWeight: 'bold',
   },
   logoutButton: {
-    backgroundColor: '#2E7D32', // Darker green
+    backgroundColor: Colors.green,
     padding: 15,
     borderRadius: 5,
     alignItems: 'center',
     marginTop: 20,
   },
   modalContainer: {
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.white,
     padding: 20,
     borderRadius: 10,
   },
@@ -151,7 +151,7 @@ export const profileStyles = StyleSheet.create({
     textAlign: 'center',
   },
   modalDeleteButton: {
-    backgroundColor: '#FF0000',
+    backgroundColor: Colors.red,
     padding: 10,
     borderRadius: 5,
     flex: 1,
