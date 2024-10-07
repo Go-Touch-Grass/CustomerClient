@@ -64,9 +64,9 @@ const EditAvatar = () => {
     setIsSaving(true);
     try {
       const updatedInfo = {
-        hatId: avatar.hat?.id,
-        shirtId: avatar.shirt?.id,
-        bottomId: avatar.bottom?.id,
+        hatId: avatar.hat?.id ?? null,
+        shirtId: avatar.shirt?.id ?? null,
+        bottomId: avatar.bottom?.id ?? null,
       };
 
       await updateAvatar(avatar.id, updatedInfo);
@@ -81,30 +81,17 @@ const EditAvatar = () => {
   };
 
   const handleSelectItem = (item: Item) => {
-    setCustomization((prev) => ({
-      ...prev,
-      [item.type]: item,
-    }));
-
     setAvatar((prevAvatar) => {
       if (!prevAvatar) return null;
 
+      // Check if the item is already equipped
+      const isEquipped = prevAvatar[item.type]?.id === item.id;
+
       return {
         ...prevAvatar,
-        [item.type]: item,
+        [item.type]: isEquipped ? null : item, // Toggle between equipping and unequipping
       };
     });
-
-    /*
-    setAvatar((prevAvatar) => {
-    const updatedAvatar = {
-        ...prevAvatar,
-        [item.type]: item,  // Ensure that 'BOTTOMS' is handled here
-    };
-    console.log('Updated avatar:', updatedAvatar); // Log to check the avatar state
-    return updatedAvatar;
-    });
-    */
   };
 
   const renderWardrobeItems = () => {
@@ -113,7 +100,14 @@ const EditAvatar = () => {
     return (
       <ScrollView horizontal>
         {categoryItems.map((item) => (
-          <TouchableOpacity key={item.id} onPress={() => handleSelectItem(item)}>
+          <TouchableOpacity 
+            key={item.id} 
+            onPress={() => handleSelectItem(item)}
+            style={[
+              CreateAvatarStyles.wearItemContainer,
+              avatar?.[item.type]?.id === item.id && CreateAvatarStyles.equippedItem
+            ]}
+          >
             <Image
               source={{ uri: item.filepath }}
               style={CreateAvatarStyles.wearItem}
@@ -176,3 +170,4 @@ const EditAvatar = () => {
 };
 
 export default EditAvatar;
+

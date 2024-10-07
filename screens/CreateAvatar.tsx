@@ -1,26 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, Image, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
-import { createAvatar, getItems, AvatarType, Item, ItemType } from '../api/avatarApi';
+import { createAvatar, getItems, AvatarType, Item, ItemType, AvatarInfo } from '../api/avatarApi';
 import { updateCustomerAvatar } from '../api/userApi';
 import { useNavigation } from '@react-navigation/native';
 import { CreateAvatarStyles } from '../styles/CreateAvatarStyles';
 import axiosInstance from '../api/authApi'; // Import the axiosInstance
+import AvatarRenderer from '../components/AvatarRenderer';
 
 const CreateAvatar = ({ route, navigation }) => {
-  const [items, setItems] = useState<Item[]>([]);
-  const [customization, setCustomization] = useState<{
-    [ItemType.HAT]: Item | null;
-    [ItemType.SHIRT]: Item | null;
-    [ItemType.BOTTOM]: Item | null;
-  }>({
-    [ItemType.HAT]: null,
-    [ItemType.SHIRT]: null,
-    [ItemType.BOTTOM]: null,
+  const [avatar, setAvatar] = useState<AvatarInfo>({
+    id: 0, // Temporary ID for creation
+    avatarType: AvatarType.TOURIST,
+    hat: null,
+    shirt: null,
+    bottom: null,
   });
-
+  const [items, setItems] = useState<Item[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  //const [baseUrl, setBaseUrl] = useState('');
 
   useEffect(() => {
     fetchItems();
@@ -30,7 +27,7 @@ const CreateAvatar = ({ route, navigation }) => {
 
   useEffect(() => {
     if (items.length > 0) {
-      const baseItem = items.find(item => item.type === ItemType.BASE && item.id === 1);
+      const baseItem = items.find((item) => item.type === ItemType.BASE && item.id === 1);
       if (baseItem) {
         // Set the base item, but don't include it in the customization state
         // as customers shouldn't be able to change it
@@ -51,13 +48,12 @@ const CreateAvatar = ({ route, navigation }) => {
   const handleCreateAvatar = async () => {
     setIsLoading(true);
     try {
-      const avatarType = AvatarType.TOURIST;
       const response = await createAvatar(
-        avatarType,
+        AvatarType.TOURIST,
         1, // Always use base item with id 1 for customers
-        customization[ItemType.HAT]?.id || null,
-        customization[ItemType.SHIRT]?.id || null,
-        customization[ItemType.BOTTOM]?.id || null,
+        avatar.hat?.id || null,
+        avatar.shirt?.id || null,
+        avatar.bottom?.id || null,
       );
 
       Alert.alert('Success', 'Avatar created successfully');
@@ -77,9 +73,16 @@ const CreateAvatar = ({ route, navigation }) => {
   };
 
   const handleSelectItem = (item: Item) => {
-    setCustomization((prev) => {
-      const newState = { ...prev, [item.type]: item };
-      return newState;
+    setAvatar((prevAvatar) => {
+      if (!prevAvatar) return prevAvatar;
+
+      // Check if the item is already equipped
+      const isEquipped = prevAvatar[item.type]?.id === item.id;
+
+      return {
+        ...prevAvatar,
+        [item.type]: isEquipped ? null : item, // Toggle between equipping and unequipping
+      };
     });
   };
 
@@ -88,7 +91,14 @@ const CreateAvatar = ({ route, navigation }) => {
     return (
       <ScrollView horizontal>
         {categoryItems.map((item) => (
-          <TouchableOpacity key={item.id} onPress={() => handleSelectItem(item)}>
+          <TouchableOpacity
+            key={item.id}
+            onPress={() => handleSelectItem(item)}
+            style={[
+              CreateAvatarStyles.wearItemContainer,
+              avatar[item.type]?.id === item.id && CreateAvatarStyles.equippedItem,
+            ]}
+          >
             <Image
               source={{ uri: item.filepath }}
               style={CreateAvatarStyles.wearItem}
@@ -104,19 +114,7 @@ const CreateAvatar = ({ route, navigation }) => {
     <View style={CreateAvatarStyles.container}>
       <Text style={CreateAvatarStyles.title}>Create Your Avatar</Text>
 
-      <View style={CreateAvatarStyles.avatarContainer}>
-        <Image source={require('../assets/sprites/avatar_base.png')} style={CreateAvatarStyles.avatar} />
-
-        {customization[ItemType.HAT] && (
-          <Image source={{ uri: customization[ItemType.HAT].filepath }} style={CreateAvatarStyles.hat} />
-        )}
-        {customization[ItemType.SHIRT] && (
-          <Image source={{ uri: customization[ItemType.SHIRT].filepath }} style={CreateAvatarStyles.upperWear} />
-        )}
-        {customization[ItemType.BOTTOM] && (
-          <Image source={{ uri: customization[ItemType.BOTTOM].filepath }} style={CreateAvatarStyles.lowerWear} />
-        )}
-      </View>
+      <AvatarRenderer avatar={avatar} />
 
       <View style={CreateAvatarStyles.categorySelection}>
         <TouchableOpacity style={CreateAvatarStyles.categoryButton} onPress={() => setSelectedCategory(ItemType.HAT)}>

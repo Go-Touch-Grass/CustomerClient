@@ -1,41 +1,70 @@
 import React from 'react';
-import { View, TouchableOpacity, Text, FlatList } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { View, TouchableOpacity, Text, Animated, TouchableWithoutFeedback } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { appMenuStyles } from '../styles/AppMenuStyles';
-import { removeToken } from '../utils/asyncStorage';
 import { useTranslation } from 'react-i18next';
+import { homeStyles } from '../styles/HomeStyles';
+import { removeToken } from '../utils/asyncStorage';
 
-const AppMenu: React.FC = () => {
+interface AppMenuProps {
+  visible: boolean;
+  menuAnimation: Animated.Value;
+  toggleMenu: (visible: boolean) => void;
+  navigation: StackNavigationProp<any>;
+}
+
+const AppMenu: React.FC<AppMenuProps> = ({ visible, menuAnimation, toggleMenu, navigation }) => {
   const { t } = useTranslation();
 
-  const navigation = useNavigation<StackNavigationProp<any>>();
-
-  const navigateToProfile = () => {
-    navigation.navigate('Profile');
-  };
-
-  const navigateToChangeLanguage = () => {
-    navigation.navigate('Change Language');
+  const navigateTo = (screen: string) => {
+    toggleMenu(false);
+    navigation.navigate(screen);
   };
 
   const handleLogout = async () => {
+    toggleMenu(false);
     await removeToken();
     navigation.replace('Login');
   };
 
+  const menuTranslateY = menuAnimation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [-50, 0],
+  });
+
   return (
-    <View style={appMenuStyles.drawerContent}>
-      <TouchableOpacity style={appMenuStyles.drawerItem} onPress={navigateToProfile}>
-        <Text style={appMenuStyles.drawerItemText}>{t('profile')}</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={appMenuStyles.drawerItem} onPress={navigateToChangeLanguage}>
-        <Text style={appMenuStyles.drawerItemText}>{t('change-language')}</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={appMenuStyles.drawerItem} onPress={handleLogout}>
-        <Text style={appMenuStyles.drawerItemText}>{t('logout')}</Text>
-      </TouchableOpacity>
-    </View>
+    <Animated.View
+      style={[
+        homeStyles.menu,
+        {
+          transform: [{ translateY: menuTranslateY }],
+          opacity: menuAnimation,
+          display: visible ? 'flex' : 'none',
+        },
+      ]}
+    >
+      <TouchableWithoutFeedback>
+        <View>
+          <TouchableOpacity style={homeStyles.menuItem} onPress={() => navigateTo('Profile')}>
+            <Text style={homeStyles.menuItemText}>{t('profile')}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={homeStyles.menuItem} onPress={() => navigateTo('GetAvatar')}>
+            <Text style={homeStyles.menuItemText}>Get Avatar</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={homeStyles.menuItem} onPress={() => navigateTo('EditAvatar')}>
+            <Text style={homeStyles.menuItemText}>Edit Avatar</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={homeStyles.menuItem} onPress={() => navigateTo('Store')}>
+            <Text style={homeStyles.menuItemText}>Store</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={homeStyles.menuItem} onPress={() => navigateTo('Change Language')}>
+            <Text style={homeStyles.menuItemText}>{t('change-language')}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={homeStyles.menuItem} onPress={handleLogout}>
+            <Text style={homeStyles.menuItemText}>{t('logout')}</Text>
+          </TouchableOpacity>
+        </View>
+      </TouchableWithoutFeedback>
+    </Animated.View>
   );
 };
 
