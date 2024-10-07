@@ -71,6 +71,7 @@ export const CreateAvatarStyles = StyleSheet.create({
     },
     wearItemContainer: {
         margin: 10,
+        alignItems: 'center', // Center the item icon vertically
     },
     wearItem: {
         width: 50,
@@ -80,6 +81,8 @@ export const CreateAvatarStyles = StyleSheet.create({
         borderWidth: 2,
         borderColor: '#00AB41', // Use your preferred color for highlighting
         borderRadius: 5,
+        width: 54, // Slightly larger than the wearItem to account for the border
+        height: 54, // Slightly larger than the wearItem to account for the border
     },
     finishButton: {
         backgroundColor: '#06402B', // Change to your preferred color
