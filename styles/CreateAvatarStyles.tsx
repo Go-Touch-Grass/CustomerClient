@@ -69,10 +69,17 @@ export const CreateAvatarStyles = StyleSheet.create({
         color: '#FFFFFF',
         fontSize: 16,
     },
+    wearItemContainer: {
+        margin: 10,
+    },
     wearItem: {
         width: 50,
         height: 50,
-        margin: 10,
+    },
+    equippedItem: {
+        borderWidth: 2,
+        borderColor: '#00AB41', // Use your preferred color for highlighting
+        borderRadius: 5,
     },
     finishButton: {
         backgroundColor: '#06402B', // Change to your preferred color

@@ -5,6 +5,7 @@ import { updateCustomerAvatar } from '../api/userApi';
 import { useNavigation } from '@react-navigation/native';
 import { CreateAvatarStyles } from '../styles/CreateAvatarStyles';
 import axiosInstance from '../api/authApi'; // Import the axiosInstance
+import AvatarRenderer from '../components/AvatarRenderer';
 
 const CreateAvatar = ({ route, navigation }) => {
   const [items, setItems] = useState<Item[]>([]);
@@ -104,19 +105,15 @@ const CreateAvatar = ({ route, navigation }) => {
     <View style={CreateAvatarStyles.container}>
       <Text style={CreateAvatarStyles.title}>Create Your Avatar</Text>
 
-      <View style={CreateAvatarStyles.avatarContainer}>
-        <Image source={require('../assets/sprites/avatar_base.png')} style={CreateAvatarStyles.avatar} />
-
-        {customization[ItemType.HAT] && (
-          <Image source={{ uri: customization[ItemType.HAT].filepath }} style={CreateAvatarStyles.hat} />
-        )}
-        {customization[ItemType.SHIRT] && (
-          <Image source={{ uri: customization[ItemType.SHIRT].filepath }} style={CreateAvatarStyles.upperWear} />
-        )}
-        {customization[ItemType.BOTTOM] && (
-          <Image source={{ uri: customization[ItemType.BOTTOM].filepath }} style={CreateAvatarStyles.lowerWear} />
-        )}
-      </View>
+      <AvatarRenderer
+        avatar={{
+          id: 0, // Temporary ID for creation
+          avatarType: AvatarType.TOURIST,
+          hat: customization[ItemType.HAT],
+          shirt: customization[ItemType.SHIRT],
+          bottom: customization[ItemType.BOTTOM],
+        }}
+      />
 
       <View style={CreateAvatarStyles.categorySelection}>
         <TouchableOpacity style={CreateAvatarStyles.categoryButton} onPress={() => setSelectedCategory(ItemType.HAT)}>

@@ -23,9 +23,9 @@ export interface AvatarInfo {
   avatarType: AvatarType;
   customer?: { id: number };
   business?: { id: number };
-  hat?: Item;
-  shirt?: Item;
-  bottom?: Item;
+  hat?: Item | null;
+  shirt?: Item | null;
+  bottom?: Item | null;
 }
 
 export enum AvatarType {
@@ -52,7 +52,7 @@ export const getAvatarById = async (id: number): Promise<AvatarInfo> => {
 
 export const updateAvatar = async (
   avatarId: number,
-  updatedInfo: { hatId?: number; shirtId?: number; bottomId?: number }
+  updatedInfo: { hatId?: number | null; shirtId?: number | null; bottomId?: number | null }
 ): Promise<AvatarInfo> => {
   const token = await getToken();
   if (!token) {
