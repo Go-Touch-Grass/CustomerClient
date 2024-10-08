@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { getAvatarByCustomerId, AvatarInfo } from '../api/avatarApi';
 import { getUserInfo } from '../api/userApi';
 import { CreateAvatarStyles } from '../styles/CreateAvatarStyles';
-import axiosInstance from '../api/authApi';
 import { StackNavigationProp } from '@react-navigation/stack';
+import AvatarRenderer from '../components/AvatarRenderer';
 
 const GetAvatar = () => {
   const [avatar, setAvatar] = useState<AvatarInfo | null>(null);
@@ -30,26 +30,6 @@ const GetAvatar = () => {
     }
   };
 
-  const renderAvatar = () => {
-    if (!avatar) return null;
-
-    return (
-      <View style={CreateAvatarStyles.avatarContainer}>
-        <Image source={require('../assets/sprites/avatar_base.png')} style={CreateAvatarStyles.avatar} />
-
-        {avatar.hat && (
-          <Image source={{ uri: avatar.hat.filepath}} style={CreateAvatarStyles.hat} />
-        )}
-        {avatar.shirt && (
-          <Image source={{ uri: avatar.shirt.filepath }} style={CreateAvatarStyles.upperWear} />
-        )}
-        {avatar.bottom && (
-          <Image source={{ uri: avatar.bottom.filepath} } style={CreateAvatarStyles.lowerWear} />
-        )}
-      </View>
-    );
-  };
-
   return (
     <View style={CreateAvatarStyles.container}>
       <Text style={CreateAvatarStyles.title}>Your Avatar</Text>
@@ -57,7 +37,7 @@ const GetAvatar = () => {
       {isLoading ? (
         <ActivityIndicator size="large" color="#00AB41" />
       ) : (
-        renderAvatar()
+        <AvatarRenderer avatar={avatar} />
       )}
 
       <TouchableOpacity

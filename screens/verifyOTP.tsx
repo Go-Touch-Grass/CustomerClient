@@ -84,8 +84,6 @@ const VerifyOTP = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>Verify Email</Text>
-      {error ? <Text style={styles.errorText}>{error}</Text> : null}
-      {success ? <Text style={styles.successText}>{success}</Text> : null}
       <View style={styles.otpContainer}>
         <TextInput
           style={styles.input}
