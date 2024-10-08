@@ -9,12 +9,9 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import SelectDropdown from 'react-native-select-dropdown';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Ionicons } from '@expo/vector-icons';
-import { initStripe, useStripe } from '@stripe/stripe-react-native';
+import { useStripe } from '@stripe/stripe-react-native';
 import axiosInstance from '../api/authApi';
 import { getToken } from '../utils/asyncStorage';
-
-const publishableKey =
-  'pk_test_51Q4z0HQA4DV7K9th7CJIMBmLCVDZi7RH3B1TtjEWfehCb8Ik5xM2j0zj0W1XaS837K47brkxSDLSUnc3zOOLzS2s00F3or1KLh';
 
 const options = [
   { id: 0, title: '50', price: 5, bonus: 0, total: 50 },
@@ -31,17 +28,11 @@ const Store: React.FC = () => {
   const [paymentSheetInitialized, setPaymentSheetInitialized] = useState(false);
   const navigation = useNavigation<StackNavigationProp<any>>();
   const [disableButton, setDisableButton] = useState<boolean>(false);
+  const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null); // State to store the payment intent ID
 
   const handleBack = () => {
     navigation.goBack();
   };
-
-  useEffect(() => {
-    initStripe({
-      publishableKey,
-      merchantIdentifier: 'yourMerchantIdentifier',
-    });
-  }, []);
 
   useEffect(() => {
     if (itemIndex !== null) {
@@ -57,7 +48,7 @@ const Store: React.FC = () => {
         console.log('Token retrieved:', token ? 'Yes' : 'No');
 
         const response = await axiosInstance.post('/api/payment/create-payment-intent', {
-          amount: options[itemIndex].price * 100, //in cents
+          amount: options[itemIndex].price * 100, // in cents
           currency: 'sgd',
         }, {
           headers: { Authorization: `Bearer ${token}` },
@@ -65,7 +56,7 @@ const Store: React.FC = () => {
 
         console.log('API response:', response.data);
 
-        const { clientSecret } = response.data;
+        const { clientSecret, paymentIntentId: id } = response.data;
 
         if (!clientSecret) {
           console.error('Failed to get client secret. API response:', response.data);
@@ -74,7 +65,6 @@ const Store: React.FC = () => {
 
         const { error } = await initPaymentSheet({
           paymentIntentClientSecret: clientSecret,
-          customFlow: true,
           merchantDisplayName: 'Go Touch Grass',
         });
 
@@ -83,8 +73,9 @@ const Store: React.FC = () => {
         } else {
           console.log('Payment sheet initialized successfully');
           setPaymentSheetInitialized(true);
+          setPaymentIntentId(id); // Store the payment intent ID for later verification
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error creating payment intent:', error);
         if (error.response) {
           console.error('Error response:', error.response.data);
@@ -101,6 +92,7 @@ const Store: React.FC = () => {
   const handleSelectItem = (selectedItem: any) => {
     setItemIndex(selectedItem.id);
     setPaymentSheetInitialized(false);
+    setPaymentIntentId(null); // Reset payment intent ID when selecting a new item
   };
 
   const viewPaymentSheet = async () => {
@@ -115,26 +107,36 @@ const Store: React.FC = () => {
     }
 
     const { error } = await presentPaymentSheet();
-    if (error) {
-      console.error('Error presenting payment sheet:', error);
-    } else {
-      console.log('Payment successful', itemIndex);
 
+    if (error) {
+      console.error('Error submitting payment sheet:', error);
+    } else {
+      console.log('Payment sheet for itemIndex', itemIndex, 'submitted');
+      
       try {
         const token = await getToken();
-        await axiosInstance.post(
-          'auth/top_up_gems',
+        const gemsAdded = options[itemIndex].total;
+
+        // Verify payment and top up gems
+        const response = await axiosInstance.post(
+          '/auth/verify-topUp',
           {
-            currency_cents: options[itemIndex].price * 100,
-            gems_added: options[itemIndex].total,
+            paymentIntentId: paymentIntentId, // Send the payment intent ID
+            gemsAdded: gemsAdded, // Send the number of gems added
           },
           {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-        setDisableButton(true);
-      } catch (error) {
-        console.error('Error updating gem balance:', error);
+
+        if (response.data.success) {
+          console.log('Gems topped up successfully:', response.data.balance);
+          setDisableButton(true); // Disable the button after successful payment
+        } else {
+          console.error('Failed to top up gems:', response.data.message);
+        }
+      } catch (error: any) {
+        console.error('Error verifying payment and updating gem balance:', error.response ? error.response.data : error.message);
       }
     }
   };
@@ -154,37 +156,14 @@ const Store: React.FC = () => {
             <DataTable.Title style={styles.textCenter}>Bonus</DataTable.Title>
             <DataTable.Title style={styles.textCenter}>Total Gems</DataTable.Title>
           </DataTable.Header>
-          <DataTable.Row>
-            <DataTable.Cell style={styles.textCenter}>$5</DataTable.Cell>
-            <DataTable.Cell style={styles.textCenter}>50</DataTable.Cell>
-            <DataTable.Cell style={styles.textCenter}>No Bonus</DataTable.Cell>
-            <DataTable.Cell style={styles.textCenter}>50</DataTable.Cell>
-          </DataTable.Row>
-
-          <DataTable.Row>
-            <DataTable.Cell style={styles.textCenter}>$10</DataTable.Cell>
-            <DataTable.Cell style={styles.textCenter}>100</DataTable.Cell>
-            <DataTable.Cell style={styles.textCenter}>1</DataTable.Cell>
-            <DataTable.Cell style={styles.textCenter}>101</DataTable.Cell>
-          </DataTable.Row>
-          <DataTable.Row>
-            <DataTable.Cell style={styles.textCenter}>$25</DataTable.Cell>
-            <DataTable.Cell style={styles.textCenter}>250</DataTable.Cell>
-            <DataTable.Cell style={styles.textCenter}>10 </DataTable.Cell>
-            <DataTable.Cell style={styles.textCenter}>260</DataTable.Cell>
-          </DataTable.Row>
-          <DataTable.Row>
-            <DataTable.Cell style={styles.textCenter}>$50</DataTable.Cell>
-            <DataTable.Cell style={styles.textCenter}>500</DataTable.Cell>
-            <DataTable.Cell style={styles.textCenter}>45 </DataTable.Cell>
-            <DataTable.Cell style={styles.textCenter}>545</DataTable.Cell>
-          </DataTable.Row>
-          <DataTable.Row>
-            <DataTable.Cell style={styles.textCenter}>$100</DataTable.Cell>
-            <DataTable.Cell style={styles.textCenter}>1000</DataTable.Cell>
-            <DataTable.Cell style={styles.textCenter}>150 </DataTable.Cell>
-            <DataTable.Cell style={styles.textCenter}>1150</DataTable.Cell>
-          </DataTable.Row>
+          {options.map((option) => (
+            <DataTable.Row key={option.id}>
+              <DataTable.Cell style={styles.textCenter}>${option.price}</DataTable.Cell>
+              <DataTable.Cell style={styles.textCenter}>{option.total}</DataTable.Cell>
+              <DataTable.Cell style={styles.textCenter}>{option.bonus ? option.bonus : 'No Bonus'}</DataTable.Cell>
+              <DataTable.Cell style={styles.textCenter}>{option.total}</DataTable.Cell>
+            </DataTable.Row>
+          ))}
         </DataTable>
       </InnerContainer>
       <InnerContainer>
@@ -224,9 +203,7 @@ const Store: React.FC = () => {
               style={disableButton || !paymentSheetInitialized ? styles.disabledButton : styles.button}
               onPress={viewPaymentSheet}
             >
-              <Text style={styles.buttonText}>
-                {disableButton ? 'Payment Successful!' : paymentSheetInitialized ? 'Buy Now' : 'Initializing...'}
-              </Text>
+              <Text style={styles.buttonText}>Purchase</Text>
             </TouchableOpacity>
           </View>
         )}
