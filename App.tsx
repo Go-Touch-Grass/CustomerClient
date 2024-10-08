@@ -25,6 +25,7 @@ import { StripeProvider } from '@stripe/stripe-react-native';
 
 const Stack = createStackNavigator();
 import Store from './screens/Store';
+import ViewVoucherInventory from './screens/ViewVoucherInventory';
 
 const App: React.FC = () => {
 
@@ -76,6 +77,9 @@ const App: React.FC = () => {
             <Stack.Screen name="EditAvatar" component={EditAvatar} />
             <Stack.Screen name="verifyOTP" component={verifyOTP} />
             <Stack.Screen name="CreateAvatar" component={CreateAvatar} />
+            <React.Fragment>
+              <Stack.Screen name="ViewVoucherInventory" component={ViewVoucherInventory} />
+            </React.Fragment>
           </Stack.Navigator>
         </NavigationContainer>
       </I18nextProvider>

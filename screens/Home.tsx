@@ -123,7 +123,15 @@ const Home: React.FC = () => {
     outputRange: [-50, 0],
   });
 
+
+  const navigateToViewVouchers = () => {
+    toggleMenu(false);
+    navigation.navigate('ViewVoucherInventory');
+  };
+
+
   return (
+
     <TouchableWithoutFeedback onPress={() => menuVisible && toggleMenu(false)}>
       <StyledContainer>
         {menuVisible && (
@@ -148,6 +156,10 @@ const Home: React.FC = () => {
         >
           <TouchableWithoutFeedback>
             <View>
+              <TouchableOpacity style={homeStyles.menuItem} onPress={navigateToViewVouchers}>
+                <Text style={homeStyles.menuItemText}>View Vouchers</Text>
+              </TouchableOpacity>
+
               <TouchableOpacity style={homeStyles.menuItem} onPress={navigateToProfile}>
                 <Text style={homeStyles.menuItemText}>{t('profile')}</Text>
               </TouchableOpacity>
@@ -166,6 +178,7 @@ const Home: React.FC = () => {
               <TouchableOpacity style={homeStyles.menuItem} onPress={handleLogout}>
                 <Text style={homeStyles.menuItemText}>{t('logout')}</Text>
               </TouchableOpacity>
+
             </View>
           </TouchableWithoutFeedback>
         </Animated.View>

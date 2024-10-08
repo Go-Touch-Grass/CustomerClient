@@ -24,6 +24,11 @@ const AppMenu: React.FC = () => {
     navigation.replace('Login');
   };
 
+  const navigateToViewVouchers = () => {
+
+    navigation.navigate('ViewVoucherInventory'); // Navigate to ViewVoucherInventory
+  };
+
   return (
     <View style={appMenuStyles.drawerContent}>
       <TouchableOpacity style={appMenuStyles.drawerItem} onPress={navigateToProfile}>
@@ -34,6 +39,9 @@ const AppMenu: React.FC = () => {
       </TouchableOpacity>
       <TouchableOpacity style={appMenuStyles.drawerItem} onPress={handleLogout}>
         <Text style={appMenuStyles.drawerItemText}>{t('logout')}</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={appMenuStyles.drawerItem} onPress={navigateToViewVouchers}>
+        <Text style={appMenuStyles.drawerItemText}>{t('View Voucher Inventory')}</Text>
       </TouchableOpacity>
     </View>
   );
