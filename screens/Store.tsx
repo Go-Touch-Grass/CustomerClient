@@ -55,6 +55,7 @@ const Store: React.FC = () => {
         console.log('Creating payment intent for item:', options[itemIndex]);
         const token = await getToken();
         console.log('Token retrieved:', token ? 'Yes' : 'No');
+        console.log('Token:', token);
 
         const response = await axiosInstance.post('/api/payment/create-payment-intent', {
           amount: options[itemIndex].price * 100, //in cents

@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, Image, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { getCustomerVouchers } from '../api/voucherApi'; // Ensure this path is correct
 import { useNavigation } from '@react-navigation/native'; // Import for navigation
+import { IP_ADDRESS } from '@env';
+import Config from 'react-native-config';
 
 // Define the Voucher interface based on what the API returns
 interface Voucher {
@@ -60,11 +62,15 @@ const ViewVoucherInventory: React.FC = () => {
         const price = typeof item.price === 'number' ? item.price : 0; // Default to 0 if undefined
         const discount = typeof item.discount === 'number' ? item.discount : 0; // Default to 0 if undefined
         const isExpanded = expandedVoucher === item.listing_id; // Check if this voucher is expanded
-
+        console.log("config.api_url", Config.API_URL);
+        console.log(item.voucherImage)
         return (
             <TouchableOpacity onPress={() => handleVoucherClick(item.listing_id)} style={styles.voucherContainer}>
+
+
                 {item.voucherImage && (
-                    <Image source={{ uri: item.voucherImage }} style={styles.voucherImage} />
+                    <Image source={{ uri: `${IP_ADDRESS}${item.voucherImage}` }} style={styles.voucherImage} />
+                    //<Image source={{ uri: `http://192.168.1.115:8080/${item.voucherImage}` }} style={styles.voucherImage} />
                 )}
                 <Text style={styles.voucherName}>{`Voucher ${index + 1}: ${item.name || 'No Name'}`}</Text>
                 {isExpanded && (
