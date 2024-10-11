@@ -9,7 +9,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import SelectDropdown from 'react-native-select-dropdown';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Ionicons } from '@expo/vector-icons';
-import { useStripe } from '@stripe/stripe-react-native';
+import { retrievePaymentIntent, useStripe } from '@stripe/stripe-react-native';
 import axiosInstance from '../api/authApi';
 import { getToken } from '../utils/asyncStorage';
 
@@ -22,12 +22,13 @@ const options = [
 ];
 
 const Store: React.FC = () => {
-  const { initPaymentSheet, presentPaymentSheet } = useStripe();
+  const { initPaymentSheet, presentPaymentSheet, retrievePaymentIntent } = useStripe();
 
   const [itemIndex, setItemIndex] = useState<number | null>(null);
   const [paymentSheetInitialized, setPaymentSheetInitialized] = useState(false);
   const navigation = useNavigation<StackNavigationProp<any>>();
   const [disableButton, setDisableButton] = useState<boolean>(false);
+  const [clientSecret, setClientSecret] = useState<string | null>(null); // State to store the client secret
   const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null); // State to store the payment intent ID
 
   const handleBack = () => {
@@ -56,15 +57,15 @@ const Store: React.FC = () => {
 
         console.log('API response:', response.data);
 
-        const { clientSecret, paymentIntentId: id } = response.data;
+        const { clientSecret: fetchedClientSecret, paymentIntentId: id } = response.data;
 
-        if (!clientSecret) {
+        if (!fetchedClientSecret) {
           console.error('Failed to get client secret. API response:', response.data);
           return;
         }
 
         const { error } = await initPaymentSheet({
-          paymentIntentClientSecret: clientSecret,
+          paymentIntentClientSecret: fetchedClientSecret,
           merchantDisplayName: 'Go Touch Grass',
         });
 
@@ -74,6 +75,7 @@ const Store: React.FC = () => {
           console.log('Payment sheet initialized successfully');
           setPaymentSheetInitialized(true);
           setPaymentIntentId(id); // Store the payment intent ID for later verification
+          setClientSecret(fetchedClientSecret); // Store the client secret for later retrieval
         }
       } catch (error: any) {
         console.error('Error creating payment intent:', error);
@@ -132,6 +134,17 @@ const Store: React.FC = () => {
         if (response.data.success) {
           console.log('Gems topped up successfully:', response.data.balance);
           setDisableButton(true); // Disable the button after successful payment
+
+          const { paymentIntent, error } = await retrievePaymentIntent(clientSecret!);
+          if (error) {
+            console.error('Error retrieving payment intent:', error);
+          } else {
+            await axiosInstance.post('/api/payment/save-payment-method-id', {
+              paymentMethodId: paymentIntent!.paymentMethodId,
+            }, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+          }
         } else {
           console.error('Failed to top up gems:', response.data.message);
         }
