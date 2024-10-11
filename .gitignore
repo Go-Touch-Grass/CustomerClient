@@ -36,3 +36,5 @@ yarn-error.*
 
 .env
 
+# Ignore ProgramData files
+%ProgramData%/
