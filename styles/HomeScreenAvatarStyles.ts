@@ -14,6 +14,11 @@ export const HomeScreenAvatarStyles =(avatarSize: number) =>
         height: avatarSize,
         },
 
+        base: {
+        width: avatarSize,
+        height: avatarSize
+        },
+
         hat: {
         position: 'absolute',
         top: avatarSize * -0.22,

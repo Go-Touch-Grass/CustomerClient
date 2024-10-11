@@ -116,4 +116,11 @@ export const homeStyles = StyleSheet.create({
         textAlign: 'center',
         padding: 10,
     },
+    entityNameText: {
+        marginTop: 15, // Space above the text
+        color: 'black', // Text color
+        fontSize: 12, // Font size
+        textAlign: 'center',
+        fontWeight: 'bold', // Center align the text
+      },
 });

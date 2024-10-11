@@ -11,11 +11,18 @@ import ProtectedRoute from '../components/ProtectedRoute';
 import { Colors } from '../styles/commonStyles';
 import { removeToken } from '../utils/asyncStorage';
 import { useTranslation } from 'react-i18next';
-import { getAvatarByCustomerId, AvatarInfo } from '../api/avatarApi';
+import { getAvatarByCustomerId, getAvatarByBusinessRegistrationId, getAvatarByOutletId } from '../api/avatarApi';
+import { AvatarInfo } from '../api/businessApi';
 import { getUserInfo } from '../api/userApi';
 import { HomeScreenAvatarStyles } from '../styles/HomeScreenAvatarStyles';
 import { DeviceMotion } from 'expo-sensors';
 import AppMenu from '../components/AppMenu';
+import { getAllSubscription, SubscriptionInfo } from '../api/businessApi';
+import axios from 'axios';
+interface GeocodeResult {
+  latitude: number;
+  longitude: number;
+}
 
 const Home: React.FC = () => {
   const { t } = useTranslation();
@@ -30,6 +37,7 @@ const Home: React.FC = () => {
   const [avatarSize, setAvatarSize] = useState(85);
   const [direction, setDirection] = useState(0);
   const [mapHeading, setMapHeading] = useState(0);
+  const [subscriptions, setSubscriptions] = useState<SubscriptionInfo[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -59,8 +67,114 @@ const Home: React.FC = () => {
     })();
 
     fetchAvatarDetails();
+    fetchSubscriptions();
   }, []);
 
+const fetchSubscriptions = async () => {
+  try {
+    const subscriptionData = await getAllSubscription();
+    console.log('Fetched Subscription Data:', subscriptionData);
+
+    // Fetch avatars and geocode each subscription's location
+    const subscriptionsWithAvatars = await Promise.all(subscriptionData.map(async (subscription) => {
+      const { branch } = subscription;
+
+      // Geocode the branch location to get latitude and longitude
+      let coordinates: { latitude: number; longitude: number } | null = null;
+      if (branch.location) {
+        try {
+          coordinates = await geocodeLocation(branch.location);
+        } catch (error) {
+          console.error(`Error geocoding location "${branch.location}":`, error);
+        }
+      }
+      try {
+        let detailedAvatar;
+        // Check the entity type and fetch the appropriate avatar
+        if (branch.entityType === 'Outlet') {
+          if (branch.outletId !== undefined) { 
+            detailedAvatar = await getAvatarByOutletId(branch.outletId);
+          } else {
+            console.warn(`Outlet ID is undefined for subscription ${subscription.subscriptionId}`);
+            return {
+              ...subscription,
+              branch: {
+                ...branch,
+                avatar: null, 
+                coordinates,
+              },
+            };
+          }
+        } else if (branch.entityType === 'Business_register_business') {
+          if (branch.registrationId !== undefined) { 
+            detailedAvatar = await getAvatarByBusinessRegistrationId(branch.registrationId);
+          } else {
+            console.warn(`Registration ID is undefined for subscription ${subscription.subscriptionId}`);
+            return {
+              ...subscription,
+              branch: {
+                ...branch,
+                avatar: null, 
+                coordinates,
+              },
+            };
+          }
+        }
+      
+        return {
+          ...subscription,
+          branch: {
+            ...branch,
+            avatar: detailedAvatar,
+            coordinates, // Add the coordinates to the branch
+          },
+        };
+      } catch (error) {
+        console.error(`Error fetching avatar for subscription ${subscription.subscriptionId}:`, error);
+      }
+      
+
+      return {
+        ...subscription,
+        branch: {
+          ...branch,
+          coordinates, // Add the coordinates to the branch even if avatar fetching fails
+        },
+      };
+    }));
+
+    setSubscriptions(subscriptionsWithAvatars as SubscriptionInfo[]); // Store updated subscriptions in state
+  } catch (error) {
+    console.error('Error fetching subscriptions:', error);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+const geocodeLocation = async (location: string): Promise<GeocodeResult> => {
+  const url = `https://api.geoapify.com/v1/geocode/search?text=${encodeURIComponent(location)}&apiKey=e0a70d13ff6640aa8172c4caf76f2ab5`;
+  console.log(`Geocoding request to: ${url}`); // Log the request URL
+  
+  try {
+    const response = await axios.get(url);
+
+    // Check if response data has features and is not empty
+    if (response.data && response.data.features && response.data.features.length > 0) {
+      // Extract the first feature's geometry coordinates
+      const { geometry } = response.data.features[0];
+      const [longitude, latitude] = geometry.coordinates; // coordinates are in [lon, lat] format
+      console.log('Geocoded Coordinates:', [latitude, longitude])
+      return { latitude, longitude };
+    } else {
+      throw new Error('No results found for the provided address.');
+    }
+  } catch (error) {
+    console.error('Geocoding request failed:', error); // More detailed error logging
+    throw error; // Re-throw for upstream handling
+  }
+};
+
+  
   const subscribeToDeviceMotion = () => {
     const subscription = DeviceMotion.addListener(({ rotation }) => {
       if (rotation) {
@@ -160,6 +274,11 @@ const Home: React.FC = () => {
     navigation.replace('Login');
   };
 
+  const navigateToStore = () => {
+    toggleMenu(false);
+    navigation.navigate('Store');
+  };
+
   const centerOnUserLocation = async () => {
     if (userLocation) {
       const newRegion = {
@@ -173,19 +292,50 @@ const Home: React.FC = () => {
     }
   };
 
-  const navigateToStore = () => {
-    toggleMenu(false);
-    navigation.navigate('Store');
-  };
-
   const menuTranslateY = menuAnimation.interpolate({
     inputRange: [0, 1],
     outputRange: [-50, 0],
   });
 
-
+  const renderSubscriptionMarkers = () => {
+    return subscriptions.map((subscription) => {
+      const { branch } = subscription;
+      if (!branch || !branch.coordinates) return null; // Check if branch or coordinates exist
+  
+      // Now we can safely access latitude and longitude
+      const { latitude, longitude } = branch.coordinates; 
+  
+      if (latitude === undefined || longitude === undefined) return null; // Ensure valid coordinates
+  
+      // Ensure branch.avatar is of type AvatarInfo and has properties
+      const avatar = branch.avatar as AvatarInfo;
+  
+      return (
+        <Marker
+          coordinate={{
+            latitude, // Use latitude
+            longitude, // Use longitude
+          }}
+        >
+          <View style={styles.avatarContainer}>
+            {avatar.base && <Image source={{ uri: avatar.base.filepath }} style={styles.base} />}
+            {avatar.hat && <Image source={{ uri: avatar.hat.filepath }} style={styles.hat} />}
+            {avatar.shirt && <Image source={{ uri: avatar.shirt.filepath }} style={styles.upperWear} />}
+            {avatar.bottom && <Image source={{ uri: avatar.bottom.filepath }} style={styles.lowerWear} />}
+            
+            {/* Render the entity name below the avatar */}
+            <Text style={homeStyles.entityNameText}>
+            {branch.entityType === 'Business_register_business' 
+              ? branch.entityName 
+              : branch.outletName}
+            </Text>
+          </View>
+        </Marker>
+      );
+    });
+  };
+  
   const styles = HomeScreenAvatarStyles(avatarSize);
-
 
   const renderAvatarMarker = () => {
     if (!avatar || !userLocation) return null;
@@ -254,7 +404,14 @@ const Home: React.FC = () => {
                 updateMapHeading();
               }}       
             >
-              {isLoading ? (<ActivityIndicator size="large" color="#00AB41" />) : (renderAvatarMarker())}
+              {isLoading ? (
+                <ActivityIndicator size="large" color="#00AB41" />
+              ) : (
+                <>
+                  {renderAvatarMarker()}
+                  {renderSubscriptionMarkers()}
+                </>
+              )}
             </MapView>
           )}
           <TouchableOpacity style={homeStyles.centerButton} onPress={centerOnUserLocation}>

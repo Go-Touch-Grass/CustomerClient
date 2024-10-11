@@ -22,15 +22,18 @@ export interface AvatarInfo {
   id: number;
   avatarType: AvatarType;
   customer?: { id: number };
-  business?: { id: number };
+  business_register_business?: { registration_id: number };
+  outlet?: {outlet_id: number};
+  base?: Item | null;
   hat?: Item | null;
   shirt?: Item | null;
   bottom?: Item | null;
 }
 
 export enum AvatarType {
-  BUSINESS = 'business',
-  TOURIST = 'tourist',
+  BUSINESS_REGISTER_BUSINESS = 'business_register_business',
+  OUTLET = 'outlet',
+  TOURIST = 'tourist'
 }
 
 export const getAvatarById = async (id: number): Promise<AvatarInfo> => {
@@ -38,7 +41,6 @@ export const getAvatarById = async (id: number): Promise<AvatarInfo> => {
   if (!token) {
     throw new Error('No token found');
   }
-
   try {
     const response = await axiosInstance.get(`/api/avatars/${id}`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -49,6 +51,38 @@ export const getAvatarById = async (id: number): Promise<AvatarInfo> => {
     throw handleApiError(error);
   }
 };
+
+export const getAvatarByBusinessRegistrationId = async (registrationId: number): Promise<AvatarInfo> => {
+  const token = await getToken();
+  if (!token) {
+    throw new Error('No token found');
+  }
+	try {
+	  const response = await axiosInstance.get(`/api/avatars/business/${registrationId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+	  });
+	  return response.data;
+	} catch (error) {
+	  console.error('Error fetching avatar by Business Registration ID:', error);
+	  throw handleApiError(error);
+	}
+  };
+
+export const getAvatarByOutletId = async (outletId: number): Promise<AvatarInfo> => {
+  const token = await getToken();
+  if (!token) {
+    throw new Error('No token found');
+  }
+	try {
+	  const response = await axiosInstance.get(`/api/avatars/outlet/${outletId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+	  });
+	  return response.data;
+	} catch (error) {
+	  console.error('Error fetching avatar by Outlet ID:', error);
+	  throw handleApiError(error);
+	}
+  };
 
 export const updateAvatar = async (
   avatarId: number,
