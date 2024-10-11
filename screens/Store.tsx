@@ -22,12 +22,13 @@ const options = [
 ];
 
 const Store: React.FC = () => {
-  const { initPaymentSheet, presentPaymentSheet } = useStripe();
+  const { initPaymentSheet, presentPaymentSheet, retrievePaymentIntent } = useStripe();
 
   const [itemIndex, setItemIndex] = useState<number | null>(null);
   const [paymentSheetInitialized, setPaymentSheetInitialized] = useState(false);
   const navigation = useNavigation<StackNavigationProp<any>>();
   const [disableButton, setDisableButton] = useState<boolean>(false);
+  // const [clientSecret, setClientSecret] = useState<string | null>(null); // State to store the client secret
   const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null); // State to store the payment intent ID
 
   const handleBack = () => {
@@ -47,25 +48,43 @@ const Store: React.FC = () => {
         const token = await getToken();
         console.log('Token retrieved:', token ? 'Yes' : 'No');
 
-        const response = await axiosInstance.post('/api/payment/create-payment-intent', {
+        // Create payment intent
+        const createPaymentIntentResponse = await axiosInstance.post('/api/payment/create-payment-intent', {
           amount: options[itemIndex].price * 100, // in cents
           currency: 'sgd',
         }, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        console.log('API response:', response.data);
+        console.log('API response:', createPaymentIntentResponse.data);
 
-        const { clientSecret, paymentIntentId: id } = response.data;
+        const { clientSecret: fetchedClientSecret, paymentIntentId: id } = createPaymentIntentResponse.data;
 
-        if (!clientSecret) {
-          console.error('Failed to get client secret. API response:', response.data);
+        if (!fetchedClientSecret) {
+          console.error('Failed to get client secret. API response:', createPaymentIntentResponse.data);
           return;
         }
 
+        // Create ephemeral key
+        const getUserStripeIdAndEphemeralKeyResponse = await axiosInstance.get('/api/payment/get-user-stripe-id-and-ephemeral-key', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        console.log('API response:', getUserStripeIdAndEphemeralKeyResponse.data);
+
+        const { userStripeId, ephemeralKeySecret } = getUserStripeIdAndEphemeralKeyResponse.data;
+
+        if (!ephemeralKeySecret) {
+          console.error('Failed to get ephemeral key secret. API response:', getUserStripeIdAndEphemeralKeyResponse.data);
+          return;
+        }
+
+        // Initialize payment sheet
         const { error } = await initPaymentSheet({
-          paymentIntentClientSecret: clientSecret,
           merchantDisplayName: 'Go Touch Grass',
+          customerId: userStripeId,
+          customerEphemeralKeySecret: ephemeralKeySecret,
+          paymentIntentClientSecret: fetchedClientSecret,
         });
 
         if (error) {
@@ -74,6 +93,7 @@ const Store: React.FC = () => {
           console.log('Payment sheet initialized successfully');
           setPaymentSheetInitialized(true);
           setPaymentIntentId(id); // Store the payment intent ID for later verification
+          // setClientSecret(fetchedClientSecret); // Store the client secret for later retrieval
         }
       } catch (error: any) {
         console.error('Error creating payment intent:', error);
@@ -132,6 +152,17 @@ const Store: React.FC = () => {
         if (response.data.success) {
           console.log('Gems topped up successfully:', response.data.balance);
           setDisableButton(true); // Disable the button after successful payment
+
+          // const { paymentIntent, error } = await retrievePaymentIntent(clientSecret!);
+          // if (error) {
+          //   console.error('Error retrieving payment intent:', error);
+          // } else {
+          //   await axiosInstance.post('/api/payment/save-payment-method-id', {
+          //     paymentMethodId: paymentIntent!.paymentMethodId,
+          //   }, {
+          //     headers: { Authorization: `Bearer ${token}` },
+          //   });
+          // }
         } else {
           console.error('Failed to top up gems:', response.data.message);
         }
