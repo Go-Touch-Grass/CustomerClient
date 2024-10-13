@@ -3,7 +3,7 @@ import { IP_ADDRESS } from '@env';
 
 const axiosInstance = axios.create({
   // baseURL: CommonBackend URL
-  baseURL: `${IP_ADDRESS}`,
+  baseURL: 'http://192.168.18.67:8080/',
   headers: {
     'Content-Type': 'application/json',
   },

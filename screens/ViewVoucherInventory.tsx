@@ -1,28 +1,27 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, Image, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
-import { getCustomerVouchers } from '../api/voucherApi'; // Ensure this path is correct
+import { getCustomerVouchers, redeemVoucher } from '../api/voucherApi'; // Ensure this path is correct
 import { useNavigation } from '@react-navigation/native'; // Import for navigation
-import { IP_ADDRESS } from '@env';
 import Config from 'react-native-config';
 
-// Define the Voucher interface based on what the API returns
 interface Voucher {
     listing_id: number;
     name: string;
     description: string;
-    price: number; // Change price to number
+    price: number;
     discount: number;
     voucherImage?: string;
     created_at: Date;
     updated_at: Date;
     redeemed: boolean;
-    expirationDate?: string; // Ensure this is present as a string
+    expirationDate?: string;
+    voucher_transaction_id: number;
 }
 
-// Define the response interface
 interface VoucherResponse {
     status: number;
     vouchers: Voucher[];
+    inventoryUsed?: boolean;
 }
 
 const ViewVoucherInventory: React.FC = () => {
@@ -35,8 +34,14 @@ const ViewVoucherInventory: React.FC = () => {
         const fetchVouchers = async () => {
             try {
                 const fetchedVouchersResponse: VoucherResponse = await getCustomerVouchers();
-                console.log('Fetched vouchers:', fetchedVouchersResponse); // Log the response
-                setVouchers(fetchedVouchersResponse.vouchers);
+                console.log('Fetched vouchers:', fetchedVouchersResponse);
+
+                // If inventoryUsed is true, don't display the vouchers
+                if (fetchedVouchersResponse.inventoryUsed) {
+                    setVouchers([]); // Clear vouchers if inventoryUsed is true
+                } else {
+                    setVouchers(fetchedVouchersResponse.vouchers); // Set vouchers if inventory is not used
+                }
             } catch (error) {
                 console.error('Error fetching customer vouchers:', error);
             } finally {
@@ -48,47 +53,66 @@ const ViewVoucherInventory: React.FC = () => {
     }, []);
 
     const handleVoucherClick = (listing_id: number) => {
-        // Toggle the expanded state of the clicked voucher
         setExpandedVoucher(expandedVoucher === listing_id ? null : listing_id);
     };
 
-    const handleRedeem = (voucher: Voucher) => {
-        // Add your redeem logic here, e.g., API call to redeem the voucher
-        console.log(`Redeeming voucher: ${voucher.listing_id}`);
-    };
+    const handleRedeem = async (voucher: Voucher) => {
+        try {
+            const transactionId = voucher.voucher_transaction_id;
+            if (!transactionId) {
+                console.error('Voucher transaction ID is missing');
+                return;
+            }
 
+            await redeemVoucher(transactionId);
+
+            setVouchers(prevVouchers => prevVouchers.map(v =>
+                v.voucher_transaction_id === transactionId ? { ...v, redeemed: true } : v
+            ));
+
+            console.log(`Voucher transaction redeemed: ${transactionId}`);
+        } catch (error) {
+            console.error('Failed to redeem voucher transaction:', error);
+        }
+    };
 
     const renderVoucher = ({ item, index }: { item: Voucher; index: number }) => {
         const price = typeof item.price === 'number' ? item.price : 0; // Default to 0 if undefined
         const discount = typeof item.discount === 'number' ? item.discount : 0; // Default to 0 if undefined
         const isExpanded = expandedVoucher === item.listing_id; // Check if this voucher is expanded
-        console.log("config.api_url", Config.API_URL);
-        console.log(item.voucherImage)
+
+        // Check if the voucher is expired
+        const isExpired = item.expirationDate ? new Date(item.expirationDate) < new Date() : false;
+
         return (
             <TouchableOpacity onPress={() => handleVoucherClick(item.listing_id)} style={styles.voucherContainer}>
-
-
                 {item.voucherImage && (
-                    <Image source={{ uri: `${IP_ADDRESS}${item.voucherImage}` }} style={styles.voucherImage} />
-                    //<Image source={{ uri: `http://192.168.1.115:8080/${item.voucherImage}` }} style={styles.voucherImage} />
+                    <Image source={{ uri: `http://192.168.18.67:8080/${item.voucherImage}` }} style={styles.voucherImage} />
                 )}
                 <Text style={styles.voucherName}>{`Voucher ${index + 1}: ${item.name || 'No Name'}`}</Text>
                 {isExpanded && (
                     <View style={styles.detailsContainer}>
                         <Text style={styles.voucherDescription}>{item.description || 'No Description'}</Text>
-                        <Text style={styles.voucherPrice}>Price: ${price.toFixed(2)}</Text>
-                        <Text style={styles.voucherDiscount}>Discount: {discount.toFixed(2)}%</Text>
+                        <Text style={styles.voucherPrice}>Price: ${item.price}</Text>
+                        <Text style={styles.voucherDiscount}>Discount: {item.discount}%</Text>
+                        <Text style={styles.voucherDiscount}>Discounted price: ${(item.price * (100 - item.discount)) / 100}</Text>
+                        {item.expirationDate && (
+                            <Text style={styles.expirationDate}>Expiry Date: {new Date(item.expirationDate).toLocaleDateString()}</Text>
+                        )}
                         {item.redeemed ? (
                             <Text style={styles.redeemedText}>Redeemed</Text>
+                        ) : isExpired ? (
+                            <Text style={styles.redeemedText}>Expired</Text> // Indicate that the voucher is expired
                         ) : (
                             <View style={styles.redeemContainer}>
-                                <TouchableOpacity style={styles.redeemButton} onPress={() => handleRedeem(item)}>
+                                <TouchableOpacity
+                                    style={[styles.redeemButton, isExpired && { backgroundColor: '#ccc' }]} // Change button style if expired
+                                    onPress={() => handleRedeem(item)}
+                                    disabled={isExpired} // Disable button if expired
+                                >
                                     <Text style={styles.redeemButtonText}>Redeem</Text>
                                 </TouchableOpacity>
                             </View>
-                        )}
-                        {item.expirationDate && (
-                            <Text style={styles.expirationDate}>Expiry Date: {new Date(item.expirationDate).toLocaleDateString()}</Text>
                         )}
                     </View>
                 )}
@@ -96,21 +120,40 @@ const ViewVoucherInventory: React.FC = () => {
         );
     };
 
+
     if (loading) {
         return <ActivityIndicator size="large" color="#0000ff" />;
     }
+
+    if (vouchers.length === 0) {
+        return (
+            <View style={styles.container}>
+                <Text style={styles.emptyInventoryText}>Nothing in inventory</Text>
+                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                    <Text style={styles.backButtonText}>Back</Text>
+                </TouchableOpacity>
+            </View>
+        );
+    }
+
 
     return (
         <View style={styles.container}>
             <View style={styles.header}>
                 <Text style={styles.headerText}>Inventory of Purchased Vouchers</Text>
             </View>
-            <FlatList
-                data={vouchers}
-                renderItem={renderVoucher}
-                keyExtractor={item => item.listing_id.toString()}
-                contentContainerStyle={styles.listContainer}
-            />
+            {vouchers.length === 0 ? (
+                <View style={styles.noVouchersContainer}>
+                    <Text style={styles.noVouchersText}>Nothing in inventory</Text>
+                </View>
+            ) : (
+                <FlatList
+                    data={vouchers}
+                    renderItem={renderVoucher}
+                    keyExtractor={item => item.listing_id.toString()}
+                    contentContainerStyle={styles.listContainer}
+                />
+            )}
             <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
                 <Text style={styles.backButtonText}>Back</Text>
             </TouchableOpacity>
@@ -119,48 +162,61 @@ const ViewVoucherInventory: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
+    emptyInventoryText: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#555',
+        textAlign: 'center',
+        marginTop: 20,
+    },
     container: {
         flex: 1,
-        backgroundColor: '#f9f9f9', // Light background for elegance
-        marginTop: 50, // Add margin to the top to lower the container
+        backgroundColor: '#f9f9f9',
+        marginTop: 50,
     },
     header: {
-        backgroundColor: '#4CAF50', // Header background color
+        backgroundColor: '#4CAF50',
         padding: 15,
         alignItems: 'center',
     },
     headerText: {
         fontSize: 20,
         fontWeight: 'bold',
-        color: '#fff', // White text for contrast
+        color: '#fff',
     },
-
+    noVouchersContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    noVouchersText: {
+        fontSize: 18,
+        color: '#888',
+    },
     redeemContainer: {
-        flexDirection: 'row', // Align items in a row
-        justifyContent: 'flex-end', // Push button to the right
-        marginTop: 10, // Add some space above the button
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        marginTop: 10,
     },
     redeemButton: {
-        paddingVertical: 5, // Smaller vertical padding
-        paddingHorizontal: 10, // Smaller horizontal padding
-        backgroundColor: '#FFD700', // Yellow background
-        borderRadius: 5, // Rounded corners
-        alignItems: 'center', // Center text horizontally
-        justifyContent: 'center', // Center text vertically
+        paddingVertical: 5,
+        paddingHorizontal: 10,
+        backgroundColor: '#FFD700',
+        borderRadius: 5,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     redeemButtonText: {
-        color: '#000', // Black text for contrast
+        color: '#000',
         fontWeight: 'bold',
-        fontSize: 12, // Smaller font size
+        fontSize: 12,
     },
-
     backButton: {
         padding: 15,
-        backgroundColor: '#4CAF50', // Green background for the button
-        borderRadius: 0, // No border radius for a straight edge
-        width: '100%', // Full width to match the phone's width
-        alignItems: 'center', // Center text horizontally
-        justifyContent: 'center', // Center text vertically
+        backgroundColor: '#4CAF50',
+        width: '100%',
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     backButtonText: {
         color: '#fff',
@@ -184,7 +240,7 @@ const styles = StyleSheet.create({
         },
         shadowOpacity: 0.2,
         shadowRadius: 2,
-        elevation: 3, // Elevation for Android
+        elevation: 3,
     },
     voucherImage: {
         width: '100%',
@@ -203,7 +259,7 @@ const styles = StyleSheet.create({
     voucherDescription: {
         fontSize: 16,
         marginBottom: 5,
-        color: '#555', // Slightly darker text for description
+        color: '#555',
     },
     voucherPrice: {
         fontSize: 16,
@@ -211,11 +267,11 @@ const styles = StyleSheet.create({
     },
     voucherDiscount: {
         fontSize: 14,
-        color: '#888', // Grey for discount
+        color: '#888',
     },
     expirationDate: {
         fontSize: 14,
-        color: '#888', // Grey for expiration date
+        color: '#888',
     },
     redeemedText: {
         color: 'green',

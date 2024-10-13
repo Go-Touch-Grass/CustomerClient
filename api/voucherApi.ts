@@ -13,8 +13,11 @@ interface Voucher {
     created_at: Date;
     updated_at: Date;
     redeemed: boolean;
-    expirationDate: string; // Added expiry date
+    expirationDate?: string;
+    voucher_transaction_id: number;
+    used: boolean; // Add the used attribute
 }
+
 
 
 // Define the response interface
@@ -22,9 +25,28 @@ interface VoucherResponse {
     status: number;
     vouchers: Voucher[];
 }
+export const redeemVoucher = async (transactionId: number) => {
+    const token = await getToken();
+    if (!token) {
+        throw new Error('No token found');
+    }
+
+    try {
+        const response = await axiosInstance.put<VoucherResponse>(
+            `/auth/voucher/redeem/${transactionId}`,
+            {}, // Send an empty object as the request body if needed
+            {
+                headers: { Authorization: `Bearer ${token}` }, // Correctly set headers here
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error('Error redeeming voucher:', error);
+        throw error;
+    }
+};
 
 
-// Fetch all vouchers the customer has purchased
 export const getCustomerVouchers = async (): Promise<VoucherResponse> => { // Change return type here
     const token = await getToken();
     if (!token) {
