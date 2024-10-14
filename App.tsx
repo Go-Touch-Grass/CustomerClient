@@ -20,6 +20,7 @@ import EditAvatar from './screens/EditAvatar';
 import Social from './screens/Social';
 import Friends from './screens/Friends';
 import BusinessAvatarInfo from './screens/BusinessAvatarInfo'
+import Navigation from './screens/Navigation'
 
 // Import utilities and services
 import { getToken } from './utils/asyncStorage';
@@ -80,6 +81,7 @@ const App: React.FC = () => {
             <Stack.Screen name="verifyOTP" component={verifyOTP} />
             <Stack.Screen name="CreateAvatar" component={CreateAvatar} />
             <Stack.Screen name="BusinessAvatarInfo"component={BusinessAvatarInfo}/>
+            <Stack.Screen name="Navigation" component={Navigation} />
             <Stack.Screen name="Social" component={Social} />
             <Stack.Screen name="Friends" component={Friends} />
           </Stack.Navigator>

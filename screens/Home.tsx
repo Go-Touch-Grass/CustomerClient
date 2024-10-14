@@ -20,6 +20,8 @@ import { DeviceMotion } from 'expo-sensors';
 import AppMenu from '../components/AppMenu';
 import { getAllSubscription, SubscriptionInfo, BranchInfo } from '../api/businessApi';
 import axios from 'axios';
+import {GEOAPIFY_API_KEY} from '@env';
+
 interface GeocodeResult {
   latitude: number;
   longitude: number;
@@ -156,7 +158,7 @@ const fetchSubscriptions = async () => {
 };
 
 const geocodeLocation = async (location: string): Promise<GeocodeResult> => {
-  const url = `https://api.geoapify.com/v1/geocode/search?text=${encodeURIComponent(location)}&apiKey=e0a70d13ff6640aa8172c4caf76f2ab5`;
+  const url = `https://api.geoapify.com/v1/geocode/search?text=${encodeURIComponent(location)}&apiKey=${GEOAPIFY_API_KEY}`;
   console.log(`Geocoding request to: ${url}`); // Log the request URL
   
   try {
@@ -301,7 +303,7 @@ const geocodeLocation = async (location: string): Promise<GeocodeResult> => {
   });
 
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
-    const R = 6371e3; // Radius of the earth in meters
+    const R = 6371e3; 
     const φ1 = (lat1 * Math.PI) / 180;
     const φ2 = (lat2 * Math.PI) / 180;
     const Δφ = ((lat2 - lat1) * Math.PI) / 180;
@@ -319,31 +321,25 @@ const geocodeLocation = async (location: string): Promise<GeocodeResult> => {
   const renderSubscriptionMarkers = () => {
     return subscriptions.map((subscription) => {
         const { branch } = subscription;
-        if (!branch || !branch.coordinates) return null; // Check if branch or coordinates exist
+        if (!branch || !branch.coordinates) return null; 
 
-        // Now we can safely access latitude and longitude
         const { latitude, longitude } = branch.coordinates;
 
-        if (latitude === undefined || longitude === undefined) return null; // Ensure valid coordinates
+        if (latitude === undefined || longitude === undefined) return null; 
 
-        // Ensure branch.avatar is of type AvatarInfo and has properties
         const avatar = branch.avatar as AvatarInfo;
 
-        // Define handleMarkerPress function here
         const handleMarkerPress = () => {
-            // Access the coordinates directly from the branch
             const { coordinates } = branch;
-
-            // Log the coordinates for debugging
             console.log('Branch coordinates:', coordinates);
 
-            // Check if coordinates is defined
             if (!coordinates) {
                 console.warn('Branch coordinates are not available.');
-                return; // Exit if no coordinates
+                return; 
             }
 
             const { latitude, longitude } = coordinates;
+
             if (!userLocation) {
                 console.warn('User location not available.');
                 return;
@@ -360,17 +356,19 @@ const geocodeLocation = async (location: string): Promise<GeocodeResult> => {
             );
 
             if (distanceToAvatar <= RADIUS_THRESHOLD) {
-                // Open the "Shop" if within radius
                 setSelectedBranch(branch);
                 setIsShopOpen(true);
             } else {
-                // Navigate to BusinessAvatarInfo page if outside radius
                 navigation.navigate('BusinessAvatarInfo', {
                     entityType: branch.entityType,
                     entityName: branch.entityType === 'Business_register_business' ? branch.entityName : branch.outletName,
                     location: branch.location,
                     category: branch.entityType === 'Business_register_business' ? branch.category : null,
                     description: branch.entityType === 'Outlet' ? branch.description : null,
+                    coordinates: {
+                      latitude: branch.coordinates?.latitude,
+                      longitude: branch.coordinates?.longitude
+                    }
                 });
             }
         };
@@ -378,10 +376,10 @@ const geocodeLocation = async (location: string): Promise<GeocodeResult> => {
         return (
             <Marker
                 coordinate={{
-                    latitude, // Use latitude
-                    longitude, // Use longitude
+                    latitude, 
+                    longitude, 
                 }}
-                onPress={handleMarkerPress} // Handle marker press
+                onPress={handleMarkerPress} 
             >
                 <View style={styles.avatarContainer}>
                     {avatar.base && <Image source={{ uri: avatar.base.filepath }} style={styles.base} />}

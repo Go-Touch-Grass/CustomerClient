@@ -9,16 +9,29 @@ import { BusinessAvatarInfoStyles } from '../styles/BusinessAvatarInfoStyles';
 const BusinessAvatarInfo: React.FC = () => {
   const route = useRoute();
   const navigation = useNavigation<StackNavigationProp<any>>();
-  const { entityType, entityName, location, category, description } = route.params as {
+  const { entityType, entityName, location, category, description, coordinates } = route.params as {
     entityType: string;
     entityName: string;
     location: string;
     category: string | null;
     description: string | null;
+    coordinates: { latitude: number; longitude: number } | null;
   };
+
 
   const handleBack = () => {
     navigation.goBack();
+  };
+
+  const handleNavigate = () => {
+    // Check if coordinates are defined and valid
+    if (coordinates && coordinates.latitude && coordinates.longitude) {
+      navigation.navigate('Navigation', { entityName, coordinates });
+    } else {
+      console.log('Entity Name:', entityName);
+      console.log('Coordinates:', coordinates);
+      alert('Coordinates are undefined. Please check the location data.');
+    }
   };
 
   return (
@@ -38,7 +51,7 @@ const BusinessAvatarInfo: React.FC = () => {
         )}
       </View>
 
-      <TouchableOpacity style={BusinessAvatarInfoStyles.navigateButton} onPress={() => {}}>
+      <TouchableOpacity style={BusinessAvatarInfoStyles.navigateButton} onPress={handleNavigate}>
         <Text style={BusinessAvatarInfoStyles.navigateButtonText}>Navigate</Text>
       </TouchableOpacity>
     </View>
