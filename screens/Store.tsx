@@ -12,6 +12,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { useStripe } from '@stripe/stripe-react-native';
 import axiosInstance from '../api/authApi';
 import { getToken } from '../utils/asyncStorage';
+import * as Linking from 'expo-linking';
+
+//for ios only
+const returnUrl = Linking.createURL('payment-complete');
 
 const options = [
   { id: 0, title: '50', price: 5, bonus: 0, total: 50 },
@@ -85,6 +89,7 @@ const Store: React.FC = () => {
           customerId: userStripeId,
           customerEphemeralKeySecret: ephemeralKeySecret,
           paymentIntentClientSecret: fetchedClientSecret,
+          returnURL: returnUrl
         });
 
         if (error) {
