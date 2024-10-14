@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, Image, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { getCustomerVouchers, redeemVoucher } from '../api/voucherApi'; // Ensure this path is correct
 import { useNavigation } from '@react-navigation/native'; // Import for navigation
-import Config from 'react-native-config';
 
 interface Voucher {
     listing_id: number;

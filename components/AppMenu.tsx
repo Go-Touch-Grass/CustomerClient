@@ -36,21 +36,7 @@ const AppMenu: React.FC<AppMenuProps> = ({ visible, menuAnimation, toggleMenu, n
     outputRange: [-50, 0],
   });
 
-  return (
-    <View style={appMenuStyles.drawerContent}>
-      <TouchableOpacity style={appMenuStyles.drawerItem} onPress={navigateToProfile}>
-        <Text style={appMenuStyles.drawerItemText}>{t('profile')}</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={appMenuStyles.drawerItem} onPress={navigateToChangeLanguage}>
-        <Text style={appMenuStyles.drawerItemText}>{t('change-language')}</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={appMenuStyles.drawerItem} onPress={handleLogout}>
-        <Text style={appMenuStyles.drawerItemText}>{t('logout')}</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={appMenuStyles.drawerItem} onPress={navigateToViewVouchers}>
-        <Text style={appMenuStyles.drawerItemText}>{t('View Voucher Inventory')}</Text>
-      </TouchableOpacity>
-    </View>
+  return (    
     <Animated.View
       style={[
         homeStyles.menu,
@@ -80,6 +66,9 @@ const AppMenu: React.FC<AppMenuProps> = ({ visible, menuAnimation, toggleMenu, n
           </TouchableOpacity>
           <TouchableOpacity style={homeStyles.menuItem} onPress={() => navigateTo('Change Language')}>
             <Text style={homeStyles.menuItemText}>{t('change-language')}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={homeStyles.menuItem} onPress={navigateToViewVouchers}>
+            <Text style={homeStyles.menuItemText}>{t('View Voucher Inventory')}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={homeStyles.menuItem} onPress={handleLogout}>
             <Text style={homeStyles.menuItemText}>{t('logout')}</Text>

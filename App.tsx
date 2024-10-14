@@ -82,7 +82,6 @@ const App: React.FC = () => {
             <Stack.Screen name="verifyOTP" component={verifyOTP} />
             <Stack.Screen name="CreateAvatar" component={CreateAvatar} />
             <Stack.Screen name="BusinessAvatarInfo" component={BusinessAvatarInfo} />
-            <Stack.Screen name="BusinessAvatarInfo"component={BusinessAvatarInfo}/>
             <Stack.Screen name="Navigation" component={Navigation} />
             <Stack.Screen name="Social" component={Social} />
             <Stack.Screen name="Friends" component={Friends} />
