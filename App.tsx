@@ -30,6 +30,7 @@ import { STRIPE_PUBLISHABLE_KEY } from '@env';
 
 const Stack = createStackNavigator();
 import Store from './screens/Store';
+import ViewVoucherInventory from './screens/ViewVoucherInventory';
 
 const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -80,10 +81,14 @@ const App: React.FC = () => {
             <Stack.Screen name="EditAvatar" component={EditAvatar} />
             <Stack.Screen name="verifyOTP" component={verifyOTP} />
             <Stack.Screen name="CreateAvatar" component={CreateAvatar} />
+            <Stack.Screen name="BusinessAvatarInfo" component={BusinessAvatarInfo} />
             <Stack.Screen name="BusinessAvatarInfo"component={BusinessAvatarInfo}/>
             <Stack.Screen name="Navigation" component={Navigation} />
             <Stack.Screen name="Social" component={Social} />
             <Stack.Screen name="Friends" component={Friends} />
+            <React.Fragment>
+              <Stack.Screen name="ViewVoucherInventory" component={ViewVoucherInventory} />
+            </React.Fragment>
           </Stack.Navigator>
         </NavigationContainer>
       </I18nextProvider>
