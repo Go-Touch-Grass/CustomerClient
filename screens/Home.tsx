@@ -15,14 +15,16 @@ import { getAvatarByCustomerId, getAvatarByBusinessRegistrationId, getAvatarByOu
 import { AvatarInfo } from '../api/businessApi';
 import { getUserInfo } from '../api/userApi';
 import { HomeScreenAvatarStyles } from '../styles/HomeScreenAvatarStyles';
+import { BusinessAvatarShopboxStyles } from '../styles/BusinessAvatarShopboxStyles';
 import { DeviceMotion } from 'expo-sensors';
 import AppMenu from '../components/AppMenu';
-import { getAllSubscription, SubscriptionInfo } from '../api/businessApi';
+import { getAllSubscription, SubscriptionInfo, BranchInfo } from '../api/businessApi';
 import axios from 'axios';
 interface GeocodeResult {
   latitude: number;
   longitude: number;
 }
+const RADIUS_THRESHOLD = 500; // in meters
 
 const Home: React.FC = () => {
   const { t } = useTranslation();
@@ -38,6 +40,8 @@ const Home: React.FC = () => {
   const [direction, setDirection] = useState(0);
   const [mapHeading, setMapHeading] = useState(0);
   const [subscriptions, setSubscriptions] = useState<SubscriptionInfo[]>([]);
+  const [selectedBranch, setSelectedBranch] = useState<BranchInfo | null>(null);
+  const [isShopOpen, setIsShopOpen] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -173,7 +177,6 @@ const geocodeLocation = async (location: string): Promise<GeocodeResult> => {
     throw error; // Re-throw for upstream handling
   }
 };
-
   
   const subscribeToDeviceMotion = () => {
     const subscription = DeviceMotion.addListener(({ rotation }) => {
@@ -297,44 +300,125 @@ const geocodeLocation = async (location: string): Promise<GeocodeResult> => {
     outputRange: [-50, 0],
   });
 
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+    const R = 6371e3; // Radius of the earth in meters
+    const φ1 = (lat1 * Math.PI) / 180;
+    const φ2 = (lat2 * Math.PI) / 180;
+    const Δφ = ((lat2 - lat1) * Math.PI) / 180;
+    const Δλ = ((lon2 - lon1) * Math.PI) / 180;
+  
+    const a =
+      Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+      Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  
+    const distance = R * c; // in meters
+    return distance;
+  };
+
   const renderSubscriptionMarkers = () => {
     return subscriptions.map((subscription) => {
-      const { branch } = subscription;
-      if (!branch || !branch.coordinates) return null; // Check if branch or coordinates exist
-  
-      // Now we can safely access latitude and longitude
-      const { latitude, longitude } = branch.coordinates; 
-  
-      if (latitude === undefined || longitude === undefined) return null; // Ensure valid coordinates
-  
-      // Ensure branch.avatar is of type AvatarInfo and has properties
-      const avatar = branch.avatar as AvatarInfo;
-  
-      return (
-        <Marker
-          coordinate={{
-            latitude, // Use latitude
-            longitude, // Use longitude
-          }}
-        >
-          <View style={styles.avatarContainer}>
-            {avatar.base && <Image source={{ uri: avatar.base.filepath }} style={styles.base} />}
-            {avatar.hat && <Image source={{ uri: avatar.hat.filepath }} style={styles.hat} />}
-            {avatar.shirt && <Image source={{ uri: avatar.shirt.filepath }} style={styles.upperWear} />}
-            {avatar.bottom && <Image source={{ uri: avatar.bottom.filepath }} style={styles.lowerWear} />}
-            
-            {/* Render the entity name below the avatar */}
-            <Text style={homeStyles.entityNameText}>
-            {branch.entityType === 'Business_register_business' 
-              ? branch.entityName 
-              : branch.outletName}
-            </Text>
-          </View>
-        </Marker>
-      );
+        const { branch } = subscription;
+        if (!branch || !branch.coordinates) return null; // Check if branch or coordinates exist
+
+        // Now we can safely access latitude and longitude
+        const { latitude, longitude } = branch.coordinates;
+
+        if (latitude === undefined || longitude === undefined) return null; // Ensure valid coordinates
+
+        // Ensure branch.avatar is of type AvatarInfo and has properties
+        const avatar = branch.avatar as AvatarInfo;
+
+        // Define handleMarkerPress function here
+        const handleMarkerPress = () => {
+            // Access the coordinates directly from the branch
+            const { coordinates } = branch;
+
+            // Log the coordinates for debugging
+            console.log('Branch coordinates:', coordinates);
+
+            // Check if coordinates is defined
+            if (!coordinates) {
+                console.warn('Branch coordinates are not available.');
+                return; // Exit if no coordinates
+            }
+
+            const { latitude, longitude } = coordinates;
+            if (!userLocation) {
+                console.warn('User location not available.');
+                return;
+            }
+
+            const userLatitude = userLocation.coords.latitude;
+            const userLongitude = userLocation.coords.longitude;
+
+            const distanceToAvatar = calculateDistance(
+                userLatitude,
+                userLongitude,
+                latitude,
+                longitude
+            );
+
+            if (distanceToAvatar <= RADIUS_THRESHOLD) {
+                // Open the "Shop" if within radius
+                setSelectedBranch(branch);
+                setIsShopOpen(true);
+            } else {
+                // Navigate to BusinessAvatarInfo page if outside radius
+                navigation.navigate('BusinessAvatarInfo', {
+                    entityType: branch.entityType,
+                    entityName: branch.entityType === 'Business_register_business' ? branch.entityName : branch.outletName,
+                    location: branch.location,
+                    category: branch.entityType === 'Business_register_business' ? branch.category : null,
+                    description: branch.entityType === 'Outlet' ? branch.description : null,
+                });
+            }
+        };
+
+        return (
+            <Marker
+                coordinate={{
+                    latitude, // Use latitude
+                    longitude, // Use longitude
+                }}
+                onPress={handleMarkerPress} // Handle marker press
+            >
+                <View style={styles.avatarContainer}>
+                    {avatar.base && <Image source={{ uri: avatar.base.filepath }} style={styles.base} />}
+                    {avatar.hat && <Image source={{ uri: avatar.hat.filepath }} style={styles.hat} />}
+                    {avatar.shirt && <Image source={{ uri: avatar.shirt.filepath }} style={styles.upperWear} />}
+                    {avatar.bottom && <Image source={{ uri: avatar.bottom.filepath }} style={styles.lowerWear} />}
+
+                    {/* Render the entity name below the avatar */}
+                    <Text style={homeStyles.entityNameText} numberOfLines={2}>
+                        {branch.entityType === 'Business_register_business'
+                            ? branch.entityName
+                            : branch.outletName}
+                    </Text>
+                </View>
+            </Marker>
+        );
     });
-  };
+};
   
+const renderShopBox = () => {
+  if (!selectedBranch) return null;
+  
+  // Get the entity name from selectedBranch
+  const entityName = selectedBranch.entityType === 'Business_register_business' 
+      ? selectedBranch.entityName 
+      : selectedBranch.outletName;
+
+  return (
+    <View style={BusinessAvatarShopboxStyles.shopBox}>
+      <Text style={BusinessAvatarShopboxStyles.shopTitle}>{`${entityName}'s Shop`}</Text>
+      <TouchableOpacity onPress={() => setIsShopOpen(false)} style={BusinessAvatarShopboxStyles.backButton}>
+        <Text>{t('Back')}</Text>
+      </TouchableOpacity>
+    </View>
+  );
+};
+
   const styles = HomeScreenAvatarStyles(avatarSize);
 
   const renderAvatarMarker = () => {
@@ -418,6 +502,8 @@ const geocodeLocation = async (location: string): Promise<GeocodeResult> => {
             <Ionicons name="locate" size={24} color="black" />
           </TouchableOpacity>
         </View>
+        {/* Render the shop box if shop is open */}
+        {isShopOpen && renderShopBox()}
       </StyledContainer>
     </TouchableWithoutFeedback>
   );

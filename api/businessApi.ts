@@ -39,8 +39,10 @@ export interface BranchInfo {
   entityType: 'Business_register_business' | 'Outlet';
   registrationId?: number; // for Business
   entityName?: string; // for Business
+  category?: string; // for Business
   outletId?: number; // for Outlet
   outletName?: string; // for Outlet
+  description?: string;// for Outlet
   location: string;
   avatar: AvatarInfo | null;
   coordinates: {
