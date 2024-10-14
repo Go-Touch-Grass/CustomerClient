@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, TouchableOpacity, Text, Animated, TouchableWithoutFeedback, Image, ActivityIndicator } from 'react-native';
+import { View, TouchableOpacity, Text, Animated, TouchableWithoutFeedback, Image, ActivityIndicator, ScrollView, Modal, Button, TextInput } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import MapView, { Region, Marker, Camera } from 'react-native-maps';
@@ -21,6 +21,7 @@ import AppMenu from '../components/AppMenu';
 import { getAllSubscription, SubscriptionInfo, BranchInfo } from '../api/businessApi';
 import axios from 'axios';
 import {GEOAPIFY_API_KEY} from '@env';
+import { Voucher, getAllVouchers, purchaseVouchers } from '../api/voucherApi';
 
 interface GeocodeResult {
   latitude: number;
@@ -44,6 +45,11 @@ const Home: React.FC = () => {
   const [subscriptions, setSubscriptions] = useState<SubscriptionInfo[]>([]);
   const [selectedBranch, setSelectedBranch] = useState<BranchInfo | null>(null);
   const [isShopOpen, setIsShopOpen] = useState(false);
+  const [vouchers, setVouchers] = useState<Voucher[]>([]);
+  const [selectedVoucher, setSelectedVoucher] = useState<Voucher>();
+  const [quantity, setQuantity] = useState(1);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
   useEffect(() => {
     (async () => {
@@ -399,23 +405,162 @@ const geocodeLocation = async (location: string): Promise<GeocodeResult> => {
     });
   };
 
-  const renderShopBox = () => {
+  useEffect(() => {
+    const fetchVouchers = async () => {
+        if (!selectedBranch) return;
+
+        try {
+            let fetchedVouchers;
+            if (selectedBranch.entityType === 'Business_register_business') {
+                console.log('Fetching vouchers for Registration ID:', selectedBranch.registrationId);
+                fetchedVouchers = await getAllVouchers(selectedBranch.registrationId);
+            } else if (selectedBranch.entityType === 'Outlet') {
+                console.log('Fetching vouchers for Outlet ID:', selectedBranch.outletId);
+                fetchedVouchers = await getAllVouchers(undefined, selectedBranch.outletId);
+            }
+            console.log('Fetched Vouchers:', fetchedVouchers);
+            setVouchers(fetchedVouchers?.vouchers || []);
+        } catch (error) {
+            console.error('Error fetching vouchers:', error);
+        }
+    };
+
+    fetchVouchers();
+}, [selectedBranch]);
+
+const renderShopBox = () => {
     if (!selectedBranch) return null;
 
     // Get the entity name from selectedBranch
     const entityName = selectedBranch.entityType === 'Business_register_business'
-      ? selectedBranch.entityName
-      : selectedBranch.outletName;
+        ? selectedBranch.entityName
+        : selectedBranch.outletName;
 
     return (
-      <View style={BusinessAvatarShopboxStyles.shopBox}>
-        <Text style={BusinessAvatarShopboxStyles.shopTitle}>{`${entityName}'s Shop`}</Text>
-        <TouchableOpacity onPress={() => setIsShopOpen(false)} style={BusinessAvatarShopboxStyles.backButton}>
-          <Text>{t('Back')}</Text>
-        </TouchableOpacity>
-      </View>
+        <View style={BusinessAvatarShopboxStyles.shopBox}>
+            <Text style={BusinessAvatarShopboxStyles.shopTitle}>{`${entityName}'s Shop`}</Text>
+
+            <TouchableOpacity onPress={() => setIsShopOpen(false)} style={BusinessAvatarShopboxStyles.backButton}>
+                <Text>{t('Back')}</Text>
+            </TouchableOpacity>
+
+            {/* Scrollable Display Vouchers */}
+            <ScrollView style={BusinessAvatarShopboxStyles.vouchersList}>
+                {vouchers.length > 0 ? (
+                    vouchers.map((voucher, index) => {
+                        // Calculate the discounted price
+                        const discountedPrice = 10*(voucher.price - (voucher.price * voucher.discount / 100));
+                        const originalPrice = 10*(voucher.price)
+                        return (
+                            <TouchableOpacity key={index} onPress={() => {
+                                setSelectedVoucher(voucher);
+                                setQuantity(1); // Reset quantity to 1
+                                setModalVisible(true);
+                            }}>
+                                <View style={BusinessAvatarShopboxStyles.voucherItem}>
+                                    {voucher.voucherImage ? (
+                                        <Image
+                                            source={require('../assets/noimage.jpg')} // Default image path
+                                            style={BusinessAvatarShopboxStyles.voucherImage}
+                                        />
+                                    ) : (
+                                        <Image
+                                            source={{ uri: `http://localhost:8080/${voucher.voucherImage}` }} // Adjust URL as needed
+                                            style={BusinessAvatarShopboxStyles.voucherImage} // Image styling
+                                        />
+                                    )}
+                                    <View style={BusinessAvatarShopboxStyles.voucherDetails}>
+                                        <Text style={BusinessAvatarShopboxStyles.voucherName}>{voucher.name}</Text>
+                                        <Text style={BusinessAvatarShopboxStyles.originalPrice}>
+                                            Price: <Text style={{ textDecorationLine: 'line-through' }}>{originalPrice} Gems</Text>
+                                            <Text style={{ color: 'green' }}> {discountedPrice} Gems</Text>
+                                        </Text>
+                                        <Text style={BusinessAvatarShopboxStyles.voucherDiscount}>{voucher.discount}% off</Text>
+                                    </View>
+                                </View>
+                            </TouchableOpacity>
+                        );
+                    })
+                ) : (
+                    <Text>{t('No vouchers available')}</Text>
+                )}
+            </ScrollView>
+
+            {/* Modal for Purchasing Vouchers */}
+            <Modal
+                transparent={false}
+                visible={modalVisible}
+                animationType="slide"
+                onRequestClose={() => setModalVisible(false)}
+            >
+                <View style={BusinessAvatarShopboxStyles.modalContainer}>
+                    <Text style={BusinessAvatarShopboxStyles.modalTitle}>
+                        How many vouchers of {selectedVoucher?.name} would you like to purchase?
+                    </Text>
+                    <View style={BusinessAvatarShopboxStyles.quantityContainer}>
+                        <Button title="-" onPress={() => setQuantity(prev => Math.max(1, prev - 1))} />
+                        <TextInput
+                            style={BusinessAvatarShopboxStyles.quantityInput}
+                            value={String(quantity)}
+                            onChangeText={text => setQuantity(Number(text))}
+                            keyboardType="numeric"
+                        />
+                        <Button title="+" onPress={() => setQuantity(prev => prev + 1)} />
+                    </View>
+
+                    {/* Calculate discounted price here */}
+                    {selectedVoucher && (
+                        <Text style={BusinessAvatarShopboxStyles.totalCost}>
+                            Total Cost: {( 10*(selectedVoucher.price - (selectedVoucher.price * selectedVoucher.discount / 100)) * quantity)} Gems
+                        </Text>
+                    )}
+
+                    <TouchableOpacity
+                        onPress={async () => {
+                            try {
+                                if (!selectedVoucher) {
+                                    console.error('No voucher selected');
+                                    return;
+                                }
+                                
+                                // Calculate the discounted price for the selected voucher
+                                const discountedPrice = (selectedVoucher.price - (selectedVoucher.price * selectedVoucher.discount / 100));
+                                const totalCostInGems = (discountedPrice * quantity);
+
+                                await purchaseVouchers(String(selectedVoucher.listing_id)); // Call your purchaseVouchers method
+                                setSuccessMessage('Your Voucher has been added to your Inventory!');
+                                setModalVisible(false);
+                                // Optionally refresh vouchers or show a success message
+                            } catch (error) {
+                                console.error('Error purchasing vouchers:', error);
+                            }
+                        }}
+                        style={BusinessAvatarShopboxStyles.confirmButton}
+                    >
+                        <Text style={BusinessAvatarShopboxStyles.confirmButtonText}>Confirm Purchase</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => setModalVisible(false)}>
+                        <Text style={BusinessAvatarShopboxStyles.cancelButton}>Cancel</Text>
+                    </TouchableOpacity>
+                </View>
+            </Modal>
+            {/* Success Message */}
+            {successMessage && (
+                <Text style={BusinessAvatarShopboxStyles.successMessage}>{successMessage}</Text>
+            )}
+        </View>
     );
-  };
+};
+
+  useEffect(() => {
+    if (successMessage) {
+        const timer = setTimeout(() => {
+            setSuccessMessage('');
+        }, 3000); // Change this duration as needed (3000ms = 3 seconds)
+
+        return () => clearTimeout(timer); // Cleanup the timer
+    }
+  }, [successMessage]);
 
   const styles = HomeScreenAvatarStyles(avatarSize);
 
