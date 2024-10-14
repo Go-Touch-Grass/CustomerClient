@@ -2,12 +2,14 @@ import axios from 'axios';
 import { IP_ADDRESS } from '@env';
 
 const axiosInstance = axios.create({
-    // baseURL: CommonBackend URL
-    // Please do configuration on .env file instead of hardcoding the value here
-    baseURL: `http://${IP_ADDRESS}:8080/`,
-    headers: {
-        'Content-Type': 'application/json',
-    },
+
+  // baseURL: CommonBackend URL
+  // Please do configuration on .env file instead of hardcoding the value here
+  baseURL: `http://${IP_ADDRESS}:8080/`,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+
 
 });
 

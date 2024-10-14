@@ -74,140 +74,140 @@ const Home: React.FC = () => {
     fetchSubscriptions();
   }, []);
 
-const fetchSubscriptions = async () => {
-  try {
-    const subscriptionData = await getAllSubscription();
-    console.log('Fetched Subscription Data:', subscriptionData);
+  const fetchSubscriptions = async () => {
+    try {
+      const subscriptionData = await getAllSubscription();
+      console.log('Fetched Subscription Data:', subscriptionData);
 
-    // Fetch avatars and geocode each subscription's location
-    const subscriptionsWithAvatars = await Promise.all(subscriptionData.map(async (subscription) => {
-      const { branch } = subscription;
+      // Fetch avatars and geocode each subscription's location
+      const subscriptionsWithAvatars = await Promise.all(subscriptionData.map(async (subscription) => {
+        const { branch } = subscription;
 
-      // Geocode the branch location to get latitude and longitude
-      let coordinates: { latitude: number; longitude: number } | null = null;
-      if (branch.location) {
+        // Geocode the branch location to get latitude and longitude
+        let coordinates: { latitude: number; longitude: number } | null = null;
+        if (branch.location) {
+          try {
+            coordinates = await geocodeLocation(branch.location);
+          } catch (error) {
+            console.error(`Error geocoding location "${branch.location}":`, error);
+          }
+        }
         try {
-          coordinates = await geocodeLocation(branch.location);
+          let detailedAvatar;
+          // Check the entity type and fetch the appropriate avatar
+          if (branch.entityType === 'Outlet') {
+            if (branch.outletId !== undefined) {
+              detailedAvatar = await getAvatarByOutletId(branch.outletId);
+            } else {
+              console.warn(`Outlet ID is undefined for subscription ${subscription.subscriptionId}`);
+              return {
+                ...subscription,
+                branch: {
+                  ...branch,
+                  avatar: null,
+                  coordinates,
+                },
+              };
+            }
+          } else if (branch.entityType === 'Business_register_business') {
+            if (branch.registrationId !== undefined) {
+              detailedAvatar = await getAvatarByBusinessRegistrationId(branch.registrationId);
+            } else {
+              console.warn(`Registration ID is undefined for subscription ${subscription.subscriptionId}`);
+              return {
+                ...subscription,
+                branch: {
+                  ...branch,
+                  avatar: null,
+                  coordinates,
+                },
+              };
+            }
+          }
+
+          return {
+            ...subscription,
+            branch: {
+              ...branch,
+              avatar: detailedAvatar,
+              coordinates, // Add the coordinates to the branch
+            },
+          };
         } catch (error) {
-          console.error(`Error geocoding location "${branch.location}":`, error);
+          console.error(`Error fetching avatar for subscription ${subscription.subscriptionId}:`, error);
         }
-      }
-      try {
-        let detailedAvatar;
-        // Check the entity type and fetch the appropriate avatar
-        if (branch.entityType === 'Outlet') {
-          if (branch.outletId !== undefined) { 
-            detailedAvatar = await getAvatarByOutletId(branch.outletId);
-          } else {
-            console.warn(`Outlet ID is undefined for subscription ${subscription.subscriptionId}`);
-            return {
-              ...subscription,
-              branch: {
-                ...branch,
-                avatar: null, 
-                coordinates,
-              },
-            };
-          }
-        } else if (branch.entityType === 'Business_register_business') {
-          if (branch.registrationId !== undefined) { 
-            detailedAvatar = await getAvatarByBusinessRegistrationId(branch.registrationId);
-          } else {
-            console.warn(`Registration ID is undefined for subscription ${subscription.subscriptionId}`);
-            return {
-              ...subscription,
-              branch: {
-                ...branch,
-                avatar: null, 
-                coordinates,
-              },
-            };
-          }
-        }
-      
+
+
         return {
           ...subscription,
           branch: {
             ...branch,
-            avatar: detailedAvatar,
-            coordinates, // Add the coordinates to the branch
+            coordinates, // Add the coordinates to the branch even if avatar fetching fails
           },
         };
-      } catch (error) {
-        console.error(`Error fetching avatar for subscription ${subscription.subscriptionId}:`, error);
-      }
-      
+      }));
 
-      return {
-        ...subscription,
-        branch: {
-          ...branch,
-          coordinates, // Add the coordinates to the branch even if avatar fetching fails
-        },
-      };
-    }));
-
-    setSubscriptions(subscriptionsWithAvatars as SubscriptionInfo[]); // Store updated subscriptions in state
-  } catch (error) {
-    console.error('Error fetching subscriptions:', error);
-  } finally {
-    setIsLoading(false);
-  }
-};
-
-const geocodeLocation = async (location: string): Promise<GeocodeResult> => {
-  const url = `https://api.geoapify.com/v1/geocode/search?text=${encodeURIComponent(location)}&apiKey=e0a70d13ff6640aa8172c4caf76f2ab5`;
-  console.log(`Geocoding request to: ${url}`); // Log the request URL
-  
-  try {
-    const response = await axios.get(url);
-
-    // Check if response data has features and is not empty
-    if (response.data && response.data.features && response.data.features.length > 0) {
-      // Extract the first feature's geometry coordinates
-      const { geometry } = response.data.features[0];
-      const [longitude, latitude] = geometry.coordinates; // coordinates are in [lon, lat] format
-      console.log('Geocoded Coordinates:', [latitude, longitude])
-      return { latitude, longitude };
-    } else {
-      throw new Error('No results found for the provided address.');
+      setSubscriptions(subscriptionsWithAvatars as SubscriptionInfo[]); // Store updated subscriptions in state
+    } catch (error) {
+      console.error('Error fetching subscriptions:', error);
+    } finally {
+      setIsLoading(false);
     }
-  } catch (error) {
-    console.error('Geocoding request failed:', error); // More detailed error logging
-    throw error; // Re-throw for upstream handling
-  }
-};
-  
+  };
+
+  const geocodeLocation = async (location: string): Promise<GeocodeResult> => {
+    const url = `https://api.geoapify.com/v1/geocode/search?text=${encodeURIComponent(location)}&apiKey=e0a70d13ff6640aa8172c4caf76f2ab5`;
+    console.log(`Geocoding request to: ${url}`); // Log the request URL
+
+    try {
+      const response = await axios.get(url);
+
+      // Check if response data has features and is not empty
+      if (response.data && response.data.features && response.data.features.length > 0) {
+        // Extract the first feature's geometry coordinates
+        const { geometry } = response.data.features[0];
+        const [longitude, latitude] = geometry.coordinates; // coordinates are in [lon, lat] format
+        console.log('Geocoded Coordinates:', [latitude, longitude])
+        return { latitude, longitude };
+      } else {
+        throw new Error('No results found for the provided address.');
+      }
+    } catch (error) {
+      console.error('Geocoding request failed:', error); // More detailed error logging
+      throw error; // Re-throw for upstream handling
+    }
+  };
+
   const subscribeToDeviceMotion = () => {
     const subscription = DeviceMotion.addListener(({ rotation }) => {
       if (rotation) {
         setDirection(rotation.alpha + 1.39626);
       }
     });
-  
+
     DeviceMotion.setUpdateInterval(100);
     return () => {
       subscription.remove(); // Clean up the listener
     };
   };
-  
+
   useEffect(() => {
     const unsubscribe = subscribeToDeviceMotion();
     return () => {
       unsubscribe();
     };
   }, []);
-  
+
   useEffect(() => {
     if (region) {
       adjustAvatarSizeBasedOnZoom(region.latitudeDelta);
     }
   }, [region]);
-  
+
   const updateMapHeading = async () => {
     if (mapRef.current) {
       const camera: Camera = await mapRef.current.getCamera();
-      setMapHeading(camera.heading || 0); 
+      setMapHeading(camera.heading || 0);
     }
   };
 
@@ -224,10 +224,10 @@ const geocodeLocation = async (location: string): Promise<GeocodeResult> => {
   };
 
   const adjustAvatarSizeBasedOnZoom = (latitudeDelta: number) => {
-    const baseSize = 85; 
-    const zoomFactor = 4000; 
-    const size = baseSize - (latitudeDelta * zoomFactor); 
-    setAvatarSize(Math.max(size, 25)); 
+    const baseSize = 85;
+    const zoomFactor = 4000;
+    const size = baseSize - (latitudeDelta * zoomFactor);
+    setAvatarSize(Math.max(size, 25));
   };
 
   const toggleMenu = (visible: boolean) => {
@@ -236,12 +236,12 @@ const geocodeLocation = async (location: string): Promise<GeocodeResult> => {
       Animated.spring(menuAnimation, {
         toValue: visible ? 1 : 0,
         useNativeDriver: true,
-        speed: 20, 
-        bounciness: 8, 
+        speed: 20,
+        bounciness: 8,
       }),
       Animated.timing(menuAnimation, {
         toValue: visible ? 1 : 0,
-        duration: 200, 
+        duration: 200,
         useNativeDriver: true,
       }),
     ]).start();
@@ -306,118 +306,118 @@ const geocodeLocation = async (location: string): Promise<GeocodeResult> => {
     const φ2 = (lat2 * Math.PI) / 180;
     const Δφ = ((lat2 - lat1) * Math.PI) / 180;
     const Δλ = ((lon2 - lon1) * Math.PI) / 180;
-  
+
     const a =
       Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
       Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  
+
     const distance = R * c; // in meters
     return distance;
   };
 
   const renderSubscriptionMarkers = () => {
     return subscriptions.map((subscription) => {
-        const { branch } = subscription;
-        if (!branch || !branch.coordinates) return null; // Check if branch or coordinates exist
+      const { branch } = subscription;
+      if (!branch || !branch.coordinates) return null; // Check if branch or coordinates exist
 
-        // Now we can safely access latitude and longitude
-        const { latitude, longitude } = branch.coordinates;
+      // Now we can safely access latitude and longitude
+      const { latitude, longitude } = branch.coordinates;
 
-        if (latitude === undefined || longitude === undefined) return null; // Ensure valid coordinates
+      if (latitude === undefined || longitude === undefined) return null; // Ensure valid coordinates
 
-        // Ensure branch.avatar is of type AvatarInfo and has properties
-        const avatar = branch.avatar as AvatarInfo;
+      // Ensure branch.avatar is of type AvatarInfo and has properties
+      const avatar = branch.avatar as AvatarInfo;
 
-        // Define handleMarkerPress function here
-        const handleMarkerPress = () => {
-            // Access the coordinates directly from the branch
-            const { coordinates } = branch;
+      // Define handleMarkerPress function here
+      const handleMarkerPress = () => {
+        // Access the coordinates directly from the branch
+        const { coordinates } = branch;
 
-            // Log the coordinates for debugging
-            console.log('Branch coordinates:', coordinates);
+        // Log the coordinates for debugging
+        console.log('Branch coordinates:', coordinates);
 
-            // Check if coordinates is defined
-            if (!coordinates) {
-                console.warn('Branch coordinates are not available.');
-                return; // Exit if no coordinates
-            }
+        // Check if coordinates is defined
+        if (!coordinates) {
+          console.warn('Branch coordinates are not available.');
+          return; // Exit if no coordinates
+        }
 
-            const { latitude, longitude } = coordinates;
-            if (!userLocation) {
-                console.warn('User location not available.');
-                return;
-            }
+        const { latitude, longitude } = coordinates;
+        if (!userLocation) {
+          console.warn('User location not available.');
+          return;
+        }
 
-            const userLatitude = userLocation.coords.latitude;
-            const userLongitude = userLocation.coords.longitude;
+        const userLatitude = userLocation.coords.latitude;
+        const userLongitude = userLocation.coords.longitude;
 
-            const distanceToAvatar = calculateDistance(
-                userLatitude,
-                userLongitude,
-                latitude,
-                longitude
-            );
-
-            if (distanceToAvatar <= RADIUS_THRESHOLD) {
-                // Open the "Shop" if within radius
-                setSelectedBranch(branch);
-                setIsShopOpen(true);
-            } else {
-                // Navigate to BusinessAvatarInfo page if outside radius
-                navigation.navigate('BusinessAvatarInfo', {
-                    entityType: branch.entityType,
-                    entityName: branch.entityType === 'Business_register_business' ? branch.entityName : branch.outletName,
-                    location: branch.location,
-                    category: branch.entityType === 'Business_register_business' ? branch.category : null,
-                    description: branch.entityType === 'Outlet' ? branch.description : null,
-                });
-            }
-        };
-
-        return (
-            <Marker
-                coordinate={{
-                    latitude, // Use latitude
-                    longitude, // Use longitude
-                }}
-                onPress={handleMarkerPress} // Handle marker press
-            >
-                <View style={styles.avatarContainer}>
-                    {avatar.base && <Image source={{ uri: avatar.base.filepath }} style={styles.base} />}
-                    {avatar.hat && <Image source={{ uri: avatar.hat.filepath }} style={styles.hat} />}
-                    {avatar.shirt && <Image source={{ uri: avatar.shirt.filepath }} style={styles.upperWear} />}
-                    {avatar.bottom && <Image source={{ uri: avatar.bottom.filepath }} style={styles.lowerWear} />}
-
-                    {/* Render the entity name below the avatar */}
-                    <Text style={homeStyles.entityNameText} numberOfLines={2}>
-                        {branch.entityType === 'Business_register_business'
-                            ? branch.entityName
-                            : branch.outletName}
-                    </Text>
-                </View>
-            </Marker>
+        const distanceToAvatar = calculateDistance(
+          userLatitude,
+          userLongitude,
+          latitude,
+          longitude
         );
+
+        if (distanceToAvatar <= RADIUS_THRESHOLD) {
+          // Open the "Shop" if within radius
+          setSelectedBranch(branch);
+          setIsShopOpen(true);
+        } else {
+          // Navigate to BusinessAvatarInfo page if outside radius
+          navigation.navigate('BusinessAvatarInfo', {
+            entityType: branch.entityType,
+            entityName: branch.entityType === 'Business_register_business' ? branch.entityName : branch.outletName,
+            location: branch.location,
+            category: branch.entityType === 'Business_register_business' ? branch.category : null,
+            description: branch.entityType === 'Outlet' ? branch.description : null,
+          });
+        }
+      };
+
+      return (
+        <Marker
+          coordinate={{
+            latitude, // Use latitude
+            longitude, // Use longitude
+          }}
+          onPress={handleMarkerPress} // Handle marker press
+        >
+          <View style={styles.avatarContainer}>
+            {avatar.base && <Image source={{ uri: avatar.base.filepath }} style={styles.base} />}
+            {avatar.hat && <Image source={{ uri: avatar.hat.filepath }} style={styles.hat} />}
+            {avatar.shirt && <Image source={{ uri: avatar.shirt.filepath }} style={styles.upperWear} />}
+            {avatar.bottom && <Image source={{ uri: avatar.bottom.filepath }} style={styles.lowerWear} />}
+
+            {/* Render the entity name below the avatar */}
+            <Text style={homeStyles.entityNameText} numberOfLines={2}>
+              {branch.entityType === 'Business_register_business'
+                ? branch.entityName
+                : branch.outletName}
+            </Text>
+          </View>
+        </Marker>
+      );
     });
-};
-  
-const renderShopBox = () => {
-  if (!selectedBranch) return null;
-  
-  // Get the entity name from selectedBranch
-  const entityName = selectedBranch.entityType === 'Business_register_business' 
-      ? selectedBranch.entityName 
+  };
+
+  const renderShopBox = () => {
+    if (!selectedBranch) return null;
+
+    // Get the entity name from selectedBranch
+    const entityName = selectedBranch.entityType === 'Business_register_business'
+      ? selectedBranch.entityName
       : selectedBranch.outletName;
 
-  return (
-    <View style={BusinessAvatarShopboxStyles.shopBox}>
-      <Text style={BusinessAvatarShopboxStyles.shopTitle}>{`${entityName}'s Shop`}</Text>
-      <TouchableOpacity onPress={() => setIsShopOpen(false)} style={BusinessAvatarShopboxStyles.backButton}>
-        <Text>{t('Back')}</Text>
-      </TouchableOpacity>
-    </View>
-  );
-};
+    return (
+      <View style={BusinessAvatarShopboxStyles.shopBox}>
+        <Text style={BusinessAvatarShopboxStyles.shopTitle}>{`${entityName}'s Shop`}</Text>
+        <TouchableOpacity onPress={() => setIsShopOpen(false)} style={BusinessAvatarShopboxStyles.backButton}>
+          <Text>{t('Back')}</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
 
   const styles = HomeScreenAvatarStyles(avatarSize);
 
@@ -436,17 +436,17 @@ const renderShopBox = () => {
       >
         <View style={styles.avatarContainer}>
           <Image source={require('../assets/sprites/avatar_base.png')} style={styles.avatar} />
-          {avatar.hat && <Image source={{ uri: avatar.hat.filepath }} style={styles.hat} /> }
+          {avatar.hat && <Image source={{ uri: avatar.hat.filepath }} style={styles.hat} />}
           {avatar.shirt && <Image source={{ uri: avatar.shirt.filepath }} style={styles.upperWear} />}
           {avatar.bottom && <Image source={{ uri: avatar.bottom.filepath }} style={styles.lowerWear} />}
 
           {/* Direction Indicator */}
           <View style={{
             position: 'absolute',
-            bottom: avatarSize * -0.65, 
+            bottom: avatarSize * -0.65,
             left: '50%',
             transform: [
-              { translateX: -15 }, 
+              { translateX: -15 },
               { rotate: `${-combinedRotation}rad` }
             ],
           }}>
@@ -457,7 +457,14 @@ const renderShopBox = () => {
     );
   };
 
+  const navigateToViewVouchers = () => {
+    toggleMenu(false);
+    navigation.navigate('ViewVoucherInventory');
+  };
+
+
   return (
+
     <TouchableWithoutFeedback onPress={() => menuVisible && toggleMenu(false)}>
       <StyledContainer>
         {menuVisible && (
@@ -486,7 +493,7 @@ const renderShopBox = () => {
               onRegionChangeComplete={(newRegion) => {
                 setRegion(newRegion);
                 updateMapHeading();
-              }}       
+              }}
             >
               {isLoading ? (
                 <ActivityIndicator size="large" color="#00AB41" />

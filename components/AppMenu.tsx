@@ -26,12 +26,31 @@ const AppMenu: React.FC<AppMenuProps> = ({ visible, menuAnimation, toggleMenu, n
     navigation.replace('Login');
   };
 
+  const navigateToViewVouchers = () => {
+
+    navigation.navigate('ViewVoucherInventory'); // Navigate to ViewVoucherInventory
+  };
+
   const menuTranslateY = menuAnimation.interpolate({
     inputRange: [0, 1],
     outputRange: [-50, 0],
   });
 
   return (
+    <View style={appMenuStyles.drawerContent}>
+      <TouchableOpacity style={appMenuStyles.drawerItem} onPress={navigateToProfile}>
+        <Text style={appMenuStyles.drawerItemText}>{t('profile')}</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={appMenuStyles.drawerItem} onPress={navigateToChangeLanguage}>
+        <Text style={appMenuStyles.drawerItemText}>{t('change-language')}</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={appMenuStyles.drawerItem} onPress={handleLogout}>
+        <Text style={appMenuStyles.drawerItemText}>{t('logout')}</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={appMenuStyles.drawerItem} onPress={navigateToViewVouchers}>
+        <Text style={appMenuStyles.drawerItemText}>{t('View Voucher Inventory')}</Text>
+      </TouchableOpacity>
+    </View>
     <Animated.View
       style={[
         homeStyles.menu,
