@@ -21,7 +21,6 @@ interface Voucher {
 interface VoucherResponse {
     status: number;
     vouchers: Voucher[];
-    inventoryUsed?: boolean;
 }
 
 const ViewVoucherInventory: React.FC = () => {
@@ -34,14 +33,8 @@ const ViewVoucherInventory: React.FC = () => {
         const fetchVouchers = async () => {
             try {
                 const fetchedVouchersResponse: VoucherResponse = await getCustomerVouchers();
-                console.log('Fetched vouchers:', fetchedVouchersResponse);
-
-                // If inventoryUsed is true, don't display the vouchers
-                if (fetchedVouchersResponse.inventoryUsed) {
-                    setVouchers([]); // Clear vouchers if inventoryUsed is true
-                } else {
-                    setVouchers(fetchedVouchersResponse.vouchers); // Set vouchers if inventory is not used
-                }
+                console.log('Fetched vouchers:', fetchedVouchersResponse); // Log the response
+                setVouchers(fetchedVouchersResponse.vouchers);
             } catch (error) {
                 console.error('Error fetching customer vouchers:', error);
             } finally {
