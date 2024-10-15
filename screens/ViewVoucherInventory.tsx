@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, Text, Image, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { getCustomerVouchers, redeemVoucher } from '../api/voucherApi'; // Ensure this path is correct
 import { useNavigation } from '@react-navigation/native'; // Import for navigation
+import { Ionicons } from '@expo/vector-icons';
+import { StyledContainer, InnerContainer, PageTitle } from '../styles/commonStyles';
+import { Colors } from '../styles/commonStyles';
+import { StyleSheet } from 'react-native';
 
 interface Voucher {
     listing_id: number;
@@ -69,17 +73,13 @@ const ViewVoucherInventory: React.FC = () => {
     };
 
     const renderVoucher = ({ item, index }: { item: Voucher; index: number }) => {
-        const price = typeof item.price === 'number' ? item.price : 0; // Default to 0 if undefined
-        const discount = typeof item.discount === 'number' ? item.discount : 0; // Default to 0 if undefined
-        const isExpanded = expandedVoucher === item.listing_id; // Check if this voucher is expanded
-
-        // Check if the voucher is expired
+        const isExpanded = expandedVoucher === item.listing_id;
         const isExpired = item.expirationDate ? new Date(item.expirationDate) < new Date() : false;
 
         return (
             <TouchableOpacity onPress={() => handleVoucherClick(item.listing_id)} style={styles.voucherContainer}>
                 {item.voucherImage && (
-                    <Image source={{ uri: `http://192.168.18.67:8080/${item.voucherImage}` }} style={styles.voucherImage} />
+                    <Image source={{ uri: `http://192.168.129.60:8080/${item.voucherImage}` }} style={styles.voucherImage} />
                 )}
                 <Text style={styles.voucherName}>{`Voucher ${index + 1}: ${item.name || 'No Name'}`}</Text>
                 {isExpanded && (
@@ -94,17 +94,15 @@ const ViewVoucherInventory: React.FC = () => {
                         {item.redeemed ? (
                             <Text style={styles.redeemedText}>Redeemed</Text>
                         ) : isExpired ? (
-                            <Text style={styles.redeemedText}>Expired</Text> // Indicate that the voucher is expired
+                            <Text style={styles.redeemedText}>Expired</Text>
                         ) : (
-                            <View style={styles.redeemContainer}>
-                                <TouchableOpacity
-                                    style={[styles.redeemButton, isExpired && { backgroundColor: '#ccc' }]} // Change button style if expired
-                                    onPress={() => handleRedeem(item)}
-                                    disabled={isExpired} // Disable button if expired
-                                >
-                                    <Text style={styles.redeemButtonText}>Redeem</Text>
-                                </TouchableOpacity>
-                            </View>
+                            <TouchableOpacity
+                                style={[styles.redeemButton, isExpired && styles.disabledButton]}
+                                onPress={() => handleRedeem(item)}
+                                disabled={isExpired}
+                            >
+                                <Text style={styles.redeemButtonText}>Redeem</Text>
+                            </TouchableOpacity>
                         )}
                     </View>
                 )}
@@ -112,162 +110,134 @@ const ViewVoucherInventory: React.FC = () => {
         );
     };
 
-
     if (loading) {
-        return <ActivityIndicator size="large" color="#0000ff" />;
-    }
-
-    if (vouchers.length === 0) {
         return (
-            <View style={styles.container}>
-                <Text style={styles.emptyInventoryText}>Nothing in inventory</Text>
-                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                    <Text style={styles.backButtonText}>Back</Text>
-                </TouchableOpacity>
-            </View>
+            <StyledContainer>
+                <ActivityIndicator size="large" color={Colors.green} />
+            </StyledContainer>
         );
     }
 
-
     return (
-        <View style={styles.container}>
-            <View style={styles.header}>
-                <Text style={styles.headerText}>Inventory of Purchased Vouchers</Text>
-            </View>
-            {vouchers.length === 0 ? (
-                <View style={styles.noVouchersContainer}>
-                    <Text style={styles.noVouchersText}>Nothing in inventory</Text>
-                </View>
-            ) : (
-                <FlatList
-                    data={vouchers}
-                    renderItem={renderVoucher}
-                    keyExtractor={item => item.listing_id.toString()}
-                    contentContainerStyle={styles.listContainer}
-                />
-            )}
-            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                <Text style={styles.backButtonText}>Back</Text>
+        <StyledContainer>
+            <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+                <Ionicons name="arrow-back" style={styles.backIcon} />
             </TouchableOpacity>
-        </View>
+            <InnerContainer>
+                <PageTitle>Voucher Inventory</PageTitle>
+                {vouchers.length === 0 ? (
+                    <Text style={styles.emptyInventoryText}>Nothing in inventory</Text>
+                ) : (
+                    <FlatList
+                        data={vouchers}
+                        renderItem={renderVoucher}
+                        keyExtractor={item => item.listing_id.toString()}
+                        contentContainerStyle={styles.listContainer}
+                    />
+                )}
+            </InnerContainer>
+        </StyledContainer>
     );
 };
 
 const styles = StyleSheet.create({
+    backButton: {
+        position: 'absolute',
+        top: 40,
+        left: 20,
+        zIndex: 1,
+        padding: 10,
+    },
+    backIcon: {
+        color: Colors.green,
+        fontSize: 24,
+    },
     emptyInventoryText: {
         fontSize: 18,
         fontWeight: 'bold',
-        color: '#555',
+        color: Colors.tertiary,
         textAlign: 'center',
         marginTop: 20,
     },
-    container: {
-        flex: 1,
-        backgroundColor: '#f9f9f9',
-        marginTop: 50,
-    },
-    header: {
-        backgroundColor: '#4CAF50',
-        padding: 15,
-        alignItems: 'center',
-    },
-    headerText: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: '#fff',
-    },
-    noVouchersContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    noVouchersText: {
-        fontSize: 18,
-        color: '#888',
-    },
-    redeemContainer: {
-        flexDirection: 'row',
-        justifyContent: 'flex-end',
-        marginTop: 10,
-    },
-    redeemButton: {
-        paddingVertical: 5,
-        paddingHorizontal: 10,
-        backgroundColor: '#FFD700',
-        borderRadius: 5,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    redeemButtonText: {
-        color: '#000',
-        fontWeight: 'bold',
-        fontSize: 12,
-    },
-    backButton: {
-        padding: 15,
-        backgroundColor: '#4CAF50',
-        width: '100%',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    backButtonText: {
-        color: '#fff',
-        fontWeight: 'bold',
-        textAlign: 'center',
-    },
     listContainer: {
         padding: 10,
+        width: '100%', // Ensure the list takes full width
     },
     voucherContainer: {
-        backgroundColor: '#fff',
+        backgroundColor: Colors.white,
         padding: 15,
-        marginBottom: 10,
+        marginBottom: 15,
         borderRadius: 10,
         borderWidth: 1,
-        borderColor: '#ddd',
-        shadowColor: '#000',
+        borderColor: Colors.secondary,
+        shadowColor: Colors.black,
         shadowOffset: {
             width: 0,
             height: 2,
         },
-        shadowOpacity: 0.2,
+        shadowOpacity: 0.1,
         shadowRadius: 2,
         elevation: 3,
+        width: 300, // Increase the width of each voucher container
+        alignSelf: 'center', // Center the voucher container
     },
     voucherImage: {
         width: '100%',
-        height: 150,
+        height: 180, // Slightly increase the height for better proportion
         borderRadius: 10,
         marginBottom: 10,
     },
     voucherName: {
-        fontSize: 20,
+        fontSize: 20, // Slightly increase font size
         fontWeight: 'bold',
-        marginBottom: 5,
+        color: Colors.tertiary,
+        marginBottom: 8,
     },
     detailsContainer: {
-        marginTop: 10,
+        marginTop: 12,
     },
     voucherDescription: {
         fontSize: 16,
-        marginBottom: 5,
-        color: '#555',
+        marginBottom: 8,
+        color: Colors.tertiary,
     },
     voucherPrice: {
-        fontSize: 16,
+        fontSize: 18,
         fontWeight: 'bold',
+        color: Colors.tertiary,
+        marginBottom: 4,
     },
     voucherDiscount: {
-        fontSize: 14,
-        color: '#888',
+        fontSize: 16,
+        color: Colors.tertiary,
+        marginBottom: 4,
     },
     expirationDate: {
         fontSize: 14,
-        color: '#888',
+        color: Colors.tertiary,
+        marginTop: 8,
+        marginBottom: 8,
+    },
+    redeemButton: {
+        backgroundColor: Colors.green,
+        padding: 12,
+        borderRadius: 8,
+        alignItems: 'center',
+        marginTop: 12,
+    },
+    redeemButtonText: {
+        color: Colors.white,
+        fontWeight: 'bold',
+        fontSize: 16,
     },
     redeemedText: {
-        color: 'green',
+        color: Colors.green,
         fontWeight: 'bold',
+        fontSize: 16,
+        marginTop: 8,
+    },
+    disabledButton: {
+        backgroundColor: Colors.lightGray,
     },
 });
 
