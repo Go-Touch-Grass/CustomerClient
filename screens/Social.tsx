@@ -6,7 +6,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { StyledContainer, InnerContainer, PageTitle } from '../styles/commonStyles';
 import { socialStyles } from '../styles/SocialStyles';
 import ProtectedRoute from '../components/ProtectedRoute';
-import { useTranslation } from 'react-i18next';
 import { Colors } from '../styles/commonStyles';
 
 import {
@@ -29,7 +28,6 @@ interface LeaderboardEntry {
 }
 
 const Social: React.FC = () => {
-	const { t } = useTranslation();
 	const navigation = useNavigation<StackNavigationProp<any>>();
 	const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
 	const [showFriendsOnly, setShowFriendsOnly] = useState(true);
@@ -83,17 +81,17 @@ const Social: React.FC = () => {
 				<Ionicons name="arrow-back" style={socialStyles.backIcon} />
 			</TouchableOpacity>
 			<InnerContainer>
-				<PageTitle>{t('social')}</PageTitle>
+				<PageTitle>Leaderboard</PageTitle>
 
 				<TouchableOpacity style={socialStyles.friendsButton} onPress={() => navigation.navigate('Friends')}>
-					<Text style={socialStyles.friendsButtonText}>{t('friends')}</Text>
+					<Text style={socialStyles.friendsButtonText}>Friends</Text>
 				</TouchableOpacity>
 
 				<View style={socialStyles.section}>
 					<View style={socialStyles.leaderboardHeader}>
-						<Text style={socialStyles.sectionTitle}>{t('leaderboard')}</Text>
+						<Text style={socialStyles.sectionTitle}>Leaderboard</Text>
 						<View style={socialStyles.toggleContainer}>
-							<Text style={socialStyles.toggleLabel}>{t('show-friends-only')}</Text>
+							<Text style={socialStyles.toggleLabel}>Show Friends Only</Text>
 							<Switch
 								value={showFriendsOnly}
 								onValueChange={setShowFriendsOnly}
@@ -106,8 +104,8 @@ const Social: React.FC = () => {
 						data={filteredLeaderboard}
 						renderItem={renderLeaderboardItem}
 						keyExtractor={(item) => item.id}
-						ListEmptyComponent={<Text style={socialStyles.emptyText}>{t('leaderboard-empty')}</Text>}
-						contentContainerStyle={{ width: '100%' }} // Ensure the FlatList content is full width
+						ListEmptyComponent={<Text style={socialStyles.emptyText}>No leaderboard data available</Text>}
+						contentContainerStyle={{ width: '100%' }}
 					/>
 				</View>
 			</InnerContainer>
