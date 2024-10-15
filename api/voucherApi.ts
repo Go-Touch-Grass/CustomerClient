@@ -16,6 +16,12 @@ export interface Voucher {
     expirationDate?: string;
     voucher_transaction_id: number;
     used: boolean; // Add the used attribute
+    rewardItem?: {
+        id: number;
+        name: string;
+        type: string;
+        filepath: string;
+    };
 }
 
 // Define the response interface
@@ -37,6 +43,12 @@ export interface VoucherPurchaseResponse {
         discounted_price_in_gems: number;
         duration: number;
         voucher_transaction_id: string; // or number
+        rewardItem?: {
+            id: number;
+            name: string;
+            type: string;
+            filepath: string;
+        };
     };
 }
 

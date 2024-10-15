@@ -181,4 +181,12 @@ export const BusinessAvatarShopboxStyles = StyleSheet.create({
         textAlign: 'center',
         fontSize: 16,
     },
+    rewardItemImage: {
+        width: 40,
+        height: 40,
+        position: 'absolute',
+        top: 50,
+        right: 10,
+        borderRadius: 25,
+    },
 });
