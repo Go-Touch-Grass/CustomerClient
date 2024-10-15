@@ -436,7 +436,6 @@ const geocodeLocation = async (location: string): Promise<GeocodeResult> => {
 const renderShopBox = () => {
     if (!selectedBranch) return null;
 
-    // Get the entity name from selectedBranch
     const entityName = selectedBranch.entityType === 'Business_register_business'
         ? selectedBranch.entityName
         : selectedBranch.outletName;
@@ -446,112 +445,115 @@ const renderShopBox = () => {
             <Text style={BusinessAvatarShopboxStyles.shopTitle}>{`${entityName}'s Shop`}</Text>
 
             <TouchableOpacity onPress={() => setIsShopOpen(false)} style={BusinessAvatarShopboxStyles.backButton}>
-                <Text>{t('Back')}</Text>
+                <Ionicons name="arrow-back" size={24} color={Colors.primary} />
+                <Text style={BusinessAvatarShopboxStyles.backButtonText}>{t('Back')}</Text>
             </TouchableOpacity>
 
-            {/* Scrollable Display Vouchers */}
             <ScrollView style={BusinessAvatarShopboxStyles.vouchersList}>
                 {vouchers.length > 0 ? (
                     vouchers.map((voucher, index) => {
-                        // Calculate the discounted price
-                        const discountedPrice = 10*(voucher.price - (voucher.price * voucher.discount / 100));
-                        const originalPrice = 10*(voucher.price)
+                        const discountedPrice = 10 * (voucher.price - (voucher.price * voucher.discount / 100));
+                        const originalPrice = 10 * (voucher.price);
                         return (
-                            <TouchableOpacity key={index} onPress={() => {
-                                setSelectedVoucher(voucher);
-                                setQuantity(1); // Reset quantity to 1
-                                setModalVisible(true);
-                            }}>
-                                <View style={BusinessAvatarShopboxStyles.voucherItem}>
-                                    {voucher.voucherImage ? (
-                                        <Image
-                                            source={require('../assets/noimage.jpg')} // Default image path
-                                            style={BusinessAvatarShopboxStyles.voucherImage}
-                                        />
-                                    ) : (
-                                        <Image
-                                            source={{ uri: `http://localhost:8080/${voucher.voucherImage}` }} // Adjust URL as needed
-                                            style={BusinessAvatarShopboxStyles.voucherImage} // Image styling
-                                        />
-                                    )}
-                                    <View style={BusinessAvatarShopboxStyles.voucherDetails}>
-                                        <Text style={BusinessAvatarShopboxStyles.voucherName}>{voucher.name}</Text>
-                                        <Text style={BusinessAvatarShopboxStyles.originalPrice}>
-                                            Price: <Text style={{ textDecorationLine: 'line-through' }}>{originalPrice} Gems</Text>
-                                            <Text style={{ color: 'green' }}> {discountedPrice} Gems</Text>
-                                        </Text>
-                                        <Text style={BusinessAvatarShopboxStyles.voucherDiscount}>{voucher.discount}% off</Text>
+                            <TouchableOpacity 
+                                key={index} 
+                                onPress={() => {
+                                    setSelectedVoucher(voucher);
+                                    setQuantity(1);
+                                    setModalVisible(true);
+                                }}
+                                style={BusinessAvatarShopboxStyles.voucherItem}
+                            >
+                                <Image
+                                    source={voucher.voucherImage ? { uri: `http://192.168.129.60:8080/${voucher.voucherImage}` } : require('../assets/noimage.jpg')}
+                                    style={BusinessAvatarShopboxStyles.voucherImage}
+                                />
+                                <View style={BusinessAvatarShopboxStyles.voucherDetails}>
+                                    <Text style={BusinessAvatarShopboxStyles.voucherName}>{voucher.name}</Text>
+                                    <View style={BusinessAvatarShopboxStyles.priceContainer}>
+                                        <Text style={BusinessAvatarShopboxStyles.originalPrice}>{originalPrice} Gems</Text>
+                                        <Text style={BusinessAvatarShopboxStyles.discountedPrice}>{discountedPrice} Gems</Text>
+                                    </View>
+                                    <View style={BusinessAvatarShopboxStyles.discountBadge}>
+                                        <Text style={BusinessAvatarShopboxStyles.discountText}>{voucher.discount}% OFF</Text>
                                     </View>
                                 </View>
+                                {voucher.rewardItem && (
+                                    <Image
+                                        source={{ uri: `${voucher.rewardItem.filepath}` }}
+                                        style={BusinessAvatarShopboxStyles.rewardItemImage}
+                                    />
+                                )}
                             </TouchableOpacity>
                         );
                     })
                 ) : (
-                    <Text>{t('No vouchers available')}</Text>
+                    <Text style={BusinessAvatarShopboxStyles.noVouchersText}>{t('No vouchers available')}</Text>
                 )}
             </ScrollView>
 
             {/* Modal for Purchasing Vouchers */}
             <Modal
-                transparent={false}
+                transparent={true}
                 visible={modalVisible}
                 animationType="slide"
                 onRequestClose={() => setModalVisible(false)}
             >
-                <View style={BusinessAvatarShopboxStyles.modalContainer}>
-                    <Text style={BusinessAvatarShopboxStyles.modalTitle}>
-                        How many vouchers of {selectedVoucher?.name} would you like to purchase?
-                    </Text>
-                    <View style={BusinessAvatarShopboxStyles.quantityContainer}>
-                        <Button title="-" onPress={() => setQuantity(prev => Math.max(1, prev - 1))} />
-                        <TextInput
-                            style={BusinessAvatarShopboxStyles.quantityInput}
-                            value={String(quantity)}
-                            onChangeText={text => setQuantity(Number(text))}
-                            keyboardType="numeric"
-                        />
-                        <Button title="+" onPress={() => setQuantity(prev => prev + 1)} />
-                    </View>
-
-                    {/* Calculate discounted price here */}
-                    {selectedVoucher && (
-                        <Text style={BusinessAvatarShopboxStyles.totalCost}>
-                            Total Cost: {( 10*(selectedVoucher.price - (selectedVoucher.price * selectedVoucher.discount / 100)) * quantity)} Gems
+                <View style={BusinessAvatarShopboxStyles.modalOverlay}>
+                    <View style={BusinessAvatarShopboxStyles.modalContainer}>
+                        <Text style={BusinessAvatarShopboxStyles.modalTitle}>
+                            Purchase {selectedVoucher?.name}
                         </Text>
-                    )}
+                        <View style={BusinessAvatarShopboxStyles.quantityContainer}>
+                            <TouchableOpacity onPress={() => setQuantity(prev => Math.max(1, prev - 1))} style={BusinessAvatarShopboxStyles.quantityButton}>
+                                <Text style={BusinessAvatarShopboxStyles.quantityButtonText}>-</Text>
+                            </TouchableOpacity>
+                            <TextInput
+                                style={BusinessAvatarShopboxStyles.quantityInput}
+                                value={String(quantity)}
+                                onChangeText={text => setQuantity(Number(text))}
+                                keyboardType="numeric"
+                            />
+                            <TouchableOpacity onPress={() => setQuantity(prev => prev + 1)} style={BusinessAvatarShopboxStyles.quantityButton}>
+                                <Text style={BusinessAvatarShopboxStyles.quantityButtonText}>+</Text>
+                            </TouchableOpacity>
+                        </View>
 
-                    <TouchableOpacity
-                        onPress={async () => {
-                            try {
-                                if (!selectedVoucher) {
-                                    console.error('No voucher selected');
-                                    return;
+                        {selectedVoucher && (
+                            <Text style={BusinessAvatarShopboxStyles.totalCost}>
+                                Total Cost: {(10 * (selectedVoucher.price - (selectedVoucher.price * selectedVoucher.discount / 100)) * quantity)} Gems
+                            </Text>
+                        )}
+
+                        <TouchableOpacity
+                            onPress={async () => {
+                                try {
+                                    if (!selectedVoucher) {
+                                        console.error('No voucher selected');
+                                        return;
+                                    }
+                                    
+                                    await purchaseVouchers(String(selectedVoucher.listing_id));
+                                    setSuccessMessage('Your Voucher has been added to your Inventory!');
+                                    setModalVisible(false);
+                                } catch (error) {
+                                    console.error('Error purchasing vouchers:', error);
                                 }
-                                
-                                // Calculate the discounted price for the selected voucher
-                                const discountedPrice = (selectedVoucher.price - (selectedVoucher.price * selectedVoucher.discount / 100));
-                                const totalCostInGems = (discountedPrice * quantity);
-
-                                await purchaseVouchers(String(selectedVoucher.listing_id)); // Call your purchaseVouchers method
-                                setSuccessMessage('Your Voucher has been added to your Inventory!');
-                                setModalVisible(false);
-                                // Optionally refresh vouchers or show a success message
-                            } catch (error) {
-                                console.error('Error purchasing vouchers:', error);
-                            }
-                        }}
-                        style={BusinessAvatarShopboxStyles.confirmButton}
-                    >
-                        <Text style={BusinessAvatarShopboxStyles.confirmButtonText}>Confirm Purchase</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => setModalVisible(false)}>
-                        <Text style={BusinessAvatarShopboxStyles.cancelButton}>Cancel</Text>
-                    </TouchableOpacity>
+                            }}
+                            style={BusinessAvatarShopboxStyles.confirmButton}
+                        >
+                            <Text style={BusinessAvatarShopboxStyles.confirmButtonText}>Confirm Purchase</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => setModalVisible(false)} style={BusinessAvatarShopboxStyles.cancelButton}>
+                            <Text style={BusinessAvatarShopboxStyles.cancelButtonText}>Cancel</Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
             </Modal>
-            {/* Success Message */}
             {successMessage && (
-                <Text style={BusinessAvatarShopboxStyles.successMessage}>{successMessage}</Text>
+                <View style={BusinessAvatarShopboxStyles.successMessageContainer}>
+                    <Text style={BusinessAvatarShopboxStyles.successMessageText}>{successMessage}</Text>
+                </View>
             )}
         </View>
     );
