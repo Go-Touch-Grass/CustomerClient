@@ -22,6 +22,7 @@ import { getAllSubscription, SubscriptionInfo, BranchInfo } from '../api/busines
 import axios from 'axios';
 import {GEOAPIFY_API_KEY} from '@env';
 import { Voucher, getAllVouchers, purchaseVouchers } from '../api/voucherApi';
+import { useIsFocused } from '@react-navigation/native';
 
 interface GeocodeResult {
   latitude: number;
@@ -50,6 +51,7 @@ const Home: React.FC = () => {
   const [quantity, setQuantity] = useState(1);
   const [modalVisible, setModalVisible] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const isFocused = useIsFocused();
 
   useEffect(() => {
     (async () => {
@@ -295,11 +297,14 @@ const geocodeLocation = async (location: string): Promise<GeocodeResult> => {
       const newRegion = {
         latitude: userLocation.coords.latitude,
         longitude: userLocation.coords.longitude,
-        latitudeDelta: 0.0922,
-        longitudeDelta: 0.0421,
+        latitudeDelta: 0.00415,
+        longitudeDelta: 0.00415,
       };
       setRegion(newRegion);
       mapRef.current?.animateToRegion(newRegion, 1000);
+      
+      // Fetch updated subscriptions
+      await fetchSubscriptions();
     }
   };
 
@@ -407,26 +412,26 @@ const geocodeLocation = async (location: string): Promise<GeocodeResult> => {
 
   useEffect(() => {
     const fetchVouchers = async () => {
-        if (!selectedBranch) return;
+      if (!selectedBranch || !isFocused) return;
 
-        try {
-            let fetchedVouchers;
-            if (selectedBranch.entityType === 'Business_register_business') {
-                console.log('Fetching vouchers for Registration ID:', selectedBranch.registrationId);
-                fetchedVouchers = await getAllVouchers(selectedBranch.registrationId);
-            } else if (selectedBranch.entityType === 'Outlet') {
-                console.log('Fetching vouchers for Outlet ID:', selectedBranch.outletId);
-                fetchedVouchers = await getAllVouchers(undefined, selectedBranch.outletId);
-            }
-            console.log('Fetched Vouchers:', fetchedVouchers);
-            setVouchers(fetchedVouchers?.vouchers || []);
-        } catch (error) {
-            console.error('Error fetching vouchers:', error);
+      try {
+        let fetchedVouchers;
+        if (selectedBranch.entityType === 'Business_register_business') {
+          console.log('Fetching vouchers for Registration ID:', selectedBranch.registrationId);
+          fetchedVouchers = await getAllVouchers(selectedBranch.registrationId);
+        } else if (selectedBranch.entityType === 'Outlet') {
+          console.log('Fetching vouchers for Outlet ID:', selectedBranch.outletId);
+          fetchedVouchers = await getAllVouchers(undefined, selectedBranch.outletId);
         }
+        console.log('Fetched Vouchers:', fetchedVouchers);
+        setVouchers(fetchedVouchers?.vouchers || []);
+      } catch (error) {
+        console.error('Error fetching vouchers:', error);
+      }
     };
 
     fetchVouchers();
-}, [selectedBranch]);
+  }, [selectedBranch, isFocused]);
 
 const renderShopBox = () => {
     if (!selectedBranch) return null;
