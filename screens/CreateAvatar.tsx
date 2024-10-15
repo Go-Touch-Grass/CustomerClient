@@ -15,7 +15,12 @@ const CreateAvatar = ({ route, navigation }) => {
     shirt: null,
     bottom: null,
   });
-  const [items, setItems] = useState<Item[]>([]);
+  const [items, setItems] = useState<Record<ItemType, Item[]>>({
+    [ItemType.BASE]: [],
+    [ItemType.HAT]: [],
+    [ItemType.SHIRT]: [],
+    [ItemType.BOTTOM]: [],
+  });
   const [selectedCategory, setSelectedCategory] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -26,8 +31,8 @@ const CreateAvatar = ({ route, navigation }) => {
   }, []);
 
   useEffect(() => {
-    if (items.length > 0) {
-      const baseItem = items.find((item) => item.type === ItemType.BASE && item.id === 1);
+    if (items[ItemType.BASE].length > 0) {
+      const baseItem = items[ItemType.BASE].find((item) => item.id === 1);
       if (baseItem) {
         // Set the base item, but don't include it in the customization state
         // as customers shouldn't be able to change it
@@ -87,7 +92,7 @@ const CreateAvatar = ({ route, navigation }) => {
   };
 
   const renderWardrobeItems = () => {
-    const categoryItems = items.filter((item) => item.type === selectedCategory);
+    const categoryItems = items[selectedCategory as ItemType] || [];
     return (
       <ScrollView horizontal>
         {categoryItems.map((item) => (

@@ -46,12 +46,12 @@ export const purchaseVouchers = async (voucherId: string): Promise<VoucherPurcha
         throw new Error('No token found');
     }
     try {
-        const response = await axiosInstance.post<VoucherPurchaseResponse>('/auth/vouchers', { voucherId },
+        const response = await axiosInstance.post<VoucherPurchaseResponse>('/api/inventory/vouchers/purchase', { voucherId },
             {
                 headers: { Authorization: `Bearer ${token}` },
             }
         );
-        return response.data; // Return the entire response
+        return response.data;
     } catch (error) {
         console.error('Error purchasing voucher:', error);
         throw error;
@@ -66,10 +66,10 @@ export const redeemVoucher = async (transactionId: number) => {
 
     try {
         const response = await axiosInstance.put<VoucherResponse>(
-            `/auth/voucher/redeem/${transactionId}`,
-            {}, // Send an empty object as the request body if needed
+            `/api/inventory/vouchers/redeem/${transactionId}`,
+            {},
             {
-                headers: { Authorization: `Bearer ${token}` }, // Correctly set headers here
+                headers: { Authorization: `Bearer ${token}` },
             }
         );
         return response.data;
@@ -79,18 +79,18 @@ export const redeemVoucher = async (transactionId: number) => {
     }
 };
 
-export const getCustomerVouchers = async (): Promise<VoucherResponse> => { // Change return type here
+export const getCustomerVouchers = async (): Promise<VoucherResponse> => {
     const token = await getToken();
     if (!token) {
         throw new Error('No token found');
     }
 
     try {
-        const response = await axiosInstance.get<VoucherResponse>('/auth/view_voucher_inventory', {
+        const response = await axiosInstance.get<VoucherResponse>('/api/inventory/vouchers', {
             headers: { Authorization: `Bearer ${token}` },
         });
 
-        return response.data; // Return the entire response
+        return response.data;
     } catch (error) {
         console.error('Error fetching customer vouchers:', error);
         throw error;

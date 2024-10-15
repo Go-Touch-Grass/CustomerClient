@@ -9,12 +9,16 @@ export enum ItemType {
   BOTTOM = 'bottom'
 }
 
-// Update the Item interface to match the backend entity
+// Update the Item interface to match the backend response
 export interface Item {
   id: number;
   name: string;
   type: ItemType;
   filepath: string;
+  scale: number;
+  xOffset: number;
+  yOffset: number;
+  isOwned: boolean;
 }
 
 // Update the AvatarInfo interface to match the backend response
@@ -121,21 +125,23 @@ export const getAvatarByCustomerId = async (customerId: number): Promise<AvatarI
   }
 };
 
-// Update the getItems function to use the new Item interface
-export const getItems = async (): Promise<Item[]> => {
+// Update the getItems function to match the new backend response
+export const getItems = async (): Promise<Record<ItemType, Item[]>> => {
   const token = await getToken();
   if (!token) {
     throw new Error('No token found');
   }
 
   try {
-    const response = await axiosInstance.get('/api/items', {
+    const response = await axiosInstance.get('/api/inventory/items', {
       headers: { Authorization: `Bearer ${token}` },
     });
-    if (!Array.isArray(response.data)) {
+    
+    if (!response.data || !response.data.items) {
       throw new Error('Invalid response format');
     }
-    return response.data;
+    
+    return response.data.items;
   } catch (error: any) {
     console.error('Error fetching items:', error);
     throw handleApiError(error);

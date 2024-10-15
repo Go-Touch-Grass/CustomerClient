@@ -11,7 +11,12 @@ const EditAvatar = () => {
   const [avatar, setAvatar] = useState<AvatarInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [items, setItems] = useState<Item[]>([]);
+  const [items, setItems] = useState<Record<ItemType, Item[]>>({
+    [ItemType.BASE]: [],
+    [ItemType.HAT]: [],
+    [ItemType.SHIRT]: [],
+    [ItemType.BOTTOM]: [],
+  });
   const [selectedCategory, setSelectedCategory] = useState('');
   const [customization, setCustomization] = useState<{
     [ItemType.HAT]: Item | null;
@@ -95,7 +100,7 @@ const EditAvatar = () => {
   };
 
   const renderWardrobeItems = () => {
-    const categoryItems = items.filter((item) => item.type === selectedCategory);
+    const categoryItems = items[selectedCategory as ItemType] || [];
 
     return (
       <ScrollView horizontal>
@@ -170,4 +175,3 @@ const EditAvatar = () => {
 };
 
 export default EditAvatar;
-
