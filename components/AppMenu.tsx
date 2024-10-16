@@ -59,7 +59,7 @@ const AppMenu: React.FC<AppMenuProps> = ({ visible, menuAnimation, toggleMenu, n
             <Text style={homeStyles.menuItemText}>Edit Avatar</Text>
           </TouchableOpacity>
           <TouchableOpacity style={homeStyles.menuItem} onPress={() => navigateTo('Store')}>
-            <Text style={homeStyles.menuItemText}>Store</Text>
+            <Text style={homeStyles.menuItemText}>Buy Gems</Text>
           </TouchableOpacity>
           <TouchableOpacity style={homeStyles.menuItem} onPress={() => navigateTo('Social')}>
             <Text style={homeStyles.menuItemText}>Leaderboard & Friends</Text>

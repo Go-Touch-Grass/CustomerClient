@@ -452,8 +452,8 @@ const renderShopBox = () => {
             <ScrollView style={BusinessAvatarShopboxStyles.vouchersList}>
                 {vouchers.length > 0 ? (
                     vouchers.map((voucher, index) => {
-                        const discountedPrice = 10 * (voucher.price - (voucher.price * voucher.discount / 100));
-                        const originalPrice = 10 * (voucher.price);
+                        const originalPrice = Math.round(10 * voucher.price);
+                        const discountedPrice = Math.round(originalPrice * (1 - voucher.discount / 100));
                         return (
                             <TouchableOpacity 
                                 key={index} 
@@ -521,7 +521,7 @@ const renderShopBox = () => {
 
                         {selectedVoucher && (
                             <Text style={BusinessAvatarShopboxStyles.totalCost}>
-                                Total Cost: {(10 * (selectedVoucher.price - (selectedVoucher.price * selectedVoucher.discount / 100)) * quantity)} Gems
+                                Total Cost: {Math.round(10 * selectedVoucher.price * (1 - selectedVoucher.discount / 100) * quantity)} Gems
                             </Text>
                         )}
 
