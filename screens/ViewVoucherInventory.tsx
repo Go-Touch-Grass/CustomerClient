@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { StyledContainer, InnerContainer, PageTitle } from '../styles/commonStyles';
 import { Colors } from '../styles/commonStyles';
 import { StyleSheet } from 'react-native';
+import { IP_ADDRESS } from '@env';
 
 interface Voucher {
     listing_id: number;
@@ -79,7 +80,7 @@ const ViewVoucherInventory: React.FC = () => {
         return (
             <TouchableOpacity onPress={() => handleVoucherClick(item.listing_id)} style={styles.voucherContainer}>
                 {item.voucherImage && (
-                    <Image source={{ uri: `http://192.168.129.60:8080/${item.voucherImage}` }} style={styles.voucherImage} />
+                    <Image source={{ uri: `http://${IP_ADDRESS}:8080/${item.voucherImage}` }} style={styles.voucherImage} />
                 )}
                 <Text style={styles.voucherName}>{`Voucher ${index + 1}: ${item.name || 'No Name'}`}</Text>
                 {isExpanded && (
