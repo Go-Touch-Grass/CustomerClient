@@ -20,7 +20,7 @@ import { DeviceMotion } from 'expo-sensors';
 import AppMenu from '../components/AppMenu';
 import { getAllSubscription, SubscriptionInfo, BranchInfo } from '../api/businessApi';
 import axios from 'axios';
-import {GEOAPIFY_API_KEY} from '@env';
+import { GEOAPIFY_API_KEY } from '@env';
 import { Voucher, getAllVouchers, purchaseVouchers } from '../api/voucherApi';
 import { useIsFocused } from '@react-navigation/native';
 import { IP_ADDRESS } from '@env';
@@ -166,12 +166,12 @@ const Home: React.FC = () => {
     }
   };
 
-const geocodeLocation = async (location: string): Promise<GeocodeResult> => {
-  const url = `https://api.geoapify.com/v1/geocode/search?text=${encodeURIComponent(location)}&apiKey=${GEOAPIFY_API_KEY}`;
-  console.log(`Geocoding request to: ${url}`); // Log the request URL
-  
-  try {
-    const response = await axios.get(url);
+  const geocodeLocation = async (location: string): Promise<GeocodeResult> => {
+    const url = `https://api.geoapify.com/v1/geocode/search?text=${encodeURIComponent(location)}&apiKey=${GEOAPIFY_API_KEY}`;
+    console.log(`Geocoding request to: ${url}`); // Log the request URL
+
+    try {
+      const response = await axios.get(url);
 
       // Check if response data has features and is not empty
       if (response.data && response.data.features && response.data.features.length > 0) {
@@ -303,7 +303,7 @@ const geocodeLocation = async (location: string): Promise<GeocodeResult> => {
       };
       setRegion(newRegion);
       mapRef.current?.animateToRegion(newRegion, 1000);
-      
+
       // Fetch updated subscriptions
       await fetchSubscriptions();
     }
@@ -315,7 +315,7 @@ const geocodeLocation = async (location: string): Promise<GeocodeResult> => {
   });
 
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
-    const R = 6371e3; 
+    const R = 6371e3;
     const φ1 = (lat1 * Math.PI) / 180;
     const φ2 = (lat2 * Math.PI) / 180;
     const Δφ = ((lat2 - lat1) * Math.PI) / 180;
@@ -332,30 +332,30 @@ const geocodeLocation = async (location: string): Promise<GeocodeResult> => {
 
   const renderSubscriptionMarkers = () => {
     return subscriptions.map((subscription) => {
-        const { branch } = subscription;
-        if (!branch || !branch.coordinates) return null; 
+      const { branch } = subscription;
+      if (!branch || !branch.coordinates) return null;
 
-        const { latitude, longitude } = branch.coordinates;
+      const { latitude, longitude } = branch.coordinates;
 
-        if (latitude === undefined || longitude === undefined) return null; 
+      if (latitude === undefined || longitude === undefined) return null;
 
-        const avatar = branch.avatar as AvatarInfo;
+      const avatar = branch.avatar as AvatarInfo;
 
-        const handleMarkerPress = () => {
-            const { coordinates } = branch;
-            console.log('Branch coordinates:', coordinates);
+      const handleMarkerPress = () => {
+        const { coordinates } = branch;
+        console.log('Branch coordinates:', coordinates);
 
-            if (!coordinates) {
-                console.warn('Branch coordinates are not available.');
-                return; 
-            }
+        if (!coordinates) {
+          console.warn('Branch coordinates are not available.');
+          return;
+        }
 
-            const { latitude, longitude } = coordinates;
+        const { latitude, longitude } = coordinates;
 
-            if (!userLocation) {
-                console.warn('User location not available.');
-                return;
-            }
+        if (!userLocation) {
+          console.warn('User location not available.');
+          return;
+        }
 
         const userLatitude = userLocation.coords.latitude;
         const userLongitude = userLocation.coords.longitude;
@@ -367,37 +367,37 @@ const geocodeLocation = async (location: string): Promise<GeocodeResult> => {
           longitude
         );
 
-            if (distanceToAvatar <= RADIUS_THRESHOLD) {
-                setSelectedBranch(branch);
-                setIsShopOpen(true);
-            } else {
-                navigation.navigate('BusinessAvatarInfo', {
-                    entityType: branch.entityType,
-                    entityName: branch.entityType === 'Business_register_business' ? branch.entityName : branch.outletName,
-                    location: branch.location,
-                    category: branch.entityType === 'Business_register_business' ? branch.category : null,
-                    description: branch.entityType === 'Outlet' ? branch.description : null,
-                    coordinates: {
-                      latitude: branch.coordinates?.latitude,
-                      longitude: branch.coordinates?.longitude
-                    }
-                });
+        if (distanceToAvatar <= RADIUS_THRESHOLD) {
+          setSelectedBranch(branch);
+          setIsShopOpen(true);
+        } else {
+          navigation.navigate('BusinessAvatarInfo', {
+            entityType: branch.entityType,
+            entityName: branch.entityType === 'Business_register_business' ? branch.entityName : branch.outletName,
+            location: branch.location,
+            category: branch.entityType === 'Business_register_business' ? branch.category : null,
+            description: branch.entityType === 'Outlet' ? branch.description : null,
+            coordinates: {
+              latitude: branch.coordinates?.latitude,
+              longitude: branch.coordinates?.longitude
             }
-        };
+          });
+        }
+      };
 
-        return (
-            <Marker
-                coordinate={{
-                    latitude, 
-                    longitude, 
-                }}
-                onPress={handleMarkerPress} 
-            >
-                <View style={styles.avatarContainer}>
-                    {avatar.base && <Image source={{ uri: avatar.base.filepath }} style={styles.base} />}
-                    {avatar.hat && <Image source={{ uri: avatar.hat.filepath }} style={styles.hat} />}
-                    {avatar.shirt && <Image source={{ uri: avatar.shirt.filepath }} style={styles.upperWear} />}
-                    {avatar.bottom && <Image source={{ uri: avatar.bottom.filepath }} style={styles.lowerWear} />}
+      return (
+        <Marker
+          coordinate={{
+            latitude,
+            longitude,
+          }}
+          onPress={handleMarkerPress}
+        >
+          <View style={styles.avatarContainer}>
+            {avatar.base && <Image source={{ uri: avatar.base.filepath }} style={styles.base} />}
+            {avatar.hat && <Image source={{ uri: avatar.hat.filepath }} style={styles.hat} />}
+            {avatar.shirt && <Image source={{ uri: avatar.shirt.filepath }} style={styles.upperWear} />}
+            {avatar.bottom && <Image source={{ uri: avatar.bottom.filepath }} style={styles.lowerWear} />}
 
             {/* Render the entity name below the avatar */}
             <Text style={homeStyles.entityNameText} numberOfLines={2}>
@@ -434,149 +434,149 @@ const geocodeLocation = async (location: string): Promise<GeocodeResult> => {
     fetchVouchers();
   }, [selectedBranch, isFocused]);
 
-const renderShopBox = () => {
+  const renderShopBox = () => {
     if (!selectedBranch) return null;
 
     const entityName = selectedBranch.entityType === 'Business_register_business'
-        ? selectedBranch.entityName
-        : selectedBranch.outletName;
+      ? selectedBranch.entityName
+      : selectedBranch.outletName;
 
     return (
-        <View style={BusinessAvatarShopboxStyles.shopBox}>
-            <Text style={BusinessAvatarShopboxStyles.shopTitle}>{`${entityName}'s Shop`}</Text>
+      <View style={BusinessAvatarShopboxStyles.shopBox}>
+        <Text style={BusinessAvatarShopboxStyles.shopTitle}>{`${entityName}'s Shop`}</Text>
 
-            <TouchableOpacity onPress={() => setIsShopOpen(false)} style={BusinessAvatarShopboxStyles.backButton}>
-                <Ionicons name="arrow-back" size={24} color={Colors.primary} />
-                <Text style={BusinessAvatarShopboxStyles.backButtonText}>{t('Back')}</Text>
-            </TouchableOpacity>
+        <TouchableOpacity onPress={() => setIsShopOpen(false)} style={BusinessAvatarShopboxStyles.backButton}>
+          <Ionicons name="arrow-back" size={24} color={Colors.primary} />
+          <Text style={BusinessAvatarShopboxStyles.backButtonText}>{t('Back')}</Text>
+        </TouchableOpacity>
 
-            <ScrollView style={BusinessAvatarShopboxStyles.vouchersList}>
-                {vouchers.length > 0 ? (
-                    vouchers.map((voucher, index) => {
-                        const originalPrice = Math.round(10 * voucher.price);
-                        const discountedPrice = Math.round(originalPrice * (1 - voucher.discount / 100));
-                        return (
-                            <TouchableOpacity 
-                                key={index} 
-                                onPress={() => {
-                                    setSelectedVoucher(voucher);
-                                    setQuantity(1);
-                                    setModalVisible(true);
-                                }}
-                                style={BusinessAvatarShopboxStyles.voucherItem}
-                            >
-                                <Image
-                                    source={voucher.voucherImage ? { uri: `http://${IP_ADDRESS}:8080/${voucher.voucherImage}` } : require('../assets/noimage.jpg')}
-                                    style={BusinessAvatarShopboxStyles.voucherImage}
-                                />
-                                <View style={BusinessAvatarShopboxStyles.voucherDetails}>
-                                    <Text style={BusinessAvatarShopboxStyles.voucherName}>{voucher.name}</Text>
-                                    <View style={BusinessAvatarShopboxStyles.priceContainer}>
-                                        <Text style={BusinessAvatarShopboxStyles.originalPrice}>{originalPrice} Gems</Text>
-                                        <Text style={BusinessAvatarShopboxStyles.discountedPrice}>{discountedPrice} Gems</Text>
-                                    </View>
-                                    <View style={BusinessAvatarShopboxStyles.discountBadge}>
-                                        <Text style={BusinessAvatarShopboxStyles.discountText}>{voucher.discount}% OFF</Text>
-                                    </View>
-                                </View>
-                                {voucher.rewardItem && (
-                                    <Image
-                                        source={{ uri: `${voucher.rewardItem.filepath}` }}
-                                        style={BusinessAvatarShopboxStyles.rewardItemImage}
-                                    />
-                                )}
-                            </TouchableOpacity>
-                        );
-                    })
-                ) : (
-                    <Text style={BusinessAvatarShopboxStyles.noVouchersText}>{t('No vouchers available')}</Text>
-                )}
-            </ScrollView>
-
-            {/* Modal for Purchasing Vouchers */}
-            <Modal
-                transparent={true}
-                visible={modalVisible}
-                animationType="slide"
-                onRequestClose={() => setModalVisible(false)}
-            >
-                <View style={BusinessAvatarShopboxStyles.modalOverlay}>
-                    <View style={BusinessAvatarShopboxStyles.modalContainer}>
-                        <Text style={BusinessAvatarShopboxStyles.modalTitle}>
-                            Purchase {selectedVoucher?.name}
-                        </Text>
-
-                        {/* Quantity Selection */}
-                        <View style={BusinessAvatarShopboxStyles.quantityContainer}>
-                            <TouchableOpacity onPress={() => setQuantity(prev => Math.max(1, prev - 1))} style={BusinessAvatarShopboxStyles.quantityButton}>
-                                <Text style={BusinessAvatarShopboxStyles.quantityButtonText}>-</Text>
-                            </TouchableOpacity>
-                            <TextInput
-                                style={BusinessAvatarShopboxStyles.quantityInput}
-                                value={String(quantity)}
-                                onChangeText={text => setQuantity(Number(text))}
-                                keyboardType="numeric"
-                            />
-                            <TouchableOpacity onPress={() => setQuantity(prev => prev + 1)} style={BusinessAvatarShopboxStyles.quantityButton}>
-                                <Text style={BusinessAvatarShopboxStyles.quantityButtonText}>+</Text>
-                            </TouchableOpacity>
-                        </View>
-
-                        {selectedVoucher && (
-                            <Text style={BusinessAvatarShopboxStyles.totalCost}>
-                                Total Cost: {Math.round(10 * selectedVoucher.price * (1 - selectedVoucher.discount / 100) * quantity)} Gems
-                            </Text>
-                        )}
-
-                        <TouchableOpacity
-                            onPress={async () => {
-                                try {
-                                    if (!selectedVoucher) {
-                                        console.error('No voucher selected');
-                                        return;
-                                    }
-                                    if (quantity > 1) {
-                                      for (let i = 0; i < quantity; i++){
-                                        await purchaseVouchers(String(selectedVoucher.listing_id));
-                                      }
-                                      setSuccessMessage('Your Voucher has been added to your Inventory!');
-                                      setModalVisible(false);
-                                    } else {
-                                      await purchaseVouchers(String(selectedVoucher.listing_id));
-                                      setSuccessMessage('Your Voucher has been added to your Inventory!');
-                                      setModalVisible(false);
-                                    }
-                                    
-                                } catch (error) {
-                                    console.error('Error purchasing vouchers:', error);
-                                }
-                            }}
-                            style={BusinessAvatarShopboxStyles.confirmButton}
-                        >
-                            <Text style={BusinessAvatarShopboxStyles.confirmButtonText}>Confirm Purchase</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={() => setModalVisible(false)} style={BusinessAvatarShopboxStyles.cancelButton}>
-                            <Text style={BusinessAvatarShopboxStyles.cancelButtonText}>Cancel</Text>
-                        </TouchableOpacity>
+        <ScrollView style={BusinessAvatarShopboxStyles.vouchersList}>
+          {vouchers.length > 0 ? (
+            vouchers.map((voucher, index) => {
+              const originalPrice = Math.round(10 * voucher.price);
+              const discountedPrice = Math.round(originalPrice * (1 - voucher.discount / 100));
+              return (
+                <TouchableOpacity
+                  key={index}
+                  onPress={() => {
+                    setSelectedVoucher(voucher);
+                    setQuantity(1);
+                    setModalVisible(true);
+                  }}
+                  style={BusinessAvatarShopboxStyles.voucherItem}
+                >
+                  <Image
+                    source={voucher.voucherImage ? { uri: `http://${IP_ADDRESS}:8080/${voucher.voucherImage}` } : require('../assets/noimage.jpg')}
+                    style={BusinessAvatarShopboxStyles.voucherImage}
+                  />
+                  <View style={BusinessAvatarShopboxStyles.voucherDetails}>
+                    <Text style={BusinessAvatarShopboxStyles.voucherName}>{voucher.name}</Text>
+                    <View style={BusinessAvatarShopboxStyles.priceContainer}>
+                      <Text style={BusinessAvatarShopboxStyles.originalPrice}>{originalPrice} Gems</Text>
+                      <Text style={BusinessAvatarShopboxStyles.discountedPrice}>{discountedPrice} Gems</Text>
                     </View>
-                </View>
-            </Modal>
-            {successMessage && (
-                <View style={BusinessAvatarShopboxStyles.successMessageContainer}>
-                    <Text style={BusinessAvatarShopboxStyles.successMessageText}>{successMessage}</Text>
-                </View>
-            )}
-        </View>
+                    <View style={BusinessAvatarShopboxStyles.discountBadge}>
+                      <Text style={BusinessAvatarShopboxStyles.discountText}>{voucher.discount}% OFF</Text>
+                    </View>
+                  </View>
+                  {voucher.rewardItem && (
+                    <Image
+                      source={{ uri: `${voucher.rewardItem.filepath}` }}
+                      style={BusinessAvatarShopboxStyles.rewardItemImage}
+                    />
+                  )}
+                </TouchableOpacity>
+              );
+            })
+          ) : (
+            <Text style={BusinessAvatarShopboxStyles.noVouchersText}>{t('No vouchers available')}</Text>
+          )}
+        </ScrollView>
+
+        {/* Modal for Purchasing Vouchers */}
+        <Modal
+          transparent={true}
+          visible={modalVisible}
+          animationType="slide"
+          onRequestClose={() => setModalVisible(false)}
+        >
+          <View style={BusinessAvatarShopboxStyles.modalOverlay}>
+            <View style={BusinessAvatarShopboxStyles.modalContainer}>
+              <Text style={BusinessAvatarShopboxStyles.modalTitle}>
+                Purchase {selectedVoucher?.name}
+              </Text>
+
+              {/* Quantity Selection */}
+              <View style={BusinessAvatarShopboxStyles.quantityContainer}>
+                <TouchableOpacity onPress={() => setQuantity(prev => Math.max(1, prev - 1))} style={BusinessAvatarShopboxStyles.quantityButton}>
+                  <Text style={BusinessAvatarShopboxStyles.quantityButtonText}>-</Text>
+                </TouchableOpacity>
+                <TextInput
+                  style={BusinessAvatarShopboxStyles.quantityInput}
+                  value={String(quantity)}
+                  onChangeText={text => setQuantity(Number(text))}
+                  keyboardType="numeric"
+                />
+                <TouchableOpacity onPress={() => setQuantity(prev => prev + 1)} style={BusinessAvatarShopboxStyles.quantityButton}>
+                  <Text style={BusinessAvatarShopboxStyles.quantityButtonText}>+</Text>
+                </TouchableOpacity>
+              </View>
+
+              {selectedVoucher && (
+                <Text style={BusinessAvatarShopboxStyles.totalCost}>
+                  Total Cost: {Math.round(10 * selectedVoucher.price * (1 - selectedVoucher.discount / 100) * quantity)} Gems
+                </Text>
+              )}
+
+              <TouchableOpacity
+                onPress={async () => {
+                  try {
+                    if (!selectedVoucher) {
+                      console.error('No voucher selected');
+                      return;
+                    }
+                    if (quantity > 1) {
+                      for (let i = 0; i < quantity; i++) {
+                        await purchaseVouchers(String(selectedVoucher.listing_id));
+                      }
+                      setSuccessMessage('Your Voucher has been added to your Inventory!');
+                      setModalVisible(false);
+                    } else {
+                      await purchaseVouchers(String(selectedVoucher.listing_id));
+                      setSuccessMessage('Your Voucher has been added to your Inventory!');
+                      setModalVisible(false);
+                    }
+
+                  } catch (error) {
+                    console.error('Error purchasing vouchers:', error);
+                  }
+                }}
+                style={BusinessAvatarShopboxStyles.confirmButton}
+              >
+                <Text style={BusinessAvatarShopboxStyles.confirmButtonText}>Confirm Purchase</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setModalVisible(false)} style={BusinessAvatarShopboxStyles.cancelButton}>
+                <Text style={BusinessAvatarShopboxStyles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+        {successMessage && (
+          <View style={BusinessAvatarShopboxStyles.successMessageContainer}>
+            <Text style={BusinessAvatarShopboxStyles.successMessageText}>{successMessage}</Text>
+          </View>
+        )}
+      </View>
     );
-};
+  };
 
   useEffect(() => {
     if (successMessage) {
-        const timer = setTimeout(() => {
-            setSuccessMessage('');
-        }, 3000); // Change this duration as needed (3000ms = 3 seconds)
+      const timer = setTimeout(() => {
+        setSuccessMessage('');
+      }, 3000); // Change this duration as needed (3000ms = 3 seconds)
 
-        return () => clearTimeout(timer); // Cleanup the timer
+      return () => clearTimeout(timer); // Cleanup the timer
     }
   }, [successMessage]);
 

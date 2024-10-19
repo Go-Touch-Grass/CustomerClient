@@ -12,7 +12,7 @@ export interface Voucher {
     voucherImage?: string;
     created_at: Date;
     updated_at: Date;
-    redeemed: boolean;
+    redeemed: "yes" | "pending" | "no";
     expirationDate?: string;
     voucher_transaction_id: number;
     used: boolean; // Add the used attribute
@@ -22,6 +22,7 @@ export interface Voucher {
         type: string;
         filepath: string;
     };
+    quantity: number;
 }
 
 // Define the response interface
@@ -34,7 +35,7 @@ interface VoucherResponse {
 export interface VoucherPurchaseResponse {
     message: string;
     voucher: {
-        listing_id: number; 
+        listing_id: number;
         name: string;
         description: string;
         original_price: number;
@@ -70,7 +71,7 @@ export const purchaseVouchers = async (voucherId: string): Promise<VoucherPurcha
     }
 };
 
-export const redeemVoucher = async (transactionId: number) => {
+export const redeemVoucher = async (voucherId: number) => {
     const token = await getToken();
     if (!token) {
         throw new Error('No token found');
@@ -78,8 +79,8 @@ export const redeemVoucher = async (transactionId: number) => {
 
     try {
         const response = await axiosInstance.put<VoucherResponse>(
-            `/api/inventory/vouchers/redeem/${transactionId}`,
-            {},
+            `/api/inventory/vouchers/redeem/${voucherId}`,
+            { voucherId },
             {
                 headers: { Authorization: `Bearer ${token}` },
             }
@@ -110,26 +111,26 @@ export const getCustomerVouchers = async (): Promise<VoucherResponse> => {
 };
 
 export const getAllVouchers = async (registration_id?: number, outlet_id?: number, searchTerm?: string): Promise<VoucherResponse> => {
-    
+
     const token = await getToken();
     if (!token) {
-      throw new Error('No token found');
+        throw new Error('No token found');
     }
-  
+
     try {
-      const params: any = {};
-      if (registration_id) params.registration_id = registration_id;
-      if (outlet_id) params.outlet_id = outlet_id;
-      if (searchTerm) params.searchTerm = searchTerm;
-  
-      const response = await axiosInstance.get<VoucherResponse>('/api/business/vouchers', {
-        headers: { Authorization: `Bearer ${token}` },
-        params, // Pass query parameters to the request
-      });
-  
-      return response.data; // Return the entire response
+        const params: any = {};
+        if (registration_id) params.registration_id = registration_id;
+        if (outlet_id) params.outlet_id = outlet_id;
+        if (searchTerm) params.searchTerm = searchTerm;
+
+        const response = await axiosInstance.get<VoucherResponse>('/api/business/vouchers', {
+            headers: { Authorization: `Bearer ${token}` },
+            params, // Pass query parameters to the request
+        });
+
+        return response.data; // Return the entire response
     } catch (error) {
-      console.error('Error fetching vouchers:', error);
-      throw error;
+        console.error('Error fetching vouchers:', error);
+        throw error;
     }
-  };
+};

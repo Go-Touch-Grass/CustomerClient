@@ -1,14 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
-import { getCustomerVouchers, redeemVoucher } from '../api/voucherApi'; // Ensure this path is correct
-import { useNavigation } from '@react-navigation/native'; // Import for navigation
+import { View, Text, Image, FlatList, ActivityIndicator, TouchableOpacity, StyleSheet } from 'react-native';
+import { getCustomerVouchers, redeemVoucher } from '../api/voucherApi';
+import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import { StyledContainer, InnerContainer, PageTitle } from '../styles/commonStyles';
-import { Colors } from '../styles/commonStyles';
-import { StyleSheet } from 'react-native';
+import { StyledContainer, InnerContainer, PageTitle, Colors } from '../styles/commonStyles';
 import { IP_ADDRESS } from '@env';
 
-interface Voucher {
+export interface Voucher {
     listing_id: number;
     name: string;
     description: string;
@@ -17,9 +15,17 @@ interface Voucher {
     voucherImage?: string;
     created_at: Date;
     updated_at: Date;
-    redeemed: boolean;
+    redeemed: "yes" | "pending" | "no";
     expirationDate?: string;
     voucher_transaction_id: number;
+    used: boolean; // Add the used attribute
+    rewardItem?: {
+        id: number;
+        name: string;
+        type: string;
+        filepath: string;
+    };
+    quantity: number;
 }
 
 interface VoucherResponse {
@@ -30,17 +36,34 @@ interface VoucherResponse {
 const ViewVoucherInventory: React.FC = () => {
     const [vouchers, setVouchers] = useState<Voucher[]>([]);
     const [loading, setLoading] = useState(true);
-    const [expandedVoucher, setExpandedVoucher] = useState<number | null>(null); // Track which voucher is expanded
-    const navigation = useNavigation(); // Use navigation hook
+    const [expandedVoucher, setExpandedVoucher] = useState<number | null>(null);
+    const [error, setError] = useState<string | null>(null);
+    const navigation = useNavigation();
 
+    // Fetch Vouchers
     useEffect(() => {
         const fetchVouchers = async () => {
+            setError(null); // Reset error state before fetching
             try {
-                const fetchedVouchersResponse: VoucherResponse = await getCustomerVouchers();
-                console.log('Fetched vouchers:', fetchedVouchersResponse); // Log the response
-                setVouchers(fetchedVouchersResponse.vouchers);
-            } catch (error) {
-                console.error('Error fetching customer vouchers:', error);
+                const response: VoucherResponse = await getCustomerVouchers();
+
+                if (response.status !== 200) throw new Error('Failed to fetch vouchers');
+
+                // Filter and map valid vouchers, excluding those with quantity 0
+                const validVouchers = response.vouchers
+                    .filter(voucher => voucher.listing_id !== undefined && voucher.quantity > 0)
+                    .map(voucher => ({
+                        ...voucher,
+                        redeemed: voucher.redeemed || "no", // Ensure there's a valid default
+                        expirationDate: voucher.expirationDate || new Date().toISOString(),
+                        voucher_transaction_id: voucher.voucher_transaction_id || 0,
+                        quantity: voucher.quantity,
+                    }));
+
+                setVouchers(validVouchers);
+            } catch (err) {
+                console.error('Error fetching customer vouchers:', err);
+                setError('Failed to fetch vouchers. Please try again later.');
             } finally {
                 setLoading(false);
             }
@@ -49,31 +72,40 @@ const ViewVoucherInventory: React.FC = () => {
         fetchVouchers();
     }, []);
 
+    // Toggle voucher details
     const handleVoucherClick = (listing_id: number) => {
         setExpandedVoucher(expandedVoucher === listing_id ? null : listing_id);
     };
 
+    // Redeem a voucher
     const handleRedeem = async (voucher: Voucher) => {
         try {
-            const transactionId = voucher.voucher_transaction_id;
-            if (!transactionId) {
-                console.error('Voucher transaction ID is missing');
+            // Ensure the voucher can be redeemed
+            if (voucher.redeemed === "pending") {
+                console.warn('This voucher redemption is pending.');
                 return;
             }
 
-            await redeemVoucher(transactionId);
+            console.log(`Attempting to redeem voucher with ID: ${voucher.listing_id}`);
 
-            setVouchers(prevVouchers => prevVouchers.map(v =>
-                v.voucher_transaction_id === transactionId ? { ...v, redeemed: true } : v
-            ));
+            // Redeem the voucher - Pass the correct voucher ID
+            await redeemVoucher(voucher.listing_id);
 
-            console.log(`Voucher transaction redeemed: ${transactionId}`);
-        } catch (error) {
-            console.error('Failed to redeem voucher transaction:', error);
+            // Update local state to reflect redemption as pending
+            setVouchers(prevVouchers =>
+                prevVouchers.map(v =>
+                    v.listing_id === voucher.listing_id ? { ...v, redeemed: "pending" } : v
+                )
+            );
+            console.log(`Voucher redemption set to pending: ${voucher.listing_id}`);
+        } catch (err) {
+            console.error('Error redeeming voucher:', err);
+            setError('Failed to redeem voucher. Please try again later.');
         }
     };
 
-    const renderVoucher = ({ item, index }: { item: Voucher; index: number }) => {
+    // Render a single voucher
+    const renderVoucher = ({ item }: { item: Voucher }) => {
         const isExpanded = expandedVoucher === item.listing_id;
         const isExpired = item.expirationDate ? new Date(item.expirationDate) < new Date() : false;
 
@@ -82,18 +114,28 @@ const ViewVoucherInventory: React.FC = () => {
                 {item.voucherImage && (
                     <Image source={{ uri: `http://${IP_ADDRESS}:8080/${item.voucherImage}` }} style={styles.voucherImage} />
                 )}
-                <Text style={styles.voucherName}>{`Voucher ${index + 1}: ${item.name || 'No Name'}`}</Text>
+                <Text style={styles.voucherName}>{`Voucher ${item.listing_id}: ${item.name || 'No Name'}`}</Text>
                 {isExpanded && (
                     <View style={styles.detailsContainer}>
                         <Text style={styles.voucherDescription}>{item.description || 'No Description'}</Text>
-                        <Text style={styles.voucherPrice}>Price: ${item.price}</Text>
-                        <Text style={styles.voucherDiscount}>Discount: {item.discount}%</Text>
-                        <Text style={styles.voucherDiscount}>Discounted price: ${(item.price * (100 - item.discount)) / 100}</Text>
-                        {item.expirationDate && (
-                            <Text style={styles.expirationDate}>Expiry Date: {new Date(item.expirationDate).toLocaleDateString()}</Text>
-                        )}
-                        {item.redeemed ? (
-                            <Text style={styles.redeemedText}>Redeemed</Text>
+                        <Text style={styles.voucherQuantity}>{`Quantity: ${item.quantity}`}</Text>
+                        <Text style={styles.voucherPrice}>{`Price: $${item.price}`}</Text>
+                        <Text style={styles.voucherDiscount}>{`Discount: ${item.discount}%`}</Text>
+                        <Text style={styles.voucherDiscount}>
+                            {`Discounted price: $${(item.price * (100 - item.discount)) / 100}`}
+                        </Text>
+                        <Text style={styles.expirationDate}>
+                            {`Expiry Date: ${item.expirationDate ? new Date(item.expirationDate).toLocaleDateString() : 'N/A'}`}
+                        </Text>
+                        {item.redeemed === "pending" ? (
+                            <Text style={styles.redeemedText}>Pending</Text>
+                        ) : item.redeemed === "yes" ? (
+                            <TouchableOpacity
+                                style={[styles.redeemButton]}
+                                onPress={() => handleRedeem(item)}
+                            >
+                                <Text style={styles.redeemButtonText}>Redeem</Text>
+                            </TouchableOpacity>
                         ) : isExpired ? (
                             <Text style={styles.redeemedText}>Expired</Text>
                         ) : (
@@ -111,6 +153,7 @@ const ViewVoucherInventory: React.FC = () => {
         );
     };
 
+    // Loading state
     if (loading) {
         return (
             <StyledContainer>
@@ -126,8 +169,9 @@ const ViewVoucherInventory: React.FC = () => {
             </TouchableOpacity>
             <InnerContainer>
                 <PageTitle>Voucher Inventory</PageTitle>
+                {error && <Text style={styles.errorText}>{error}</Text>}
                 {vouchers.length === 0 ? (
-                    <Text style={styles.emptyInventoryText}>Nothing in inventory</Text>
+                    <Text style={styles.emptyInventoryText}>No vouchers in inventory</Text>
                 ) : (
                     <FlatList
                         data={vouchers}
@@ -141,6 +185,7 @@ const ViewVoucherInventory: React.FC = () => {
     );
 };
 
+// Styles
 const styles = StyleSheet.create({
     backButton: {
         position: 'absolute',
@@ -153,6 +198,16 @@ const styles = StyleSheet.create({
         color: Colors.green,
         fontSize: 24,
     },
+    pendingText: {
+        color: 'orange',
+        fontWeight: 'bold',
+    },
+    errorText: {
+        color: 'red',
+        fontSize: 16,
+        marginBottom: 10,
+        textAlign: 'center',
+    },
     emptyInventoryText: {
         fontSize: 18,
         fontWeight: 'bold',
@@ -162,7 +217,7 @@ const styles = StyleSheet.create({
     },
     listContainer: {
         padding: 10,
-        width: '100%', // Ensure the list takes full width
+        width: '100%',
     },
     voucherContainer: {
         backgroundColor: Colors.white,
@@ -172,73 +227,64 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: Colors.secondary,
         shadowColor: Colors.black,
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
+        shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 2,
         elevation: 3,
-        width: 300, // Increase the width of each voucher container
-        alignSelf: 'center', // Center the voucher container
+        width: 300,
+        alignSelf: 'center',
     },
     voucherImage: {
         width: '100%',
-        height: 180, // Slightly increase the height for better proportion
+        height: 180,
         borderRadius: 10,
         marginBottom: 10,
     },
     voucherName: {
-        fontSize: 20, // Slightly increase font size
+        fontSize: 20,
         fontWeight: 'bold',
-        color: Colors.tertiary,
-        marginBottom: 8,
-    },
-    detailsContainer: {
-        marginTop: 12,
     },
     voucherDescription: {
         fontSize: 16,
-        marginBottom: 8,
-        color: Colors.tertiary,
+        marginVertical: 5,
+    },
+    detailsContainer: {
+        marginTop: 10,
+    },
+    voucherQuantity: {
+        fontSize: 16,
+        marginBottom: 5,
     },
     voucherPrice: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: Colors.tertiary,
-        marginBottom: 4,
+        fontSize: 16,
+        marginBottom: 5,
     },
     voucherDiscount: {
         fontSize: 16,
-        color: Colors.tertiary,
-        marginBottom: 4,
+        marginBottom: 5,
     },
     expirationDate: {
-        fontSize: 14,
-        color: Colors.tertiary,
-        marginTop: 8,
-        marginBottom: 8,
+        fontSize: 16,
+        marginBottom: 5,
     },
     redeemButton: {
         backgroundColor: Colors.green,
-        padding: 12,
-        borderRadius: 8,
+        borderRadius: 5,
+        padding: 10,
+        marginTop: 10,
         alignItems: 'center',
-        marginTop: 12,
     },
     redeemButtonText: {
         color: Colors.white,
         fontWeight: 'bold',
-        fontSize: 16,
     },
     redeemedText: {
-        color: Colors.green,
-        fontWeight: 'bold',
-        fontSize: 16,
-        marginTop: 8,
+        color: 'gray',
+        fontStyle: 'italic',
+        marginTop: 10,
     },
     disabledButton: {
-        backgroundColor: Colors.lightGray,
+        backgroundColor: 'lightgray',
     },
 });
 
