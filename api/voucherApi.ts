@@ -12,7 +12,7 @@ export interface Voucher {
     voucherImage?: string;
     created_at: Date;
     updated_at: Date;
-    redeemed: boolean;
+    redeemed: "yes" | "pending" | "no";
     expirationDate?: string;
     voucher_transaction_id: number;
     used: boolean; // Add the used attribute
@@ -25,6 +25,7 @@ export interface Voucher {
     groupPurchaseEnabled: boolean;
     groupSize: number;
     groupDiscount: number;
+    quantity: number;
 }
 
 // Define the response interface
@@ -73,7 +74,7 @@ export const purchaseVouchers = async (voucherId: string): Promise<VoucherPurcha
     }
 };
 
-export const redeemVoucher = async (transactionId: number) => {
+export const redeemVoucher = async (voucherId: number) => {
     const token = await getToken();
     if (!token) {
         throw new Error('No token found');
@@ -81,8 +82,8 @@ export const redeemVoucher = async (transactionId: number) => {
 
     try {
         const response = await axiosInstance.put<VoucherResponse>(
-            `/api/inventory/vouchers/redeem/${transactionId}`,
-            {},
+            `/api/inventory/vouchers/redeem/${voucherId}`,
+            { voucherId },
             {
                 headers: { Authorization: `Bearer ${token}` },
             }

@@ -6,7 +6,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { StyledContainer, InnerContainer, PageTitle, Colors } from '../styles/commonStyles';
 import { socialStyles } from '../styles/SocialStyles';
 import ProtectedRoute from '../components/ProtectedRoute';
-import { useTranslation } from 'react-i18next';
 
 import {
   getAllFriends,
@@ -24,7 +23,7 @@ interface Friend {
 }
 
 const Friends: React.FC = () => {
-  const { t } = useTranslation();
+  // const { t } = useTranslation();
   const navigation = useNavigation<StackNavigationProp<any>>();
   const [friends, setFriends] = useState<Friend[]>([]);
   const [friendRequests, setFriendRequests] = useState<Friend[]>([]);
@@ -45,12 +44,12 @@ const Friends: React.FC = () => {
       setError('');
     } catch (error) {
       console.error('Error fetching friends data:', error);
-      setError(t('failed-fetch-friends-data'));
+      setError('Failed to fetch friends data');
     }
   };
 
   const showSuccessAlert = (message: string) => {
-    Alert.alert(t('success'), message);
+    Alert.alert('Success', message);
   };
 
   const handleAddFriend = async () => {
@@ -60,13 +59,13 @@ const Friends: React.FC = () => {
       setShowAddFriendModal(false);
       fetchFriendsData();
       setError('');
-      showSuccessAlert(t('friend-request-sent'));
+      showSuccessAlert('Friend request sent');
     } catch (error) {
       console.error('Error sending friend request:', error);
       if (error.response && error.response.data && error.response.data.message) {
         setError(error.response.data.message);
       } else {
-        setError(t('unexpected-error'));
+        setError('An unexpected error occurred');
       }
     }
   };
@@ -81,7 +80,7 @@ const Friends: React.FC = () => {
       }
     } catch (error) {
       console.error('Error accepting friend request:', error);
-      setError(t('failed-accept-friend-request'));
+      setError('Failed to accept friend request');
     }
   };
 
@@ -95,31 +94,31 @@ const Friends: React.FC = () => {
       }
     } catch (error) {
       console.error('Error rejecting friend request:', error);
-      setError(t('failed-reject-friend-request'));
+      setError('Failed to reject friend request');
     }
   };
 
   const handleRemoveFriend = async (friendId: string, fullName: string, username: string) => {
     Alert.alert(
-      t('remove-friend'),
-      t('remove-friend-confirm', { name: fullName }),
+      'Remove Friend',
+      `Are you sure you want to remove ${fullName} from your friends list?`,
       [
         {
-          text: t('cancel'),
+          text: 'Cancel',
           style: 'cancel'
         },
         {
-          text: t('remove'),
+          text: 'Remove',
           style: 'destructive',
           onPress: async () => {
             try {
               await removeFriend(friendId);
               setError('');
               fetchFriendsData();
-              showSuccessAlert(t('friend-removed', { name: fullName }));
+              showSuccessAlert(`${fullName} has been removed from your friends list`);
             } catch (error) {
               console.error('Error removing friend:', error);
-              setError(t('friend-remove-error'));
+              setError('Failed to remove friend');
             }
           }
         }
@@ -169,7 +168,7 @@ const Friends: React.FC = () => {
         <Ionicons name="arrow-back" style={socialStyles.backIcon} />
       </TouchableOpacity>
       <InnerContainer>
-        <PageTitle>{t('friends')}</PageTitle>
+        <PageTitle>Friends</PageTitle>
 
         {error ? <Text style={socialStyles.errorText}>{error}</Text> : null}
 
@@ -178,13 +177,13 @@ const Friends: React.FC = () => {
             style={[socialStyles.button, socialStyles.primaryButton, socialStyles.addFriendButton]}
             onPress={() => setShowAddFriendModal(true)}
           >
-            <Text style={[socialStyles.buttonText, socialStyles.primaryButtonText]}>{t('add-friend')}</Text>
+            <Text style={[socialStyles.buttonText, socialStyles.primaryButtonText]}>Add Friend</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[socialStyles.button, socialStyles.friendRequestsButton]}
             onPress={() => setShowFriendRequestsModal(true)}
           >
-            <Text style={socialStyles.buttonText}>{t('friend-requests')}</Text>
+            <Text style={socialStyles.buttonText}>Friend Requests</Text>
             {friendRequests.length > 0 && (
               <View style={socialStyles.badgeContainer}>
                 <Text style={socialStyles.badgeText}>{friendRequests.length}</Text>
@@ -194,12 +193,12 @@ const Friends: React.FC = () => {
         </View>
 
         <View style={socialStyles.section}>
-          <Text style={socialStyles.sectionTitle}>{t('friends')}</Text>
+          <Text style={socialStyles.sectionTitle}>Friends</Text>
           <FlatList
             data={friends}
             renderItem={renderFriendItem}
             keyExtractor={(item) => item.id}
-            ListEmptyComponent={<Text style={socialStyles.emptyText}>{t('no-friends')}</Text>}
+            ListEmptyComponent={<Text style={socialStyles.emptyText}>You have no friends yet :( </Text>}
           />
         </View>
 
@@ -211,10 +210,10 @@ const Friends: React.FC = () => {
         >
           <View style={socialStyles.modalContainer}>
             <View style={socialStyles.modalContent}>
-              <Text style={socialStyles.modalTitle}>{t('add-friend')}</Text>
+              <Text style={socialStyles.modalTitle}>Add Friend</Text>
               <TextInput
                 style={socialStyles.input}
-                placeholder={t('enter-username')}
+                placeholder="Enter username"
                 placeholderTextColor={Colors.tertiary + '80'}
                 value={friendUsername}
                 onChangeText={(text) => {
@@ -227,7 +226,7 @@ const Friends: React.FC = () => {
                 style={[socialStyles.button, socialStyles.primaryButton, socialStyles.fullWidthButton, socialStyles.modalButton]}
                 onPress={handleAddFriend}
               >
-                <Text style={[socialStyles.buttonText, socialStyles.primaryButtonText]}>{t('add')}</Text>
+                <Text style={[socialStyles.buttonText, socialStyles.primaryButtonText]}>Add</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[socialStyles.button, socialStyles.fullWidthButton, socialStyles.modalButton]}
@@ -236,7 +235,7 @@ const Friends: React.FC = () => {
                   setError('');
                 }}
               >
-                <Text style={socialStyles.buttonText}>{t('cancel')}</Text>
+                <Text style={socialStyles.buttonText}>Cancel</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -250,18 +249,18 @@ const Friends: React.FC = () => {
         >
           <View style={socialStyles.modalContainer}>
             <View style={socialStyles.modalContent}>
-              <Text style={socialStyles.modalTitle}>{t('friend-requests')}</Text>
+              <Text style={socialStyles.modalTitle}>Friend Requests</Text>
               <FlatList
                 data={friendRequests}
                 renderItem={renderFriendRequestItem}
                 keyExtractor={(item) => item.id}
-                ListEmptyComponent={<Text style={socialStyles.emptyText}>{t('no-friend-requests')}</Text>}
+                ListEmptyComponent={<Text style={socialStyles.emptyText}>No friend requests :'( </Text>}
               />
               <TouchableOpacity
                 style={[socialStyles.button, socialStyles.fullWidthButton, socialStyles.modalButton]}
                 onPress={() => setShowFriendRequestsModal(false)}
               >
-                <Text style={socialStyles.buttonText}>{t('close')}</Text>
+                <Text style={socialStyles.buttonText}>Close</Text>
               </TouchableOpacity>
             </View>
           </View>

@@ -57,23 +57,23 @@ const AppMenu: React.FC<AppMenuProps> = ({ visible, menuAnimation, toggleMenu, n
           <TouchableOpacity style={homeStyles.menuItem} onPress={() => navigateTo('Profile')}>
             <Text style={homeStyles.menuItemText}>{t('profile')}</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={homeStyles.menuItem} onPress={() => navigateTo('GetAvatar')}>
+          {/* <TouchableOpacity style={homeStyles.menuItem} onPress={() => navigateTo('GetAvatar')}>
             <Text style={homeStyles.menuItemText}>Get Avatar</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           <TouchableOpacity style={homeStyles.menuItem} onPress={() => navigateTo('EditAvatar')}>
             <Text style={homeStyles.menuItemText}>Edit Avatar</Text>
           </TouchableOpacity>
           <TouchableOpacity style={homeStyles.menuItem} onPress={() => navigateTo('Store')}>
-            <Text style={homeStyles.menuItemText}>Store</Text>
+            <Text style={homeStyles.menuItemText}>Buy Gems</Text>
           </TouchableOpacity>
           <TouchableOpacity style={homeStyles.menuItem} onPress={() => navigateTo('Social')}>
-            <Text style={homeStyles.menuItemText}>{t('social')}</Text>
+            <Text style={homeStyles.menuItemText}>Leaderboard & Friends</Text>
           </TouchableOpacity>
           <TouchableOpacity style={homeStyles.menuItem} onPress={() => navigateTo('Change Language')}>
             <Text style={homeStyles.menuItemText}>{t('change-language')}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={homeStyles.menuItem} onPress={navigateToViewVouchers}>
-            <Text style={homeStyles.menuItemText}>{t('View Voucher Inventory')}</Text>
+            <Text style={homeStyles.menuItemText}>{t('Voucher Inventory')}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={homeStyles.menuItem} onPress={navigateToViewAllVouchers}>
             <Text style={homeStyles.menuItem}>{t('View All Vouchers')}</Text>

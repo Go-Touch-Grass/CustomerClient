@@ -84,6 +84,7 @@ export const socialStyles = StyleSheet.create({
     color: Colors.tertiary,
     textAlign: 'center',
     fontStyle: 'italic',
+    margin: 20,
   },
   backButton: {
     position: 'absolute',

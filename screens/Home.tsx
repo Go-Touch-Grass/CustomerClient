@@ -23,6 +23,7 @@ import axios from 'axios';
 import { GEOAPIFY_API_KEY } from '@env';
 import { Voucher, getAllVouchers, purchaseVouchers } from '../api/voucherApi';
 import { useIsFocused } from '@react-navigation/native';
+import { IP_ADDRESS } from '@env';
 
 interface GeocodeResult {
   latitude: number;
@@ -452,8 +453,8 @@ const Home: React.FC = () => {
         <ScrollView style={BusinessAvatarShopboxStyles.vouchersList}>
           {vouchers.length > 0 ? (
             vouchers.map((voucher, index) => {
-              const discountedPrice = 10 * (voucher.price - (voucher.price * voucher.discount / 100));
-              const originalPrice = 10 * (voucher.price);
+              const originalPrice = Math.round(10 * voucher.price);
+              const discountedPrice = Math.round(originalPrice * (1 - voucher.discount / 100));
               return (
                 <TouchableOpacity
                   key={index}
@@ -465,7 +466,7 @@ const Home: React.FC = () => {
                   style={BusinessAvatarShopboxStyles.voucherItem}
                 >
                   <Image
-                    source={voucher.voucherImage ? { uri: `http://192.168.129.60:8080/${voucher.voucherImage}` } : require('../assets/noimage.jpg')}
+                    source={voucher.voucherImage ? { uri: `http://${IP_ADDRESS}:8080/${voucher.voucherImage}` } : require('../assets/noimage.jpg')}
                     style={BusinessAvatarShopboxStyles.voucherImage}
                   />
                   <View style={BusinessAvatarShopboxStyles.voucherDetails}>
@@ -504,6 +505,8 @@ const Home: React.FC = () => {
               <Text style={BusinessAvatarShopboxStyles.modalTitle}>
                 Purchase {selectedVoucher?.name}
               </Text>
+
+              {/* Quantity Selection */}
               <View style={BusinessAvatarShopboxStyles.quantityContainer}>
                 <TouchableOpacity onPress={() => setQuantity(prev => Math.max(1, prev - 1))} style={BusinessAvatarShopboxStyles.quantityButton}>
                   <Text style={BusinessAvatarShopboxStyles.quantityButtonText}>-</Text>
@@ -521,7 +524,7 @@ const Home: React.FC = () => {
 
               {selectedVoucher && (
                 <Text style={BusinessAvatarShopboxStyles.totalCost}>
-                  Total Cost: {(10 * (selectedVoucher.price - (selectedVoucher.price * selectedVoucher.discount / 100)) * quantity)} Gems
+                  Total Cost: {Math.round(10 * selectedVoucher.price * (1 - selectedVoucher.discount / 100) * quantity)} Gems
                 </Text>
               )}
 
@@ -532,10 +535,18 @@ const Home: React.FC = () => {
                       console.error('No voucher selected');
                       return;
                     }
+                    if (quantity > 1) {
+                      for (let i = 0; i < quantity; i++) {
+                        await purchaseVouchers(String(selectedVoucher.listing_id));
+                      }
+                      setSuccessMessage('Your Voucher has been added to your Inventory!');
+                      setModalVisible(false);
+                    } else {
+                      await purchaseVouchers(String(selectedVoucher.listing_id));
+                      setSuccessMessage('Your Voucher has been added to your Inventory!');
+                      setModalVisible(false);
+                    }
 
-                    await purchaseVouchers(String(selectedVoucher.listing_id));
-                    setSuccessMessage('Your Voucher has been added to your Inventory!');
-                    setModalVisible(false);
                   } catch (error) {
                     console.error('Error purchasing vouchers:', error);
                   }
