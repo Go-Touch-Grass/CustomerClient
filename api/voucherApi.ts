@@ -22,6 +22,9 @@ export interface Voucher {
         type: string;
         filepath: string;
     };
+    groupPurchaseEnabled: boolean;
+    groupSize: number;
+    groupDiscount: number;
 }
 
 // Define the response interface
@@ -34,7 +37,7 @@ interface VoucherResponse {
 export interface VoucherPurchaseResponse {
     message: string;
     voucher: {
-        listing_id: number; 
+        listing_id: number;
         name: string;
         description: string;
         original_price: number;
@@ -110,26 +113,107 @@ export const getCustomerVouchers = async (): Promise<VoucherResponse> => {
 };
 
 export const getAllVouchers = async (registration_id?: number, outlet_id?: number, searchTerm?: string): Promise<VoucherResponse> => {
-    
+
     const token = await getToken();
     if (!token) {
-      throw new Error('No token found');
+        throw new Error('No token found');
     }
-  
+
     try {
-      const params: any = {};
-      if (registration_id) params.registration_id = registration_id;
-      if (outlet_id) params.outlet_id = outlet_id;
-      if (searchTerm) params.searchTerm = searchTerm;
-  
-      const response = await axiosInstance.get<VoucherResponse>('/api/business/vouchers', {
-        headers: { Authorization: `Bearer ${token}` },
-        params, // Pass query parameters to the request
-      });
-  
-      return response.data; // Return the entire response
+        const params: any = {};
+        if (registration_id) params.registration_id = registration_id;
+        if (outlet_id) params.outlet_id = outlet_id;
+        if (searchTerm) params.searchTerm = searchTerm;
+
+        const response = await axiosInstance.get<VoucherResponse>('/api/business/vouchers', {
+            headers: { Authorization: `Bearer ${token}` },
+            params, // Pass query parameters to the request
+        });
+
+        return response.data; // Return the entire response
     } catch (error) {
-      console.error('Error fetching vouchers:', error);
-      throw error;
+        console.error('Error fetching vouchers:', error);
+        throw error;
     }
-  };
+};
+
+// Testing method: Fetch all vouchers for the customer to purchase no matter the branch or outlet
+export const viewAllAvailableVouchers = async (): Promise<VoucherResponse> => { // Change return type here
+    const token = await getToken();
+    if (!token) {
+        throw new Error('No token found');
+    }
+
+    try {
+        const response = await axiosInstance.get<VoucherResponse>('/auth/vouchers/getAllVouchers', {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+
+        return response.data; // Return the entire response
+    } catch (error) {
+        console.error('Error fetching customer vouchers:', error);
+        throw error;
+    }
+};
+
+
+export const startGroupPurchase = async (voucher: Voucher): Promise<any> => {
+    const token = await getToken();
+    if (!token) {
+        throw new Error('No token found');
+    }
+    //console.log("voucher in StartGroupPurchase", voucher);
+    try {
+        const response = await axiosInstance.post('/auth/group-purchase/start', {
+            voucher_id: voucher.listing_id,
+            group_size: voucher.groupSize,
+            expires_at: new Date(new Date().getTime() + 30 * 60 * 1000) // Set expiry time, e.g., 30 minutes from now
+        }, {
+            headers: { Authorization: `Bearer ${token}` },
+        },
+        );
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const joinGroupPurchase = async (groupPurchaseId: String): Promise<any> => {
+    const token = await getToken();
+    if (!token) {
+        throw new Error('No token found');
+    }
+    //console.log("voucher in StartGroupPurchase", voucher);
+    try {
+        const response = await axiosInstance.post('/auth/group-purchase/join', {
+            group_purchase_id: groupPurchaseId
+        }, {
+            headers: { Authorization: `Bearer ${token}` },
+        },
+        );
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+
+export const GroupPurchaseStatus = async (groupPurchaseId: String): Promise<any> => {
+    const token = await getToken();
+    if (!token) {
+        throw new Error('No token found');
+    }
+    //console.log("voucher in StartGroupPurchase", voucher);
+    try {
+        const response = await axiosInstance.get(`/auth/group-purchase/status/${groupPurchaseId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+        },
+        );
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+
+

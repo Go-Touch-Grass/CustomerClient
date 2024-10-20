@@ -31,12 +31,17 @@ const AppMenu: React.FC<AppMenuProps> = ({ visible, menuAnimation, toggleMenu, n
     navigation.navigate('ViewVoucherInventory'); // Navigate to ViewVoucherInventory
   };
 
+  const navigateToViewAllVouchers = () => {
+
+    navigation.navigate('tempViewAllVouchers'); // Navigate to ViewVoucherInventory
+  };
+
   const menuTranslateY = menuAnimation.interpolate({
     inputRange: [0, 1],
     outputRange: [-50, 0],
   });
 
-  return (    
+  return (
     <Animated.View
       style={[
         homeStyles.menu,
@@ -69,6 +74,9 @@ const AppMenu: React.FC<AppMenuProps> = ({ visible, menuAnimation, toggleMenu, n
           </TouchableOpacity>
           <TouchableOpacity style={homeStyles.menuItem} onPress={navigateToViewVouchers}>
             <Text style={homeStyles.menuItemText}>{t('View Voucher Inventory')}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={homeStyles.menuItem} onPress={navigateToViewAllVouchers}>
+            <Text style={homeStyles.menuItem}>{t('View All Vouchers')}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={homeStyles.menuItem} onPress={handleLogout}>
             <Text style={homeStyles.menuItemText}>{t('logout')}</Text>

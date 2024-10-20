@@ -21,6 +21,10 @@ import Social from './screens/Social';
 import Friends from './screens/Friends';
 import BusinessAvatarInfo from './screens/BusinessAvatarInfo'
 import Navigation from './screens/Navigation'
+import TempViewAllVouchers from './screens/TempViewAllVouchers';
+import GroupPurchase from './screens/GroupPurchase';
+import { viewAllAvailableVouchers } from './api/voucherApi';
+import JoinGroupPurchase from './screens/JoinGroupPurchase';
 
 // Import utilities and services
 import { getToken } from './utils/asyncStorage';
@@ -31,6 +35,10 @@ import { STRIPE_PUBLISHABLE_KEY } from '@env';
 const Stack = createStackNavigator();
 import Store from './screens/Store';
 import ViewVoucherInventory from './screens/ViewVoucherInventory';
+
+
+
+
 
 const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -88,6 +96,16 @@ const App: React.FC = () => {
             <React.Fragment>
               <Stack.Screen name="ViewVoucherInventory" component={ViewVoucherInventory} />
             </React.Fragment>
+            <React.Fragment>
+              <Stack.Screen name="TempViewAllVouchers" component={TempViewAllVouchers} />
+            </React.Fragment>
+            <React.Fragment>
+              <Stack.Screen name="GroupPurchase" component={GroupPurchase} />
+            </React.Fragment>
+            <React.Fragment>
+              <Stack.Screen name="JoinGroupPurchase" component={JoinGroupPurchase} />
+            </React.Fragment>
+
           </Stack.Navigator>
         </NavigationContainer>
       </I18nextProvider>
