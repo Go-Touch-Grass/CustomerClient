@@ -216,5 +216,24 @@ export const GroupPurchaseStatus = async (groupPurchaseId: String): Promise<any>
     }
 };
 
+export const finalizeGroupPurchase = async (groupPurchaseId: String): Promise<any> => {
+    const token = await getToken();
+    if (!token) {
+        throw new Error('No token found');
+    }
+    //console.log("voucher in StartGroupPurchase", voucher);
+    console.log('groupPurchaseId:', groupPurchaseId);
+    try {
+        const response = await axiosInstance.post(`/api/payment/group-purchase/finalize`, {
+            group_purchase_id: groupPurchaseId
 
+        }, {
+            headers: { Authorization: `Bearer ${token}` },
+        },
+        );
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+}
 

@@ -49,6 +49,7 @@ const TempViewAllVouchers: React.FC = () => {
         console.log(`Initiating group purchase for voucher: ${voucher.listing_id}`);
         try {
             const response = await startGroupPurchase(voucher);
+            //console.log("passing groupPurchase Id over", response.id);
             navigation.navigate('GroupPurchase', { groupPurchaseId: response.id });
         } catch (error) {
             //console.error('Error starting group purchase:', error.response?.data || error.message);

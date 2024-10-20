@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
-import { GroupPurchaseStatus } from '../api/voucherApi';
+import { finalizeGroupPurchase, GroupPurchaseStatus } from '../api/voucherApi';
 import ProtectedRoute from '../components/ProtectedRoute';
+import { socialStyles } from '../styles/SocialStyles';
+import { Ionicons } from '@expo/vector-icons';
 
 // Define the type for route params
 interface GroupPurchaseRouteParams {
@@ -23,6 +25,7 @@ const GroupPurchase = () => {
 
     useEffect(() => {
         // If groupPurchaseId is passed directly, fetch status automatically
+        // console.log("grouppurchaseId is", groupPurchaseId)
         if (groupPurchaseId) {
             fetchGroupStatus();
         }
@@ -45,22 +48,27 @@ const GroupPurchase = () => {
     };
 
     const handleCompletePurchase = async () => {
-        {/* 
+
         try {
-            const response = await axios.post(`/api/payment/group-purchase/finalize`, {
-                group_purchase_id: groupPurchaseId,
-            });
+            const response = await finalizeGroupPurchase(groupPurchaseId);
             console.log("Purchase finalized:", response.data);
         } catch (error) {
-            console.error("Error completing purchase:", error);
+            if (error instanceof Error) {
+                console.error("Error completing purchase:", error.message);
+            } else {
+                console.error("Error completing purchase:", error);
+            }
         }
-            */}
+
     };
 
     const isGroupComplete = groupStatus && groupStatus.current_size >= groupStatus.group_size;
 
     return (
         <View style={styles.container}>
+            <TouchableOpacity style={socialStyles.backButton} onPress={() => navigation.goBack()}>
+                <Ionicons name="arrow-back" style={socialStyles.backIcon} />
+            </TouchableOpacity>
             <Text style={styles.headerText}>Group Purchase Status</Text>
 
             {/* If no groupPurchaseId was passed, show the input field */}

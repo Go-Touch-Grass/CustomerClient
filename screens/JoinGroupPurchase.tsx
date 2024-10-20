@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, Button, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import axios from 'axios';
+import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { joinGroupPurchase } from '../api/voucherApi';
 import ProtectedRoute from '../components/ProtectedRoute';
+import { socialStyles } from '../styles/SocialStyles';
 
 interface GroupPurchaseRouteParams {
     groupPurchaseId: number;
@@ -40,13 +42,18 @@ const JoinGroupPurchase = () => {
     const handleJoinGroup = async () => {
 
         try {
+            console.log("Joining group purchase with ID:", groupPurchaseId);
             const response = await joinGroupPurchase(groupPurchaseId.toString());
             //const response = await axios.post(`/auth/group-purchase/join`, { group_purchase_id: groupPurchaseId });
-            //console.log("Successfully joined the group purchase:", response.data);
+            console.log("Successfully joined the group purchase:", response.data);
             // Redirect to group status page after joining
             navigation.navigate('GroupPurchase', { groupPurchase: response.data });
         } catch (error) {
-            //console.error("Error joining the group:", error.response?.data || error.message);
+            if (error instanceof Error) {
+                console.error("Error joining the group:", error.message);
+            } else {
+                console.error("Error joining the group:", String(error));
+            }
             setError(error instanceof Error ? error.message : String(error));
             //alert(error.response?.data.message || "Error joining the group purchase.");
         }
@@ -58,6 +65,9 @@ const JoinGroupPurchase = () => {
 
     return (
         <View style={styles.container}>
+            <TouchableOpacity style={socialStyles.backButton} onPress={() => navigation.goBack()}>
+                <Ionicons name="arrow-back" style={socialStyles.backIcon} />
+            </TouchableOpacity>
             <Text style={styles.headerText}>Join Group Purchase</Text>
             <Text style={styles.label}>Enter Group ID to Join:</Text>
             <TextInput

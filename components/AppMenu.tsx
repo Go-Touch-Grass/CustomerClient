@@ -31,9 +31,23 @@ const AppMenu: React.FC<AppMenuProps> = ({ visible, menuAnimation, toggleMenu, n
     navigation.navigate('ViewVoucherInventory'); // Navigate to ViewVoucherInventory
   };
 
-  const navigateToViewAllVouchers = () => {
+  const navigateToTempViewAllVouchers = () => {
 
-    navigation.navigate('tempViewAllVouchers'); // Navigate to ViewVoucherInventory
+    navigation.navigate('TempViewAllVouchers'); // Navigate to ViewVoucherInventory
+  };
+
+
+  const navigateToJoinGroupPurchase = () => {
+    toggleMenu(false);
+    navigation.navigate('JoinGroupPurchase');
+    //console.log("JoinGroupPurchase screen loaded");
+  };
+
+
+  const navigateToViewGroupPurchaseStatus = () => {
+    toggleMenu(false);
+    navigation.navigate('GroupPurchase');
+
   };
 
   const menuTranslateY = menuAnimation.interpolate({
@@ -75,8 +89,14 @@ const AppMenu: React.FC<AppMenuProps> = ({ visible, menuAnimation, toggleMenu, n
           <TouchableOpacity style={homeStyles.menuItem} onPress={navigateToViewVouchers}>
             <Text style={homeStyles.menuItemText}>{t('Voucher Inventory')}</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={homeStyles.menuItem} onPress={navigateToViewAllVouchers}>
-            <Text style={homeStyles.menuItem}>{t('View All Vouchers')}</Text>
+          <TouchableOpacity style={homeStyles.menuItem} onPress={navigateToTempViewAllVouchers}>
+            <Text style={homeStyles.menuItem}>{t('Temp View All Vouchers')}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={homeStyles.menuItem} onPress={navigateToViewGroupPurchaseStatus}>
+            <Text style={homeStyles.menuItem}>{t('Group purchase status')}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={homeStyles.menuItem} onPress={navigateToJoinGroupPurchase}>
+            <Text style={homeStyles.menuItem}>{t('Join group purchase')}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={homeStyles.menuItem} onPress={handleLogout}>
             <Text style={homeStyles.menuItemText}>{t('logout')}</Text>

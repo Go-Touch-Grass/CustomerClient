@@ -618,30 +618,7 @@ const Home: React.FC = () => {
     );
   };
 
-  const navigateToViewVouchers = () => {
-    toggleMenu(false);
-    navigation.navigate('ViewVoucherInventory');
-  };
 
-
-  const navigateToTempViewAllVouchers = () => {
-    toggleMenu(false);
-    navigation.navigate('TempViewAllVouchers');
-  };
-
-
-  const navigateToJoinGroupPurchase = () => {
-    toggleMenu(false);
-    navigation.navigate('JoinGroupPurchase');
-    //console.log("JoinGroupPurchase screen loaded");
-  };
-
-
-  const navigateToViewGroupPurchaseStatus = () => {
-    toggleMenu(false);
-    navigation.navigate('GroupPurchase');
-
-  };
 
   return (
 
