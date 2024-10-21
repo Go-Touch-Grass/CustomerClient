@@ -548,7 +548,7 @@ const Home: React.FC = () => {
                     }
 
                   } catch (error) {
-                    console.error('Error purchasing vouchers:', error);
+                    console.error('Please top up more gems first!');
                   }
                 }}
                 style={BusinessAvatarShopboxStyles.confirmButton}
