@@ -23,6 +23,7 @@ export interface Voucher {
         filepath: string;
     };
     quantity: number;
+    status: boolean;
 }
 
 // Define the response interface
@@ -52,6 +53,28 @@ export interface VoucherPurchaseResponse {
         };
     };
 }
+
+export const updateVoucherStatus = async (voucherId: number, status: boolean) => {
+    const token = await getToken();
+    if (!token) {
+        throw new Error('No token found');
+    }
+
+    try {
+        const response = await axiosInstance.put<VoucherResponse>(
+            `/api/inventory/vouchers/status`,
+            { status, voucherId },
+            {
+                headers: { Authorization: `Bearer ${token}` },
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error('Error updating voucher status:', error);
+        throw error;
+    }
+};
+
 
 export const purchaseVouchers = async (voucherId: string): Promise<VoucherPurchaseResponse> => {
     const token = await getToken();
