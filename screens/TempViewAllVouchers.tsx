@@ -77,8 +77,8 @@ const TempViewAllVouchers: React.FC = () => {
                 {isExpanded && (
                     <View style={styles.detailsContainer}>
                         <Text style={styles.voucherDescription}>{item.description || 'No Description'}</Text>
-                        <Text style={styles.voucherPrice}>Price: ${price.toFixed(2)}</Text>
-                        <Text style={styles.voucherDiscount}>Discount: {discount.toFixed(2)}%</Text>
+                        <Text style={styles.voucherPrice}>Price: ${item.price}</Text>
+                        <Text style={styles.voucherDiscount}>Discount: {item.discount}%</Text>
 
                         {item.expirationDate && (
                             <Text style={styles.expirationDate}>Expiry Date: {new Date(item.expirationDate).toLocaleDateString()}</Text>
