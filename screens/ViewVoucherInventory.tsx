@@ -5,6 +5,8 @@ import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { StyledContainer, InnerContainer, PageTitle, Colors } from '../styles/commonStyles';
 import { IP_ADDRESS } from '@env';
+// Import your update function
+import { updateVoucherStatus } from '../api/voucherApi';
 
 export interface Voucher {
     listing_id: number;
@@ -26,6 +28,7 @@ export interface Voucher {
         filepath: string;
     };
     quantity: number;
+    status: boolean;
 }
 
 interface VoucherResponse {
@@ -41,6 +44,7 @@ const ViewVoucherInventory: React.FC = () => {
     const navigation = useNavigation();
 
     // Fetch Vouchers
+    // Fetch Vouchers
     useEffect(() => {
         const fetchVouchers = async () => {
             setError(null); // Reset error state before fetching
@@ -51,15 +55,19 @@ const ViewVoucherInventory: React.FC = () => {
 
                 // Filter and map valid vouchers, excluding those with quantity 0
                 const validVouchers = response.vouchers
-                    .filter(voucher => voucher.listing_id !== undefined && voucher.quantity > 0)
-                    .map(voucher => ({
-                        ...voucher,
-                        redeemed: voucher.redeemed || "no", // Ensure there's a valid default
-                        expirationDate: voucher.expirationDate || new Date().toISOString(),
-                        voucher_transaction_id: voucher.voucher_transaction_id || 0,
-                        quantity: voucher.quantity,
-                    }));
+                    .filter(voucher => voucher.listing_id !== undefined && voucher.quantity > 0 && voucher.status === true)
+                    .map(voucher => {
+                        console.log('Voucher before mapping:', voucher); // Debugging line
+                        return {
+                            ...voucher,
+                            redeemed: voucher.redeemed || "yes", // Ensure there's a valid default
+                            expirationDate: voucher.expirationDate || new Date().toISOString(),
+                            voucher_transaction_id: voucher.voucher_transaction_id || 0,
+                            quantity: voucher.quantity,
+                        };
+                    });
 
+                console.log('Valid vouchers:', validVouchers); // Debugging line
                 setVouchers(validVouchers);
             } catch (err) {
                 console.error('Error fetching customer vouchers:', err);
@@ -72,10 +80,34 @@ const ViewVoucherInventory: React.FC = () => {
         fetchVouchers();
     }, []);
 
+
     // Toggle voucher details
     const handleVoucherClick = (listing_id: number) => {
         setExpandedVoucher(expandedVoucher === listing_id ? null : listing_id);
     };
+
+
+
+    // Update the handleClose function
+    const handleCrossButtonClick = async (voucher: Voucher) => {
+        try {
+            // Update the voucher status to false
+            await updateVoucherStatus(voucher.listing_id, false);
+
+            // Update local state to reflect the change
+            setVouchers(prevVouchers =>
+                prevVouchers.map(v =>
+                    v.listing_id === voucher.listing_id ? { ...v, redeemed: "no" } : v
+                )
+            );
+            console.log(`Voucher status updated to false: ${voucher.listing_id}`);
+        } catch (err) {
+            console.error('Error updating voucher status:', err);
+            setError('Failed to update voucher status. Please try again later.');
+        }
+    };
+
+
 
     // Redeem a voucher
     const handleRedeem = async (voucher: Voucher) => {
@@ -105,6 +137,7 @@ const ViewVoucherInventory: React.FC = () => {
     };
 
     // Render a single voucher
+    // Render a single voucher
     const renderVoucher = ({ item }: { item: Voucher }) => {
         const isExpanded = expandedVoucher === item.listing_id;
         const isExpired = item.expirationDate ? new Date(item.expirationDate) < new Date() : false;
@@ -122,11 +155,12 @@ const ViewVoucherInventory: React.FC = () => {
                         <Text style={styles.voucherPrice}>{`Price: $${item.price}`}</Text>
                         <Text style={styles.voucherDiscount}>{`Discount: ${item.discount}%`}</Text>
                         <Text style={styles.voucherDiscount}>
-                            {`Discounted price: $${(item.price * (100 - item.discount)) / 100}`}
+                            {`Discounted price: $${((item.price * (100 - item.discount)) / 100).toFixed(2)}`}
                         </Text>
                         <Text style={styles.expirationDate}>
                             {`Expiry Date: ${item.expirationDate ? new Date(item.expirationDate).toLocaleDateString() : 'N/A'}`}
                         </Text>
+
                         {item.redeemed === "pending" ? (
                             <Text style={styles.redeemedText}>Pending</Text>
                         ) : item.redeemed === "yes" ? (
@@ -136,6 +170,18 @@ const ViewVoucherInventory: React.FC = () => {
                             >
                                 <Text style={styles.redeemButtonText}>Redeem</Text>
                             </TouchableOpacity>
+                        ) : item.redeemed === "no" ? (
+                            <View style={styles.rejectedContainer}>
+                                <Text style={styles.redeemedText}>Voucher Rejected</Text>
+                                <View>
+                                    <TouchableOpacity
+                                        style={styles.closeButton}
+                                        onPress={() => handleCrossButtonClick(item)}
+                                    >
+                                        <Text style={styles.closeButtonText}>X</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
                         ) : isExpired ? (
                             <Text style={styles.redeemedText}>Expired</Text>
                         ) : (
@@ -147,11 +193,14 @@ const ViewVoucherInventory: React.FC = () => {
                                 <Text style={styles.redeemButtonText}>Redeem</Text>
                             </TouchableOpacity>
                         )}
+
                     </View>
                 )}
             </TouchableOpacity>
         );
     };
+
+
 
     // Loading state
     if (loading) {
@@ -187,6 +236,26 @@ const ViewVoucherInventory: React.FC = () => {
 
 // Styles
 const styles = StyleSheet.create({
+    closeButton: {
+        marginTop: 10,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'red', // or any color you prefer
+        padding: 5,
+        borderRadius: 5,
+        width: 30, // Adjust as needed
+        height: 30, // Adjust as needed
+    },
+    closeButtonText: {
+        color: 'white',
+        fontWeight: 'bold',
+        textAlign: 'center',
+    },
+    rejectedContainer: {
+        marginTop: 10,
+        alignItems: 'center', // Center the text and button
+    },
+
     backButton: {
         position: 'absolute',
         top: 40,
