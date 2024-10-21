@@ -4,9 +4,10 @@ import axios from 'axios';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { joinGroupPurchase } from '../api/voucherApi';
+import { GroupPurchaseStatus, joinGroupPurchase } from '../api/voucherApi';
 import ProtectedRoute from '../components/ProtectedRoute';
 import { socialStyles } from '../styles/SocialStyles';
+import { getAllFriends } from '../api/socialApi';
 
 interface GroupPurchaseRouteParams {
     groupPurchaseId: number;
@@ -20,6 +21,7 @@ const JoinGroupPurchase = () => {
     const [loading, setLoading] = useState(false);
     const [groupPurchaseId, setGroupPurchaseId] = useState<number>(0);
     const [error, setError] = useState<string | null>(null);
+
 
     /*
     // Fetch group purchase details by groupPurchaseId
@@ -40,8 +42,21 @@ const JoinGroupPurchase = () => {
     */
 
     const handleJoinGroup = async () => {
-
         try {
+            const friends = await getAllFriends();
+            console.log("groupPurchaseId", groupPurchaseId);
+            const grpPurchaseStatus = await GroupPurchaseStatus(groupPurchaseId.toString());
+            // Ensure that the response contains text-friendly data
+            //console.log("grpPurchaseStatus", grpPurchaseStatus);
+            //console.log("groupStatus,creator", grpPurchaseStatus.creator_id);
+            //console.log("friends", friends);
+            //console.log("grpPurchaseStatus.customer.username", grpPurchaseStatus.username)
+            const isFriend = friends.find((friend) => friend.username === grpPurchaseStatus.creator.username);
+            if (!isFriend) {
+                setError("You can only join the group purchase if you are a friend of the creator.");
+                return;
+            }
+
             console.log("Joining group purchase with ID:", groupPurchaseId);
             const response = await joinGroupPurchase(groupPurchaseId.toString());
             //const response = await axios.post(`/auth/group-purchase/join`, { group_purchase_id: groupPurchaseId });
