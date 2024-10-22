@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, FlatList } from 'react-native';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
-import { finalizeGroupPurchase, GroupPurchaseStatus } from '../api/voucherApi';
+import { finalizeGroupPurchase, getAllCreatedGroups, getAllJoinedGroups, GroupPurchaseStatus } from '../api/voucherApi';
 import ProtectedRoute from '../components/ProtectedRoute';
 import { socialStyles } from '../styles/SocialStyles';
 import { Ionicons } from '@expo/vector-icons';
@@ -9,6 +9,17 @@ import { Ionicons } from '@expo/vector-icons';
 // Define the type for route params
 interface GroupPurchaseRouteParams {
     groupPurchaseId: string; // Expect groupPurchaseId as a string
+}
+
+interface GroupPurchase {
+    id: string;
+    voucher: {
+        name: string;
+    };
+    groupStatus: string;
+    current_size: number;
+    group_size: number;
+    paymentStatus: string;
 }
 
 const GroupPurchase = () => {
@@ -22,6 +33,8 @@ const GroupPurchase = () => {
     const [groupPurchaseId, setGroupPurchaseId] = useState<string>(initialGroupPurchaseId); // Add input field for group ID
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [createdGroups, setCreatedGroups] = useState<GroupPurchase[]>([]);
+    const [joinedGroups, setJoinedGroups] = useState<GroupPurchase[]>([]);
 
     useEffect(() => {
         // If groupPurchaseId is passed directly, fetch status automatically
@@ -37,8 +50,13 @@ const GroupPurchase = () => {
         setError(null); // Clear any previous errors
         try {
             const response = await GroupPurchaseStatus(groupPurchaseId);
-            // Ensure that the response contains text-friendly data
             setGroupStatus(response);
+
+            const createdResponse = await getAllCreatedGroups();
+            const joinedResponse = await getAllJoinedGroups();
+            setCreatedGroups(createdResponse.groupPurchases);
+            setJoinedGroups(joinedResponse.joinedGroupPurchases);
+
         } catch (err) {
             console.error("Error fetching group status:", err);
             setError('Error fetching group purchase status. Please check the ID.');
@@ -77,11 +95,20 @@ const GroupPurchase = () => {
             setLoading(false);
         }
     };
-
-
     const isGroupComplete = groupStatus && groupStatus.current_size >= groupStatus.group_size;
     // Check if all participants have paid
     const isPaymentCompleted = groupStatus && groupStatus.participants.every((participant: any) => participant.payment_status === 'paid');
+
+    // Render a single group item
+    const renderGroupItem = (group: GroupPurchase) => (
+        <View style={styles.groupItem}>
+            <Text style={styles.infoText}>Group ID: {group.id}</Text>
+            <Text style={styles.infoText}>Voucher: {group.voucher.name}</Text>
+            <Text style={styles.infoText}>Status: {group.groupStatus}</Text>
+            <Text style={styles.infoText}>Participants: {group.current_size}/{group.group_size}</Text>
+            <Text style={styles.infoText}>Payment Status: {group.paymentStatus}</Text>
+        </View>
+    );
 
     return (
         <View style={styles.container}>
@@ -142,6 +169,22 @@ const GroupPurchase = () => {
                     )}
                 </>
             )}
+
+            <Text style={styles.sectionHeader}>Created Groups</Text>
+            <FlatList
+                data={createdGroups}
+                renderItem={({ item }) => renderGroupItem(item)}
+                keyExtractor={(item) => item.id.toString()}
+                ListEmptyComponent={<Text style={styles.infoText}>No created groups found.</Text>}
+            />
+
+            <Text style={styles.sectionHeader}>Joined Groups</Text>
+            <FlatList
+                data={joinedGroups}
+                renderItem={({ item }) => renderGroupItem(item)}
+                keyExtractor={(item) => item.id.toString()}
+                ListEmptyComponent={<Text style={styles.infoText}>No joined groups found.</Text>}
+            />
         </View>
     );
 };
@@ -153,6 +196,19 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
+    sectionHeader: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginTop: 20,
+        marginBottom: 10,
+    },
+    groupItem: {
+        padding: 15,
+        backgroundColor: '#f0f0f0',
+        marginBottom: 10,
+        borderRadius: 5,
+    },
+
     headerText: {
         fontSize: 24,
         fontWeight: 'bold',

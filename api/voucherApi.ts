@@ -260,3 +260,38 @@ export const finalizeGroupPurchase = async (groupPurchaseId: String): Promise<an
     }
 }
 
+export const getAllCreatedGroups = async (): Promise<any> => {
+    const token = await getToken();
+    if (!token) {
+        throw new Error('No token found');
+    }
+    try {
+        const response = await axiosInstance.get('/auth/group-purchase/getAllCreatedGroups', {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching customer vouchers:', error);
+        throw error;
+    }
+};
+
+export const getAllJoinedGroups = async (): Promise<any> => {
+    const token = await getToken();
+    if (!token) {
+        throw new Error('No token found');
+    }
+    try {
+        const response = await axiosInstance.get('/auth/group-purchase/getAllJoinedGroups', {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching customer vouchers:', error);
+        throw error;
+    }
+};
+
+
