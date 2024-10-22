@@ -38,7 +38,7 @@ const AppMenu: React.FC<AppMenuProps> = ({ visible, menuAnimation, toggleMenu, n
 
 
   const navigateToJoinGroupPurchase = () => {
-    toggleMenu(false);
+    //toggleMenu(false);
     navigation.navigate('JoinGroupPurchase');
     //console.log("JoinGroupPurchase screen loaded");
   };
@@ -90,13 +90,13 @@ const AppMenu: React.FC<AppMenuProps> = ({ visible, menuAnimation, toggleMenu, n
             <Text style={homeStyles.menuItemText}>{t('Voucher Inventory')}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={homeStyles.menuItem} onPress={navigateToTempViewAllVouchers}>
-            <Text style={homeStyles.menuItem}>{t('Temp View All Vouchers')}</Text>
+            <Text style={homeStyles.menuItemText}>{t('All Group Buy vouchers')}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={homeStyles.menuItem} onPress={navigateToViewGroupPurchaseStatus}>
-            <Text style={homeStyles.menuItem}>{t('Group purchase status')}</Text>
+            <Text style={homeStyles.menuItemText}>{t('Group purchase status')}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={homeStyles.menuItem} onPress={navigateToJoinGroupPurchase}>
-            <Text style={homeStyles.menuItem}>{t('Join group purchase')}</Text>
+            <Text style={homeStyles.menuItemText}>{t('Join group purchase')}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={homeStyles.menuItem} onPress={handleLogout}>
             <Text style={homeStyles.menuItemText}>{t('logout')}</Text>

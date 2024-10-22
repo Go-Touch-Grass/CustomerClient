@@ -29,6 +29,9 @@ export interface Voucher {
     };
     quantity: number;
     status: boolean;
+    groupPurchaseEnabled: boolean;
+    groupSize: number;
+    groupDiscount: number;
 }
 
 interface VoucherResponse {
@@ -57,7 +60,7 @@ const ViewVoucherInventory: React.FC = () => {
                 const validVouchers = response.vouchers
                     .filter(voucher => voucher.listing_id !== undefined && voucher.quantity > 0 && voucher.status === true)
                     .map(voucher => {
-                        console.log('Voucher before mapping:', voucher); // Debugging line
+                        console.log('Voucher before mapping:', voucher);
                         return {
                             ...voucher,
                             redeemed: voucher.redeemed || "yes", // Ensure there's a valid default
@@ -67,7 +70,7 @@ const ViewVoucherInventory: React.FC = () => {
                         };
                     });
 
-                console.log('Valid vouchers:', validVouchers); // Debugging line
+                console.log('Valid vouchers:', validVouchers);
                 setVouchers(validVouchers);
             } catch (err) {
                 console.error('Error fetching customer vouchers:', err);
@@ -142,6 +145,17 @@ const ViewVoucherInventory: React.FC = () => {
         const isExpanded = expandedVoucher === item.listing_id;
         const isExpired = item.expirationDate ? new Date(item.expirationDate) < new Date() : false;
 
+
+        //Voucher price without group discount
+        const discountedPrice = item.price - (item.price * (item.discount / 100));
+        const conversionRate = 10;
+        const discountedPriceInGems = Math.round(discountedPrice * conversionRate);
+
+        //Group discount price
+        const discountedPriceWithGroupBuy = discountedPrice * (1 - item.groupDiscount / 100);
+        const discountedPriceInGemsWithGroupBuy = Math.round(discountedPriceWithGroupBuy * conversionRate);
+
+
         return (
             <TouchableOpacity onPress={() => handleVoucherClick(item.listing_id)} style={styles.voucherContainer}>
                 {item.voucherImage && (
@@ -150,13 +164,26 @@ const ViewVoucherInventory: React.FC = () => {
                 <Text style={styles.voucherName}>{`Voucher ${item.listing_id}: ${item.name || 'No Name'}`}</Text>
                 {isExpanded && (
                     <View style={styles.detailsContainer}>
-                        <Text style={styles.voucherDescription}>{item.description || 'No Description'}</Text>
+                        <Text style={styles.voucherDescription}>{`Description: ${item.description}` || 'No Description'}</Text>
                         <Text style={styles.voucherQuantity}>{`Quantity: ${item.quantity}`}</Text>
                         <Text style={styles.voucherPrice}>{`Price: $${item.price}`}</Text>
                         <Text style={styles.voucherDiscount}>{`Discount: ${item.discount}%`}</Text>
-                        <Text style={styles.voucherDiscount}>
-                            {`Discounted price: $${((item.price * (100 - item.discount)) / 100).toFixed(2)}`}
-                        </Text>
+
+                        {item.groupPurchaseEnabled ? (
+                            <>
+                                <Text style={styles.voucherDiscount}>
+                                    {`Group discount: ${item.groupDiscount}%`}
+                                </Text>
+                                <Text style={styles.voucherDiscount}>{`Group size: ${item.groupSize}`}</Text>
+                                <Text style={styles.voucherDiscount}>
+                                    {`Discounted price: ${discountedPriceInGemsWithGroupBuy} gems`}
+                                </Text>
+                            </>
+                        ) :
+                            <Text style={styles.voucherDiscount}>
+                                {`Discounted price: ${discountedPriceInGems} gems`}
+                            </Text>
+                        }
                         <Text style={styles.expirationDate}>
                             {`Expiry Date: ${item.expirationDate ? new Date(item.expirationDate).toLocaleDateString() : 'N/A'}`}
                         </Text>
