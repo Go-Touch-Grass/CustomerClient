@@ -12,6 +12,15 @@ interface UserInfo {
   xpProgress: number;
 }
 
+interface XPUpdateResponse {
+  previousLevel: number;
+  currentLevel: number;
+  totalXP: number;
+  xpForNextLevel: number;
+  xpProgress: number;
+  leveledUp: boolean;
+}
+
 export const getUserInfo = async (): Promise<UserInfo> => {
   const token = await getToken();
   if (!token) {
@@ -95,4 +104,24 @@ export const updateCustomerAvatar = async (avatarId: number): Promise<void> => {
     } catch (error) {
         throw error;
     }
+};
+
+export const updateXP = async (xpAmount: number): Promise<XPUpdateResponse> => {
+  const token = await getToken();
+  if (!token) {
+    throw new Error('No token found');
+  }
+
+  try {
+    const response = await axiosInstance.post(
+      'auth/update-xp',
+      { xpAmount },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    return response.data.data;
+  } catch (error) {
+    throw error;
+  }
 };
