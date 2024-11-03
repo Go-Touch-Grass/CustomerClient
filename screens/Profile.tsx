@@ -23,6 +23,8 @@ interface UserInfo {
   xp_progress: number;
 
   gem_balance: number;
+  streakCount: number;  // Streak count
+  lastCheckIn: Date | null; // Last check-in date
 }
 
 const Profile: React.FC = () => {
@@ -123,6 +125,15 @@ const Profile: React.FC = () => {
               </Text>
 
               <Text style={profileStyles.infoText}>Gem Balance : {userInfo.gem_balance}</Text>
+
+              {/* Streak Information */}
+              <Text style={profileStyles.infoText}>
+                {t('streak-count')}: {userInfo.streakCount}
+              </Text>
+              <Text style={profileStyles.infoText}>
+                {t('last-check-in')}: {userInfo.lastCheckIn ? new Date(userInfo.lastCheckIn).toDateString() : t('never')}
+              </Text>
+
             </View>
             <View style={profileStyles.progressContainer}>
               <Text style={profileStyles.progressText}>{t('level-progress')}</Text>
