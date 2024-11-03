@@ -39,6 +39,5 @@ export const HomeScreenAvatarStyles =(avatarSize: number) =>
         width: avatarSize * 0.9, 
         height: avatarSize * 0.5, 
         },
-
     });
   

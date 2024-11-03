@@ -24,6 +24,7 @@ import { GEOAPIFY_API_KEY } from '@env';
 import { Voucher, getAllVouchers, purchaseVouchers } from '../api/voucherApi';
 import { useIsFocused } from '@react-navigation/native';
 import { IP_ADDRESS } from '@env';
+import { awardXP, XP_REWARDS } from '../utils/xpRewards';
 
 interface GeocodeResult {
   latitude: number;
@@ -53,6 +54,9 @@ const Home: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const isFocused = useIsFocused();
+  const [labelVisible, setLabelVisible] = useState(false);
+  const [selectedBranchId, setSelectedBranchId] = useState<string | null>(null);
+  const [messageVisible, setMessageVisible] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -330,28 +334,68 @@ const Home: React.FC = () => {
     return distance;
   };
 
+  const calculateRoamingCoordinates = (
+    branchLat: number,
+    branchLng: number,
+    userLat: number,
+    userLng: number,
+    distance: number
+  ) => {
+    const toRadians = (degrees: number) => degrees * (Math.PI / 180);
+    const toDegrees = (radians: number) => radians * (180 / Math.PI);
+
+    const earthRadius = 6371e3; // Earth's radius in meters
+    const distanceInMeters = distance * 1000;
+
+    const branchLatRad = toRadians(branchLat);
+    const branchLngRad = toRadians(branchLng);
+    const userLatRad = toRadians(userLat);
+    const userLngRad = toRadians(userLng);
+
+    const bearing = Math.atan2(
+      Math.sin(userLngRad - branchLngRad) * Math.cos(userLatRad),
+      Math.cos(branchLatRad) * Math.sin(userLatRad) -
+      Math.sin(branchLatRad) * Math.cos(userLatRad) * Math.cos(userLngRad - branchLngRad)
+    );
+
+    const newLatRad = Math.asin(
+      Math.sin(branchLatRad) * Math.cos(distanceInMeters / earthRadius) +
+      Math.cos(branchLatRad) * Math.sin(distanceInMeters / earthRadius) * Math.cos(bearing)
+    );
+
+    const newLngRad =
+      branchLngRad +
+      Math.atan2(
+        Math.sin(bearing) * Math.sin(distanceInMeters / earthRadius) * Math.cos(branchLatRad),
+        Math.cos(distanceInMeters / earthRadius) - Math.sin(branchLatRad) * Math.sin(newLatRad)
+      );
+
+    return {
+      latitude: toDegrees(newLatRad),
+      longitude: toDegrees(newLngRad),
+    };
+  };
+
   const renderSubscriptionMarkers = () => {
-    return subscriptions.map((subscription) => {
+    return subscriptions.flatMap((subscription) => {
       const { branch } = subscription;
-      if (!branch || !branch.coordinates) return null;
+      if (!branch || !branch.coordinates) return [];
 
       const { latitude, longitude } = branch.coordinates;
-
-      if (latitude === undefined || longitude === undefined) return null;
+      if (latitude === undefined || longitude === undefined) return [];
 
       const avatar = branch.avatar as AvatarInfo;
+      const markers = [];
 
-      const handleMarkerPress = () => {
-        const { coordinates } = branch;
-        console.log('Branch coordinates:', coordinates);
-
+      // Function to handle marker press
+      const handleMarkerPress = (targetBranch: BranchInfo, isRoaming = false) => {
+        const { coordinates } = targetBranch;
         if (!coordinates) {
           console.warn('Branch coordinates are not available.');
           return;
         }
 
         const { latitude, longitude } = coordinates;
-
         if (!userLocation) {
           console.warn('User location not available.');
           return;
@@ -367,9 +411,40 @@ const Home: React.FC = () => {
           longitude
         );
 
-        if (distanceToAvatar <= RADIUS_THRESHOLD) {
-          setSelectedBranch(branch);
+        if (distanceToAvatar <= RADIUS_THRESHOLD && !isRoaming) {
+          setSelectedBranch(targetBranch);
           setIsShopOpen(true);
+        } else if (isRoaming) {
+          const roamingCoordinates = calculateRoamingCoordinates(
+            latitude,
+            longitude,
+            userLocation.coords.latitude,
+            userLocation.coords.longitude,
+            subscription.distanceCoverage
+          );
+          const distanceToRoamingAvatar = calculateDistance(
+            userLatitude,
+            userLongitude,
+            roamingCoordinates.latitude,
+            roamingCoordinates.longitude
+          );
+
+          if (distanceToRoamingAvatar <= 500 && branch.coordinates) {
+            // Proceed with the normal logic for roaming avatar
+            mapRef.current?.animateToRegion({
+              latitude: branch.coordinates.latitude,
+              longitude: branch.coordinates.longitude,
+              latitudeDelta: 0.005,
+              longitudeDelta: 0.005,
+            });
+            setSelectedBranchId(branch.entityType === 'Business_register_business' ? String(branch.registrationId) : String(branch.outletId));
+            setLabelVisible(true);
+            setTimeout(() => setLabelVisible(false), 3000);
+          } else {
+            // Show message if user is too far from the roaming avatar
+            setMessageVisible(true);
+            setTimeout(() => setMessageVisible(false), 3000);
+          }
         } else {
           navigation.navigate('BusinessAvatarInfo', {
             entityType: branch.entityType,
@@ -385,31 +460,66 @@ const Home: React.FC = () => {
         }
       };
 
-      return (
+      // Render the actual branch avatar marker
+      markers.push(
         <Marker
-          coordinate={{
-            latitude,
-            longitude,
-          }}
-          onPress={handleMarkerPress}
+          coordinate={{ latitude, longitude }}
+          onPress={() => handleMarkerPress(branch)}
         >
           <View style={styles.avatarContainer}>
             {avatar.base && <Image source={{ uri: avatar.base.filepath }} style={styles.base} />}
             {avatar.hat && <Image source={{ uri: avatar.hat.filepath }} style={styles.hat} />}
             {avatar.shirt && <Image source={{ uri: avatar.shirt.filepath }} style={styles.upperWear} />}
             {avatar.bottom && <Image source={{ uri: avatar.bottom.filepath }} style={styles.lowerWear} />}
-
-            {/* Render the entity name below the avatar */}
             <Text style={homeStyles.entityNameText} numberOfLines={2}>
               {branch.entityType === 'Business_register_business'
                 ? branch.entityName
                 : branch.outletName}
             </Text>
+            {/* Label for the Up arrows */}
+            {selectedBranchId === (branch.entityType === 'Business_register_business' ? String(branch.registrationId) : String(branch.outletId)) && labelVisible && (
+              <View>
+                <Text style={homeStyles.labelText}>↑↑↑</Text>
+              </View>
+            )}
           </View>
         </Marker>
       );
+
+      // Render roaming avatar if distanceCoverage > 0
+      if (subscription.distanceCoverage > 0 && userLocation) {
+        const roamingCoordinates = calculateRoamingCoordinates(
+          latitude,
+          longitude,
+          userLocation.coords.latitude,
+          userLocation.coords.longitude,
+          subscription.distanceCoverage
+        );
+
+        markers.push(
+          <Marker
+            coordinate={roamingCoordinates}
+            onPress={() => handleMarkerPress(branch, true)}
+          >
+            <View style={styles.avatarContainer}>
+              {avatar.base && <Image source={{ uri: avatar.base.filepath }} style={styles.base} />}
+              {avatar.hat && <Image source={{ uri: avatar.hat.filepath }} style={styles.hat} />}
+              {avatar.shirt && <Image source={{ uri: avatar.shirt.filepath }} style={styles.upperWear} />}
+              {avatar.bottom && <Image source={{ uri: avatar.bottom.filepath }} style={styles.lowerWear} />}
+              <Text style={homeStyles.entityNameText} numberOfLines={2}>
+                [ROAMING] {branch.entityType === 'Business_register_business'
+                  ? branch.entityName
+                  : branch.outletName}
+              </Text>
+            </View>
+          </Marker>
+        );
+      }
+
+      return markers;
     });
   };
+
 
   useEffect(() => {
     const fetchVouchers = async () => {
@@ -466,7 +576,9 @@ const Home: React.FC = () => {
                   style={BusinessAvatarShopboxStyles.voucherItem}
                 >
                   <Image
-                    source={voucher.voucherImage ? { uri: `http://${IP_ADDRESS}:8080/${voucher.voucherImage}` } : require('../assets/noimage.jpg')}
+                    // source={voucher.voucherImage ? { uri: `http://192.168.222.142:8080/${voucher.voucherImage}` } : require('../assets/noimage.jpg')}
+                    // source={voucher.voucherImage ? { uri: `http://${IP_ADDRESS}:8080/${voucher.voucherImage}` } : require('../assets/noimage.jpg')}
+                    source={voucher.voucherImage ? { uri: `http://localhost:8080/${voucher.voucherImage}` } : require('../assets/noimage.jpg')}
                     style={BusinessAvatarShopboxStyles.voucherImage}
                   />
                   <View style={BusinessAvatarShopboxStyles.voucherDetails}>
@@ -539,14 +651,15 @@ const Home: React.FC = () => {
                       for (let i = 0; i < quantity; i++) {
                         await purchaseVouchers(String(selectedVoucher.listing_id));
                       }
-                      setSuccessMessage('Your Voucher has been added to your Inventory!');
+                      await awardXP(XP_REWARDS.PURCHASE_VOUCHER);
+                      setSuccessMessage(`Your Voucher has been added to your Inventory! (${XP_REWARDS.PURCHASE_VOUCHER} XP earned)`);
                       setModalVisible(false);
                     } else {
                       await purchaseVouchers(String(selectedVoucher.listing_id));
-                      setSuccessMessage('Your Voucher has been added to your Inventory!');
+                      await awardXP(XP_REWARDS.PURCHASE_VOUCHER);
+                      setSuccessMessage(`Your Voucher has been added to your Inventory! (${XP_REWARDS.PURCHASE_VOUCHER} XP earned)`);
                       setModalVisible(false);
                     }
-
                   } catch (error) {
                     console.error('Please top up more gems first!');
                   }
@@ -665,6 +778,11 @@ const Home: React.FC = () => {
           <TouchableOpacity style={homeStyles.centerButton} onPress={centerOnUserLocation}>
             <Ionicons name="locate" size={24} color="black" />
           </TouchableOpacity>
+          {messageVisible && (
+            <View style={homeStyles.messageContainer}>
+              <Text style={homeStyles.messageText}>Get closer to the Roaming avatar first!</Text>
+            </View>
+          )}
         </View>
         {/* Render the shop box if shop is open */}
         {isShopOpen && renderShopBox()}

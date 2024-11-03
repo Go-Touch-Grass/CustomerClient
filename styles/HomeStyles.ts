@@ -124,4 +124,24 @@ export const homeStyles = StyleSheet.create({
         fontWeight: 'bold',
         maxWidth: 150,
       },
+      labelText: {
+        color: '#e01414',
+        fontSize: 35,
+        top: 0,
+        left: 10,
+        transform: [{ translateX: -10 }],
+    },
+    messageContainer: {
+        position: 'absolute',
+        top: '40%', // adjust this value to move it upwards or downwards
+        left: '27%',
+        transform: [{ translateX: -50 }], // center horizontally
+        backgroundColor: 'rgba(0, 0, 0, 0.7)', // semi-transparent background
+        padding: 10,
+        borderRadius: 5,
+    },
+      messageText: {
+        color: '#90EE90',
+        fontSize: 16,
+      },
 });
