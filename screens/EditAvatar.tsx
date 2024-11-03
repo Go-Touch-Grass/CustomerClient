@@ -6,6 +6,7 @@ import { CreateAvatarStyles } from '../styles/CreateAvatarStyles';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { getUserInfo } from '../api/userApi';
 import { getItems, AvatarType, Item, ItemType } from '../api/avatarApi';
+import { awardXP, XP_REWARDS, showXPAlert } from '../utils/xpRewards';
 
 const EditAvatar = () => {
   const [avatar, setAvatar] = useState<AvatarInfo | null>(null);
@@ -75,7 +76,8 @@ const EditAvatar = () => {
       };
 
       await updateAvatar(avatar.id, updatedInfo);
-      Alert.alert('Success', 'Avatar updated successfully');
+      const xpResult = await awardXP(XP_REWARDS.UPDATE_AVATAR);
+      showXPAlert(xpResult);
       navigation.replace('Home');
     } catch (error) {
       console.error('Error updating avatar:', error);

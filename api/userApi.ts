@@ -12,7 +12,7 @@ interface UserInfo {
   xpProgress: number;
 }
 
-interface XPUpdateResponse {
+export interface XPUpdateResponse {
   previousLevel: number;
   currentLevel: number;
   totalXP: number;

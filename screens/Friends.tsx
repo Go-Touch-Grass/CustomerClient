@@ -16,6 +16,8 @@ import {
   sendFriendRequest,
 } from '../api/socialApi';
 
+import { awardXP, XP_REWARDS, showXPAlert } from '../utils/xpRewards';
+
 interface Friend {
   id: string;
   username: string;
@@ -60,6 +62,8 @@ const Friends: React.FC = () => {
       fetchFriendsData();
       setError('');
       showSuccessAlert('Friend request sent');
+      const xpResult = await awardXP(XP_REWARDS.ADD_FRIEND);
+      showXPAlert(xpResult);
     } catch (error) {
       console.error('Error sending friend request:', error);
       if (error.response && error.response.data && error.response.data.message) {
@@ -73,6 +77,8 @@ const Friends: React.FC = () => {
   const handleAcceptFriendRequest = async (friendId: string) => {
     try {
       await acceptFriendRequest(friendId);
+      const xpResult = await awardXP(XP_REWARDS.ACCEPT_FRIEND);
+      showXPAlert(xpResult);
       setError('');
       await fetchFriendsData();
       if (friendRequests.length === 1) {

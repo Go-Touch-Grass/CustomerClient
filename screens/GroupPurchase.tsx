@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, FlatList } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, FlatList, Alert } from 'react-native';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { finalizeGroupPurchase, getAllCreatedGroups, getAllJoinedGroups, GroupPurchaseStatus } from '../api/voucherApi';
 import ProtectedRoute from '../components/ProtectedRoute';
 import { socialStyles } from '../styles/SocialStyles';
 import { Ionicons } from '@expo/vector-icons';
+import { awardXP, XP_REWARDS, showXPAlert } from '../utils/xpRewards';
 
 // Define the type for route params
 interface GroupPurchaseRouteParams {
@@ -66,24 +67,23 @@ const GroupPurchase = () => {
     };
 
     const handleCompletePurchase = async () => {
-        setError(null); // Clear previous errors
-        setLoading(true); // Indicate that the process is ongoing
+        setError(null);
+        setLoading(true);
 
         try {
             const response = await finalizeGroupPurchase(groupPurchaseId);
-            console.log("Purchase finalized:", response.data);
-            fetchGroupStatus(); // refresh group status after completion
-            //navigate? 
-
+            const xpResult = await awardXP(XP_REWARDS.GROUP_PURCHASE_CREATE);
+            showXPAlert(xpResult);
+            fetchGroupStatus();
         } catch (error: any) {
             if (error.response && error.response.status === 400) {
                 if (error.response.data.insufficientParticipants) {
-                    // Handle insufficient gems case
                     const insufficientParticipants = error.response.data.insufficientParticipants;
                     const participantsMessage = insufficientParticipants
-                        .map((participant: { username: string; balance: number }) => `Username: ${participant.username}, Balance: ${participant.balance}`)
+                        .map((participant: { username: string; balance: number }) => 
+                            `Username: ${participant.username}, Balance: ${participant.balance}`
+                        )
                         .join("\n");
-
                     setError(`Some participants have insufficient gems. Please top up:\n${participantsMessage}`);
                 } else {
                     setError(error.response.data.message || "Error completing purchase.");
@@ -95,6 +95,18 @@ const GroupPurchase = () => {
             setLoading(false);
         }
     };
+
+    const handleJoinPurchase = async () => {
+        try {
+            await joinGroupPurchase(groupPurchaseId);
+            const xpResult = await awardXP(XP_REWARDS.GROUP_PURCHASE_JOIN);
+            showXPAlert(xpResult);
+            fetchGroupStatus();
+        } catch (error) {
+            // ... error handling ...
+        }
+    };
+
     const isGroupComplete = groupStatus && groupStatus.current_size >= groupStatus.group_size;
     // Check if all participants have paid
     const isPaymentCompleted = groupStatus && groupStatus.participants.every((participant: any) => participant.payment_status === 'paid');

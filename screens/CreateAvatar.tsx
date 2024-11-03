@@ -6,6 +6,7 @@ import { useNavigation } from '@react-navigation/native';
 import { CreateAvatarStyles } from '../styles/CreateAvatarStyles';
 import axiosInstance from '../api/authApi'; // Import the axiosInstance
 import AvatarRenderer from '../components/AvatarRenderer';
+import { awardXP, XP_REWARDS } from '../utils/xpRewards';
 
 const CreateAvatar = ({ route, navigation }) => {
   const [avatar, setAvatar] = useState<AvatarInfo>({
@@ -55,13 +56,17 @@ const CreateAvatar = ({ route, navigation }) => {
     try {
       const response = await createAvatar(
         AvatarType.TOURIST,
-        1, // Always use base item with id 1 for customers
+        1,
         avatar.hat?.id || null,
         avatar.shirt?.id || null,
         avatar.bottom?.id || null,
       );
 
-      Alert.alert('Success', 'Avatar created successfully');
+      await awardXP(XP_REWARDS.CREATE_AVATAR);
+      Alert.alert(
+        '🎉 Welcome to GTG! 🌱', 
+        `✨ You earned ${XP_REWARDS.CREATE_AVATAR} XP for signing up! 🌟`
+      );
       if (route.params?.onAvatarCreated) {
         await route.params.onAvatarCreated();
       }
