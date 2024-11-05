@@ -4,13 +4,14 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons'; // Add this import
 import { removeToken } from '../utils/asyncStorage';
-import { getUserInfo } from '../api/userApi';
+import { getUserInfo, repairStreak } from '../api/userApi';
 import { StyledContainer, InnerContainer, PageTitle } from '../styles/commonStyles';
 import { profileStyles } from '../styles/ProfileStyles';
 import ProtectedRoute from '../components/ProtectedRoute';
 import { deleteAccount } from '../api/userApi';
 import { Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 interface UserInfo {
   id: string;
@@ -25,17 +26,20 @@ interface UserInfo {
   gem_balance: number;
   streakCount: number;  // Streak count
   lastCheckIn: Date | null; // Last check-in date
+  maxStreakCount: number;
 }
 
 const Profile: React.FC = () => {
   const { t } = useTranslation();
   const navigation = useNavigation<StackNavigationProp<any>>();
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+  const [gemsRequired, setGemsRequired] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
         const info = await getUserInfo();
+        console.log('Max Streak Count:', info); // Log the maxStreakCount
         setUserInfo(info);
       } catch (error) {
         console.error('Error fetching user info:', error);
@@ -92,6 +96,24 @@ const Profile: React.FC = () => {
     navigation.navigate('ChangePassword');
   };
 
+
+  const handleRepairStreak = async () => {
+    if (!userInfo) return;
+    try {
+      const response = await repairStreak(userInfo.id); // Make sure this calls the right endpoint
+      setUserInfo(prev => prev && { ...prev, gem_balance: response.gem_balance, streakCount: response.streakCount });
+      setGemsRequired(response.gemsRequired);
+    } catch (error) {
+      // Check if the error has a response property
+      const errorMessage = error.response?.data?.error || 'Unable to repair streak.'; // Default message if none provided
+      Alert.alert('Error', errorMessage);
+    }
+  };
+
+
+  // **Added**: Check if the streak is broken
+  const isStreakBroken = userInfo && userInfo.streakCount <= 1;
+
   return (
     <StyledContainer>
       <TouchableOpacity style={profileStyles.backButton} onPress={handleBack}>
@@ -127,12 +149,33 @@ const Profile: React.FC = () => {
               <Text style={profileStyles.infoText}>Gem Balance : {userInfo.gem_balance}</Text>
 
               {/* Streak Information */}
-              <Text style={profileStyles.infoText}>
-                {t('streak-count')}: {userInfo.streakCount}
-              </Text>
+              <View style={profileStyles.streakContainer}>
+                <Text style={profileStyles.infoText}>{t('streak-count')}:</Text>
+                <View style={profileStyles.starsContainer}>
+                  {[...Array(userInfo.streakCount)].map((_, index) => (
+                    <Icon key={index} name="star" size={20} color="#FFD700" />
+                  ))}
+                </View>
+              </View>
               <Text style={profileStyles.infoText}>
                 {t('last-check-in')}: {userInfo.lastCheckIn ? new Date(userInfo.lastCheckIn).toDateString() : t('never')}
               </Text>
+
+              <TouchableOpacity
+                style={[
+                  profileStyles.repairButton,
+                  userInfo.streakCount >= userInfo.streak.maxStreakCount
+                    ? profileStyles.disabledButton
+                    : {}
+                ]}
+                onPress={handleRepairStreak}
+                disabled={userInfo.streakCount >= userInfo.streak.maxStreakCount}
+              >
+                <Text style={profileStyles.buttonText}>
+                  Restore Streak to {userInfo.streak.maxStreakCount} Stars
+                </Text>
+              </TouchableOpacity>
+
 
             </View>
             <View style={profileStyles.progressContainer}>
@@ -169,5 +212,7 @@ const Profile: React.FC = () => {
     </StyledContainer>
   );
 };
+
+
 
 export default ProtectedRoute(Profile);

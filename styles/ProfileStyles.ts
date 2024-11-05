@@ -2,6 +2,24 @@ import { StyleSheet } from 'react-native';
 import { Colors } from './commonStyles';
 
 export const profileStyles = StyleSheet.create({
+  streakContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  starsContainer: {
+    flexDirection: 'row',
+  },
+  repairButton: {
+    backgroundColor: '#FF6347', // Example color, use your preferred color
+    padding: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginVertical: 10,
+  },
+  disabledButton: {
+    backgroundColor: '#ccc', // Grey background for the disabled state
+    opacity: 0.5, // Make it slightly transparent
+  },
   container: {
     flex: 1,
     padding: 20,

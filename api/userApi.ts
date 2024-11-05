@@ -21,6 +21,35 @@ export interface XPUpdateResponse {
   leveledUp: boolean;
 }
 
+interface RepairStreakResponse {
+  gem_balance: number;
+  streakCount: number;
+  gemsRequired: number; // Amount of gems required for the repair
+}
+
+export const repairStreak = async (customerId: string): Promise<RepairStreakResponse> => {
+  const token = await getToken();
+  if (!token) {
+    throw new Error('No token found');
+  }
+
+  try {
+    const response = await axiosInstance.post(
+      `auth/customers/${customerId}/repair-streak`,
+      {}, // Empty body since gemsRequired is calculated server-side
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+
+
+
 export const getUserInfo = async (): Promise<UserInfo> => {
   const token = await getToken();
   if (!token) {
@@ -55,19 +84,19 @@ export const editProfile = async (updatedInfo: Partial<UserInfo>): Promise<UserI
 
 
 export const deleteAccount = async (password: string): Promise<void> => {
-    const token = await getToken();
-    if (!token) {
-        throw new Error('No token found');
-    }
+  const token = await getToken();
+  if (!token) {
+    throw new Error('No token found');
+  }
 
-    try {
-        await axiosInstance.delete('auth/profile/delete', {
-            headers: { Authorization: `Bearer ${token}` },
-            data: { password }
-        });
-    } catch (error) {
-        throw error;
-    }
+  try {
+    await axiosInstance.delete('auth/profile/delete', {
+      headers: { Authorization: `Bearer ${token}` },
+      data: { password }
+    });
+  } catch (error) {
+    throw error;
+  }
 
 };
 
@@ -92,18 +121,18 @@ export const changePassword = async (currentPassword: string, newPassword: strin
 };
 
 export const updateCustomerAvatar = async (avatarId: number): Promise<void> => {
-    const token = await getToken();
-    if (!token) {
-        throw new Error('No token found');
-    }
+  const token = await getToken();
+  if (!token) {
+    throw new Error('No token found');
+  }
 
-    try {
-        await axiosInstance.post('auth/update-avatar', { avatarId }, {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-    } catch (error) {
-        throw error;
-    }
+  try {
+    await axiosInstance.post('auth/update-avatar', { avatarId }, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  } catch (error) {
+    throw error;
+  }
 };
 
 export const updateXP = async (xpAmount: number): Promise<XPUpdateResponse> => {
