@@ -12,6 +12,7 @@
     "@formatjs/intl-pluralrules": "^5.2.14",
     "@react-native-async-storage/async-storage": "^1.23.1",
     "@react-native-community/geolocation": "^3.4.0",
+    "@react-native-community/progress-bar-android": "^1.0.5",
     "@react-navigation/native": "^6.1.18",
     "@react-navigation/stack": "^6.4.1",
     "@react-three/drei": "^9.114.0",
