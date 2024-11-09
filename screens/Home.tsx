@@ -21,7 +21,7 @@ import AppMenu from '../components/AppMenu';
 import { getAllSubscription, SubscriptionInfo, BranchInfo } from '../api/businessApi';
 import axios from 'axios';
 import { GEOAPIFY_API_KEY } from '@env';
-import { Voucher, getAllVouchers, purchaseVouchers } from '../api/voucherApi';
+import { Voucher, getAllVouchers, purchaseVouchers, startGroupPurchase } from '../api/voucherApi';
 import { useIsFocused } from '@react-navigation/native';
 import { IP_ADDRESS } from '@env';
 import { awardXP, XP_REWARDS } from '../utils/xpRewards';
@@ -57,6 +57,8 @@ const Home: React.FC = () => {
   const [labelVisible, setLabelVisible] = useState(false);
   const [selectedBranchId, setSelectedBranchId] = useState<string | null>(null);
   const [messageVisible, setMessageVisible] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
 
   useEffect(() => {
     (async () => {
@@ -376,6 +378,20 @@ const Home: React.FC = () => {
     };
   };
 
+  const handleGroupPurchaseStart = async (voucher: Voucher) => {
+    // Logic for initiating a group purchase or navigating to the group purchase flow
+    console.log(`Initiating group purchase for voucher: ${voucher.listing_id}`);
+    try {
+      const response = await startGroupPurchase(voucher);
+      //console.log("passing groupPurchase Id over", response.id);
+      navigation.navigate('GroupPurchase', { groupPurchaseId: response.id });
+    } catch (error) {
+      //console.error('Error starting group purchase:', error.response?.data || error.message);
+      setError(error instanceof Error ? error.message : String(error));
+      //alert(error.response?.data.message || 'Error starting group purchase.');
+    }
+  };
+
   const renderSubscriptionMarkers = () => {
     return subscriptions.flatMap((subscription) => {
       const { branch } = subscription;
@@ -577,8 +593,8 @@ const Home: React.FC = () => {
                 >
                   <Image
                     // source={voucher.voucherImage ? { uri: `http://192.168.222.142:8080/${voucher.voucherImage}` } : require('../assets/noimage.jpg')}
-                    // source={voucher.voucherImage ? { uri: `http://${IP_ADDRESS}:8080/${voucher.voucherImage}` } : require('../assets/noimage.jpg')}
-                    source={voucher.voucherImage ? { uri: `http://localhost:8080/${voucher.voucherImage}` } : require('../assets/noimage.jpg')}
+                    source={voucher.voucherImage ? { uri: `http://${IP_ADDRESS}:8080/${voucher.voucherImage}` } : require('../assets/noimage.jpg')}
+                    //source={voucher.voucherImage ? { uri: `http://localhost:8080/${voucher.voucherImage}` } : require('../assets/noimage.jpg')}
                     style={BusinessAvatarShopboxStyles.voucherImage}
                   />
                   <View style={BusinessAvatarShopboxStyles.voucherDetails}>
@@ -586,6 +602,21 @@ const Home: React.FC = () => {
                     <View style={BusinessAvatarShopboxStyles.priceContainer}>
                       <Text style={BusinessAvatarShopboxStyles.originalPrice}>{originalPrice} Gems</Text>
                       <Text style={BusinessAvatarShopboxStyles.discountedPrice}>{discountedPrice} Gems</Text>
+
+                      {voucher.groupPurchaseEnabled && (
+                        <View style={BusinessAvatarShopboxStyles.groupPurchaseContainer}>
+                          <View style={BusinessAvatarShopboxStyles.groupInfoContainer}>
+                            <Text style={BusinessAvatarShopboxStyles.groupInfoText}>Group Size: {voucher.groupSize}</Text>
+                            <Text style={BusinessAvatarShopboxStyles.groupInfoText}>Group Discount: {voucher.groupDiscount}%</Text>
+                          </View>
+
+                          <TouchableOpacity style={BusinessAvatarShopboxStyles.groupButton} onPress={() => handleGroupPurchaseStart(voucher)}>
+                            <Text style={BusinessAvatarShopboxStyles.groupButtonText}>Group Purchase</Text>
+                          </TouchableOpacity>
+                        </View>
+                      )}
+
+
                     </View>
                     <View style={BusinessAvatarShopboxStyles.discountBadge}>
                       <Text style={BusinessAvatarShopboxStyles.discountText}>{voucher.discount}% OFF</Text>
@@ -790,5 +821,6 @@ const Home: React.FC = () => {
     </TouchableWithoutFeedback>
   );
 };
+
 
 export default ProtectedRoute(Home);

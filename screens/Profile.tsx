@@ -96,19 +96,32 @@ const Profile: React.FC = () => {
     navigation.navigate('ChangePassword');
   };
 
-
   const handleRepairStreak = async () => {
     if (!userInfo) return;
-    try {
-      const response = await repairStreak(userInfo.id); // Make sure this calls the right endpoint
-      setUserInfo(prev => prev && { ...prev, gem_balance: response.gem_balance, streakCount: response.streakCount });
-      setGemsRequired(response.gemsRequired);
-    } catch (error) {
-      // Check if the error has a response property
-      const errorMessage = error.response?.data?.error || 'Unable to repair streak.'; // Default message if none provided
-      Alert.alert('Error', errorMessage);
-    }
+
+    // Show confirmation prompt before attempting to repair streak
+    Alert.alert(
+      'Repair Streak',
+      'Are you sure you want to use gems to restore your streak?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Confirm',
+          onPress: async () => {
+            try {
+              const response = await repairStreak(userInfo.id); // Make sure this calls the right endpoint
+              setUserInfo(prev => prev && { ...prev, gem_balance: response.gem_balance, streakCount: response.streakCount });
+              setGemsRequired(response.gemsRequired);
+            } catch (error) {
+              const errorMessage = error.response?.data?.error || 'Unable to repair streak.';
+              Alert.alert('Error', errorMessage);
+            }
+          },
+        },
+      ]
+    );
   };
+
 
 
   // **Added**: Check if the streak is broken
