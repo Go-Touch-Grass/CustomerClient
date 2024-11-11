@@ -21,13 +21,29 @@ interface XPUpdateResult {
     leveledUp: boolean;
 }
 
+let isXpDoublerActive = false;
+let xpDoublerTimeout: NodeJS.Timeout | null = null;
+
+export const activateXpDoubler = () => {
+    isXpDoublerActive = true;
+    if (xpDoublerTimeout) {
+        clearTimeout(xpDoublerTimeout);
+    }
+    xpDoublerTimeout = setTimeout(() => {
+        isXpDoublerActive = false;
+        xpDoublerTimeout = null;
+        console.log('XP Doubler has expired.');
+    }, 15 * 60 * 1000); 
+};
+
 export const awardXP = async (amount: number): Promise<XPUpdateResult> => {
     try {
-        const result = await updateXP(amount);
+        const effectiveAmount = isXpDoublerActive ? amount * 2 : amount;
+        const result = await updateXP(effectiveAmount);
         return {
             currentLevel: result.currentLevel,
             previousLevel: result.previousLevel,
-            xpGained: amount,
+            xpGained: effectiveAmount,
             totalXP: result.totalXP,
             xpForNextLevel: result.xpForNextLevel,
             xpProgress: result.xpProgress,
