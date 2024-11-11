@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, FlatList, Alert, } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, FlatList, Alert, Share } from 'react-native';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { finalizeGroupPurchase, getAllCreatedGroups, getAllJoinedGroups, GroupPurchaseStatus } from '../api/voucherApi';
 import ProtectedRoute from '../components/ProtectedRoute';
 import { socialStyles } from '../styles/SocialStyles';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { awardXP, XP_REWARDS, showXPAlert } from '../utils/xpRewards';
+import { IP_ADDRESS } from '@env';
 
 // Define the type for route params
 interface GroupPurchaseRouteParams {
@@ -172,6 +173,32 @@ const GroupPurchase = () => {
         );
     };
 
+    const handleShare = async (groupPurchaseID: String) => {
+        const expoGoLink = `exp://${IP_ADDRESS}:8081`;
+
+        try {
+            const result = await Share.share({
+                message: `Join my group purchase group with this number "${groupPurchaseID}". \nOpen the app here:${expoGoLink}`,
+            });
+            if (result.action === Share.sharedAction) {
+                if (result.activityType) {
+                    console.log('Shared with activity type: ', result.activityType);
+                } else {
+                    console.log('Shared');
+                }
+            } else if (result.action === Share.dismissedAction) {
+                console.log('Dismissed');
+            }
+        } catch (error) {
+            if (error instanceof Error) {
+                setError(error.message);
+            } else {
+                setError('An unknown error occurred.');
+            }
+        }
+    };
+
+
     return (
         <View style={styles.container}>
             <TouchableOpacity style={socialStyles.backButton} onPress={() => navigation.goBack()}>
@@ -225,8 +252,15 @@ const GroupPurchase = () => {
                             ) : (
                                 <>
                                     <Text style={styles.infoText}>
-                                        Send this Group Purchase ID <Text style={styles.boldText}>"{groupPurchaseId}"</Text> to your friend.
+                                        Send this Group Number <Text style={styles.boldText}>"{groupPurchaseId}"</Text> to your friend.
                                     </Text>
+                                    <TouchableOpacity onPress={() => handleShare(groupPurchaseId)} style={styles.shareButton} >
+                                        <View style={styles.shareContent}>
+                                            <Text style={styles.shareText}>Share</Text>
+                                            <Ionicons name="share-social" size={20} color="#000" />
+                                        </View>
+                                    </TouchableOpacity>
+
                                     <Text style={styles.infoText}>Waiting for more people to join...</Text>
                                 </>
                             )}
@@ -382,6 +416,21 @@ const styles = StyleSheet.create({
     infoText: {
         fontSize: 16,
         marginBottom: 10,
+    },
+    shareButton: {
+        paddingVertical: 10,
+        paddingHorizontal: 15,
+    },
+    shareContent: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    shareText: {
+        textDecorationLine: 'underline',
+        fontSize: 18,
+        color: 'blue',
+        marginLeft: 5, // space between icon and text
+
     },
     completeButton: {
         backgroundColor: 'green',
