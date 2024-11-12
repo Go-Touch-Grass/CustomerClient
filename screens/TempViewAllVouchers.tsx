@@ -63,7 +63,7 @@ const TempViewAllVouchers: React.FC = () => {
         const price = typeof item.price === 'number' ? item.price : 0; // Default to 0 if undefined
         const discount = typeof item.discount === 'number' ? item.discount : 0; // Default to 0 if undefined
         const isExpanded = expandedVoucher === item.listing_id; // Check if this voucher is expanded
-        console.log("config.api_url", Config.API_URL);
+        //console.log("config.api_url", Config.API_URL);
         console.log(item.voucherImage)
         return (
             <TouchableOpacity onPress={() => handleVoucherClick(item.listing_id)} style={styles.voucherContainer}>

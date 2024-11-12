@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, ScrollView, Text, Image, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { PreventRemoveContext, useNavigation } from '@react-navigation/native';
 import { getAvatarByCustomerId, getAvatarById, AvatarInfo, updateAvatar } from '../api/avatarApi'; // Adjust the import based on your project structure
@@ -7,8 +7,13 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { getUserInfo } from '../api/userApi';
 import { getItems, AvatarType, Item, ItemType } from '../api/avatarApi';
 import { awardXP, XP_REWARDS, showXPAlert } from '../utils/xpRewards';
+import { captureRef } from 'react-native-view-shot';
+import * as Sharing from 'expo-sharing';
+import { Share } from 'react-native';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 
 const EditAvatar = () => {
+  const avatarRef = useRef<View>(null); // ref for sharing of avatar image
   const [avatar, setAvatar] = useState<AvatarInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -107,8 +112,8 @@ const EditAvatar = () => {
     return (
       <ScrollView horizontal>
         {categoryItems.map((item) => (
-          <TouchableOpacity 
-            key={item.id} 
+          <TouchableOpacity
+            key={item.id}
             onPress={() => handleSelectItem(item)}
             style={[
               CreateAvatarStyles.wearItemContainer,
@@ -140,14 +145,68 @@ const EditAvatar = () => {
     );
   };
 
+  const handleShareAvatar = async () => {
+    if (!avatarRef.current) return;
+    console.log('Sharing avatar...');
+    try {
+      // Delay to ensure the view is fully rendered
+      //await new Promise((resolve) => setTimeout(resolve, 500));
+
+      // Capture the avatar view and save it as a png file
+      const result = await captureRef(avatarRef);
+      console.log('Captured avatar:', result);
+      // Share the captured image
+
+      await Sharing.shareAsync(result, {
+        mimeType: 'image/png',
+        dialogTitle: 'Share Your Avatar',
+        UTI: 'public.png',
+      });
+
+    } catch (error) {
+      console.error('Error sharing avatar:', error);
+      Alert.alert('Error', 'Failed to share avatar.');
+    }
+  };
+
   return (
     <View style={CreateAvatarStyles.container}>
       <Text style={CreateAvatarStyles.title}>Edit Your Avatar</Text>
 
-      <View style={CreateAvatarStyles.avatarContainer}>
-        {isLoading ? <ActivityIndicator size="large" color="#00AB41" /> : renderAvatar()}
+      {/* TEST capture for sharing - works */}
+      <View ref={avatarRef} style={CreateAvatarStyles.avatarContainer}>
+        <View style={CreateAvatarStyles.backgroundTextContainer}>
+          <Text style={CreateAvatarStyles.backgroundText}>
+            Go-Touch-Grass
+          </Text>
+          <Ionicons name="rose" style={CreateAvatarStyles.flowerIcon} />
+        </View>
+
+        <Image source={require('../assets/sprites/avatar_base.png')} style={CreateAvatarStyles.avatar} />
+        {avatar?.hat && <Image source={{ uri: avatar.hat.filepath }} style={CreateAvatarStyles.hat} />}
+        {avatar?.shirt && <Image source={{ uri: avatar.shirt.filepath }} style={CreateAvatarStyles.upperWear} />}
+        {avatar?.bottom && <Image source={{ uri: avatar.bottom.filepath }} style={CreateAvatarStyles.lowerWear} />}
       </View>
 
+
+      {/* ORIGINAL METHOD 
+      <View style={CreateAvatarStyles.avatarContainer}>
+       {isLoading ? <ActivityIndicator size="large" color="#00AB41" /> : renderAvatar()} 
+      </View>
+*/}
+      {/* Share Avatar Button */}
+      <TouchableOpacity style={CreateAvatarStyles.shareButton} onPress={handleShareAvatar}>
+        <Text style={CreateAvatarStyles.shareButtonText}>Share Avatar</Text>
+      </TouchableOpacity>
+
+      {/* Testing with direct view 
+      <View ref={avatarRef} style={CreateAvatarStyles.avatarContainer}>
+        <Image source={require('../assets/sprites/avatar_base.png')} style={CreateAvatarStyles.avatar} />
+        {avatar?.hat && <Image source={{ uri: avatar.hat.filepath }} style={CreateAvatarStyles.hat} />}
+        {avatar?.shirt && <Image source={{ uri: avatar.shirt.filepath }} style={CreateAvatarStyles.upperWear} />}
+        {avatar?.bottom && <Image source={{ uri: avatar.bottom.filepath }} style={CreateAvatarStyles.lowerWear} />}
+      </View>
+*/}
       <View style={CreateAvatarStyles.categorySelection}>
         <TouchableOpacity style={CreateAvatarStyles.categoryButton} onPress={() => setSelectedCategory(ItemType.HAT)}>
           <Text style={CreateAvatarStyles.categoryButtonText}>Hat</Text>
@@ -172,6 +231,9 @@ const EditAvatar = () => {
       >
         <Text style={CreateAvatarStyles.finishButtonText}>{isSaving ? 'Saving...' : 'Save Changes'}</Text>
       </TouchableOpacity>
+
+
+
     </View>
   );
 };

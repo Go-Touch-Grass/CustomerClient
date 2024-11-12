@@ -8,6 +8,7 @@ import { GroupPurchaseStatus, joinGroupPurchase } from '../api/voucherApi';
 import ProtectedRoute from '../components/ProtectedRoute';
 import { socialStyles } from '../styles/SocialStyles';
 import { getAllFriends } from '../api/socialApi';
+import { awardXP, XP_REWARDS, showXPAlert } from '../utils/xpRewards';
 
 interface GroupPurchaseRouteParams {
     groupPurchaseId: number;
@@ -59,6 +60,8 @@ const JoinGroupPurchase = () => {
 
             console.log("Joining group purchase with ID:", groupPurchaseId);
             const response = await joinGroupPurchase(groupPurchaseId.toString());
+            const xpResult = await awardXP(XP_REWARDS.GROUP_PURCHASE_JOIN);
+            showXPAlert(xpResult);
             //const response = await axios.post(`/auth/group-purchase/join`, { group_purchase_id: groupPurchaseId });
             console.log("Successfully joined the group purchase:", response.data);
             // Redirect to group status page after joining
