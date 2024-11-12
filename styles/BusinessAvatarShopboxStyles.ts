@@ -4,6 +4,123 @@ import { Colors } from './commonStyles';
 const { width, height } = Dimensions.get('window');
 
 export const BusinessAvatarShopboxStyles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#f9f9f9', // Light background for elegance
+        marginTop: 50, // Add margin to the top to lower the container
+    },
+    header: {
+        backgroundColor: '#4CAF50', // Header background color
+        padding: 15,
+        alignItems: 'center',
+    },
+    headerText: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#fff', // White text for contrast
+    },
+
+    redeemContainer: {
+        flexDirection: 'row', // Align items in a row
+        justifyContent: 'flex-end', // Push button to the right
+        marginTop: 10, // Add some space above the button
+    },
+    redeemButton: {
+        paddingVertical: 5, // Smaller vertical padding
+        paddingHorizontal: 10, // Smaller horizontal padding
+        backgroundColor: '#FFD700', // Yellow background
+        borderRadius: 5, // Rounded corners
+        alignItems: 'center', // Center text horizontally
+        justifyContent: 'center', // Center text vertically
+    },
+    redeemButtonText: {
+        color: '#000', // Black text for contrast
+        fontWeight: 'bold',
+        fontSize: 12, // Smaller font size
+    },
+
+
+    listContainer: {
+        padding: 10,
+    },
+    voucherContainer: {
+        backgroundColor: '#fff',
+        padding: 15,
+        marginBottom: 10,
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: '#ddd',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.2,
+        shadowRadius: 2,
+        elevation: 3, // Elevation for Android
+    },
+
+    detailsContainer: {
+        marginTop: 10,
+    },
+    voucherDescription: {
+        fontSize: 16,
+        marginBottom: 5,
+        color: '#555', // Slightly darker text for description
+    },
+    voucherPrice: {
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    voucherDiscount: {
+        fontSize: 14,
+        color: '#888', // Grey for discount
+    },
+    expirationDate: {
+        fontSize: 14,
+        color: '#888', // Grey for expiration date
+    },
+    redeemedText: {
+        color: 'green',
+        fontWeight: 'bold',
+    },
+    groupPurchaseContainer: {
+        flexDirection: 'row', // To align button at the bottom right
+        justifyContent: 'flex-end', // Align button to the right
+
+    },
+    groupInfoContainer: {
+        flexDirection: 'column', // Stack items vertically
+        marginRight: 10, // Space between info and button
+    },
+    groupInfoText: {
+        fontSize: 14,
+        color: '#888',
+        marginBottom: 5, // Add space between lines
+    },
+
+    groupInfo: {
+        fontSize: 14,
+        color: '#888', // Grey for group purchase info
+    },
+    groupButton: {
+        paddingVertical: 5,
+        paddingHorizontal: 10,
+        backgroundColor: '#FF4500', // Orange color for group purchase button
+        borderRadius: 5,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginLeft: 22
+
+    },
+    groupButtonText: {
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 12,
+        maxWidth: 80,
+        flexShrink: 1, // Allow text to shrink if it overflows
+    },
+
     shopBox: {
         position: 'absolute',
         bottom: 0,
@@ -63,8 +180,9 @@ export const BusinessAvatarShopboxStyles = StyleSheet.create({
         marginBottom: 5,
     },
     priceContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
+        flexDirection: 'column', // Stack items vertically
+        alignItems: 'flex-start', // Align text elements to the start
+        marginBottom: 10, // Adjust as needed
     },
     originalPrice: {
         fontSize: 14,
