@@ -21,10 +21,11 @@ import AppMenu from '../components/AppMenu';
 import { getAllSubscription, SubscriptionInfo, BranchInfo } from '../api/businessApi';
 import axios from 'axios';
 import { GEOAPIFY_API_KEY } from '@env';
-import { Voucher, getAllVouchers, purchaseVouchers } from '../api/voucherApi';
+import { Voucher, getAllVouchers, purchaseVouchers, startGroupPurchase } from '../api/voucherApi';
 import { useIsFocused } from '@react-navigation/native';
 import { IP_ADDRESS } from '@env';
-import { awardXP, XP_REWARDS } from '../utils/xpRewards';
+import { activateXpDoubler, awardXP, XP_REWARDS } from '../utils/xpRewards';
+import { FontAwesome } from '@expo/vector-icons';
 
 interface GeocodeResult {
   latitude: number;
@@ -53,10 +54,14 @@ const Home: React.FC = () => {
   const [quantity, setQuantity] = useState(1);
   const [modalVisible, setModalVisible] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [timerMessage, setTimerMessage] = useState(false);
   const isFocused = useIsFocused();
   const [labelVisible, setLabelVisible] = useState(false);
   const [selectedBranchId, setSelectedBranchId] = useState<string | null>(null);
   const [messageVisible, setMessageVisible] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [xpDoublerTimeLeft, setXpDoublerTimeLeft] = useState<number | null>(null);
+  const [isTimerModalVisible, setIsTimerModalVisible] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -376,6 +381,42 @@ const Home: React.FC = () => {
     };
   };
 
+  const handleGroupPurchaseStart = async (voucher: Voucher) => {
+    // Logic for initiating a group purchase or navigating to the group purchase flow
+    console.log(`Initiating group purchase for voucher: ${voucher.listing_id}`);
+    try {
+      const response = await startGroupPurchase(voucher);
+      //console.log("passing groupPurchase Id over", response.id);
+      navigation.navigate('GroupPurchase', { groupPurchaseId: response.id });
+    } catch (error) {
+      //console.error('Error starting group purchase:', error.response?.data || error.message);
+      setError(error instanceof Error ? error.message : String(error));
+      //alert(error.response?.data.message || 'Error starting group purchase.');
+    }
+  };
+  const handleActivateXpDoubler = () => {
+    activateXpDoubler();
+    setXpDoublerTimeLeft(15 * 60); 
+  };
+
+  useEffect(() => {
+    if (xpDoublerTimeLeft !== null && xpDoublerTimeLeft > 0) {
+        const interval = setInterval(() => {
+            setXpDoublerTimeLeft(prev => (prev !== null ? prev - 1 : null));
+        }, 1000);
+
+        return () => clearInterval(interval);
+    } else if (xpDoublerTimeLeft === 0) {
+        setXpDoublerTimeLeft(null); // Clear the timer when it runs out
+    }
+  }, [xpDoublerTimeLeft]);
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
   const renderSubscriptionMarkers = () => {
     return subscriptions.flatMap((subscription) => {
       const { branch } = subscription;
@@ -577,8 +618,8 @@ const Home: React.FC = () => {
                 >
                   <Image
                     // source={voucher.voucherImage ? { uri: `http://192.168.222.142:8080/${voucher.voucherImage}` } : require('../assets/noimage.jpg')}
-                    // source={voucher.voucherImage ? { uri: `http://${IP_ADDRESS}:8080/${voucher.voucherImage}` } : require('../assets/noimage.jpg')}
-                    source={voucher.voucherImage ? { uri: `http://localhost:8080/${voucher.voucherImage}` } : require('../assets/noimage.jpg')}
+                    source={voucher.voucherImage ? { uri: `http://${IP_ADDRESS}:8080/${voucher.voucherImage}` } : require('../assets/noimage.jpg')}
+                    //source={voucher.voucherImage ? { uri: `http://localhost:8080/${voucher.voucherImage}` } : require('../assets/noimage.jpg')}
                     style={BusinessAvatarShopboxStyles.voucherImage}
                   />
                   <View style={BusinessAvatarShopboxStyles.voucherDetails}>
@@ -586,6 +627,21 @@ const Home: React.FC = () => {
                     <View style={BusinessAvatarShopboxStyles.priceContainer}>
                       <Text style={BusinessAvatarShopboxStyles.originalPrice}>{originalPrice} Gems</Text>
                       <Text style={BusinessAvatarShopboxStyles.discountedPrice}>{discountedPrice} Gems</Text>
+
+                      {voucher.groupPurchaseEnabled && (
+                        <View style={BusinessAvatarShopboxStyles.groupPurchaseContainer}>
+                          <View style={BusinessAvatarShopboxStyles.groupInfoContainer}>
+                            <Text style={BusinessAvatarShopboxStyles.groupInfoText}>Group Size: {voucher.groupSize}</Text>
+                            <Text style={BusinessAvatarShopboxStyles.groupInfoText}>Group Discount: {voucher.groupDiscount}%</Text>
+                          </View>
+
+                          <TouchableOpacity style={BusinessAvatarShopboxStyles.groupButton} onPress={() => handleGroupPurchaseStart(voucher)}>
+                            <Text style={BusinessAvatarShopboxStyles.groupButtonText}>Group Purchase</Text>
+                          </TouchableOpacity>
+                        </View>
+                      )}
+
+
                     </View>
                     <View style={BusinessAvatarShopboxStyles.discountBadge}>
                       <Text style={BusinessAvatarShopboxStyles.discountText}>{voucher.discount}% OFF</Text>
@@ -651,13 +707,19 @@ const Home: React.FC = () => {
                       for (let i = 0; i < quantity; i++) {
                         await purchaseVouchers(String(selectedVoucher.listing_id));
                       }
-                      await awardXP(XP_REWARDS.PURCHASE_VOUCHER);
-                      setSuccessMessage(`Your Voucher has been added to your Inventory! (${XP_REWARDS.PURCHASE_VOUCHER} XP earned)`);
+                      handleActivateXpDoubler();
+                      const xpResult = await awardXP(XP_REWARDS.PURCHASE_VOUCHER);
+                      setSuccessMessage(`Your Voucher has been added to your Inventory! (${xpResult.xpGained} XP earned)`);
+                      setTimerMessage(true);
+                      setTimeout(() => setTimerMessage(false), 7000);
                       setModalVisible(false);
                     } else {
                       await purchaseVouchers(String(selectedVoucher.listing_id));
-                      await awardXP(XP_REWARDS.PURCHASE_VOUCHER);
-                      setSuccessMessage(`Your Voucher has been added to your Inventory! (${XP_REWARDS.PURCHASE_VOUCHER} XP earned)`);
+                      handleActivateXpDoubler();
+                      const xpResult = await awardXP(XP_REWARDS.PURCHASE_VOUCHER);
+                      setSuccessMessage(`Your Voucher has been added to your Inventory! (${xpResult.xpGained} XP earned)`);
+                      setTimerMessage(true);
+                      setTimeout(() => setTimerMessage(false), 7000);
                       setModalVisible(false);
                     }
                   } catch (error) {
@@ -674,11 +736,13 @@ const Home: React.FC = () => {
             </View>
           </View>
         </Modal>
+
         {successMessage && (
           <View style={BusinessAvatarShopboxStyles.successMessageContainer}>
             <Text style={BusinessAvatarShopboxStyles.successMessageText}>{successMessage}</Text>
           </View>
         )}
+
       </View>
     );
   };
@@ -734,7 +798,6 @@ const Home: React.FC = () => {
 
 
   return (
-
     <TouchableWithoutFeedback onPress={() => menuVisible && toggleMenu(false)}>
       <StyledContainer>
         {menuVisible && (
@@ -747,13 +810,41 @@ const Home: React.FC = () => {
             <Ionicons name="menu" size={24} color={Colors.white} />
           </TouchableOpacity>
         </View>
+
+        {/* Double XP Timer */}
+        <View style = {homeStyles.timer}>
+          {xpDoublerTimeLeft !== null && (
+            <TouchableOpacity onPress={() => setIsTimerModalVisible(true)} style={{ padding: 10 }}>
+              <FontAwesome name="hourglass-half" size={30} color="#4F7942" />
+            </TouchableOpacity>
+          )}
+
+          {/* Modal for showing time left */}
+          <Modal
+            transparent={true}
+            visible={isTimerModalVisible}
+            onRequestClose={() => setIsTimerModalVisible(false)}
+          >
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+              <View style={{ backgroundColor: 'white', padding: 20, borderRadius: 10 }}>
+                <Text style={{ fontSize: 18 }}>XP Doubler Time Left:</Text>
+                <Text style={{ fontSize: 24, fontWeight: 'bold' }}>
+                  {xpDoublerTimeLeft !== null ? formatTime(xpDoublerTimeLeft) : '00:00'}
+                </Text>
+                <TouchableOpacity onPress={() => setIsTimerModalVisible(false)} style={{ marginTop: 10 }}>
+                  <Text style={{ color: 'green' }}>Close</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
+        </View>
+
         <AppMenu
           visible={menuVisible}
           menuAnimation={menuAnimation}
           toggleMenu={toggleMenu}
           navigation={navigation}
         />
-
         <View style={homeStyles.mapContainer}>
           {region && (
             <MapView
@@ -783,6 +874,11 @@ const Home: React.FC = () => {
               <Text style={homeStyles.messageText}>Get closer to the Roaming avatar first!</Text>
             </View>
           )}
+          {timerMessage && (
+            <View style={homeStyles.timerMessageContainer}>
+              <Text style={homeStyles.timerMessageText}>XP Doubler activated! View remaining XP doubler time from the hourglass icon!</Text>
+            </View>
+          )}
         </View>
         {/* Render the shop box if shop is open */}
         {isShopOpen && renderShopBox()}
@@ -790,5 +886,6 @@ const Home: React.FC = () => {
     </TouchableWithoutFeedback>
   );
 };
+
 
 export default ProtectedRoute(Home);

@@ -124,7 +124,7 @@ export const homeStyles = StyleSheet.create({
         fontWeight: 'bold',
         maxWidth: 150,
       },
-      labelText: {
+    labelText: {
         color: '#e01414',
         fontSize: 35,
         top: 0,
@@ -140,8 +140,27 @@ export const homeStyles = StyleSheet.create({
         padding: 10,
         borderRadius: 5,
     },
-      messageText: {
+    messageText: {
         color: '#90EE90',
         fontSize: 16,
       },
+    timer: {
+        position: 'absolute', // Adjust position as needed
+        top: 140, // You can change this value to position the timer where you want
+        right: 305, // Positioning to the right side, adjust if necessary
+        zIndex: 1000,
+    },
+    timerMessageContainer: {
+        position: 'absolute',
+        top: '20%', // adjust this value to move it upwards or downwards
+        left: '15%',
+        transform: [{ translateX: -50 }], // center horizontally
+        backgroundColor: 'rgba(0, 0, 0, 0.7)', // semi-transparent background
+        padding: 10,
+        borderRadius: 5,
+    },
+    timerMessageText: {
+        color: '#90EE90',
+        fontSize: 16,
+    },
 });
