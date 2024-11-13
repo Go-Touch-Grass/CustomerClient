@@ -213,6 +213,32 @@ export const socialStyles = StyleSheet.create({
     borderWidth: 2,
     borderColor: Colors.green,
   },
+  referralCode: {
+    backgroundColor: Colors.green,
+    borderWidth: 3,
+    borderColor: Colors.lightGreen,
+    padding: 6,
+    flexDirection: "column",
+    alignItems: "center",
+    gap: 10,
+    marginBottom: 20
+  },
+  referralCodeTitle: {
+    color: Colors.white,
+    fontSize: 20,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  referralCodeText: {
+    color: Colors.white,
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  referralCodeIcon:{
+    color: Colors.white,
+    marginLeft:10,
+    fontSize: 20
+  }
 });
 
 // Add these color definitions to the Colors object
