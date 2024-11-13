@@ -10,6 +10,8 @@ interface UserInfo {
   currentLevel: number;
   xpForNextLevel: number;
   xpProgress: number;
+  referral_code: string;
+	code_used: number;
 }
 
 export interface XPUpdateResponse {

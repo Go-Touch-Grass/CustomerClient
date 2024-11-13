@@ -7,6 +7,7 @@ import { StyledContainer, InnerContainer, PageTitle } from '../styles/commonStyl
 import { socialStyles } from '../styles/SocialStyles';
 import ProtectedRoute from '../components/ProtectedRoute';
 import { Colors } from '../styles/commonStyles';
+import * as Clipboard from 'expo-clipboard';
 
 import {
 	getAllFriends,
@@ -25,6 +26,7 @@ interface LeaderboardEntry {
 	id: string;
 	username: string;
 	exp: number;
+
 }
 
 const Social: React.FC = () => {
@@ -32,7 +34,7 @@ const Social: React.FC = () => {
 	const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
 	const [showFriendsOnly, setShowFriendsOnly] = useState(true);
 	const [friends, setFriends] = useState<Friend[]>([]);
-	const [currentUser, setCurrentUser] = useState<{ id: string; username: string } | null>(null);
+	const [currentUser, setCurrentUser] = useState<{ id: string; username: string; referralCode: string; codeUsed: number } | null>(null);
 
 	useFocusEffect(
 		useCallback(() => {
@@ -49,7 +51,7 @@ const Social: React.FC = () => {
 			]);
 			setLeaderboard(leaderboardData);
 			setFriends(friendsData);
-			setCurrentUser({ id: userInfo.id, username: userInfo.username });
+			setCurrentUser({ id: userInfo.id, username: userInfo.username, referralCode: userInfo.referral_code, codeUsed: userInfo.code_used });
 		} catch (error) {
 			console.error('Error fetching social data:', error);
 			Alert.alert('Error', 'Failed to fetch social data');
@@ -75,6 +77,14 @@ const Social: React.FC = () => {
 		</View>
 	);
 
+	const copyToClipboard = async () => {
+		if(currentUser){
+			await Clipboard.setStringAsync(currentUser.referralCode);
+			Alert.alert('Copied!', 'Referral code copied to clipboard.');
+		}
+		
+	  };
+
 	return (
 		<StyledContainer>
 			<TouchableOpacity style={socialStyles.backButton} onPress={() => navigation.goBack()}>
@@ -88,7 +98,19 @@ const Social: React.FC = () => {
 				</TouchableOpacity>
 
 				<View style={socialStyles.section}>
+					<View style={socialStyles.referralCode}>
+				<Text style={socialStyles.referralCodeTitle}>INVITE & EARN 🎉 </Text>
+				<Text style={socialStyles.referralCodeText}>When your friend signs up using your code, you BOTH earn 50 gems!</Text>
+				<Text style={socialStyles.referralCodeText}>Your referral code: {currentUser?.referralCode} 
+					<TouchableOpacity onPress={copyToClipboard}>
+						<Ionicons name="copy-outline" style={socialStyles.referralCodeIcon} />
+      				</TouchableOpacity>
+				</Text>
+				<Text style={socialStyles.referralCodeText}>You have invited a total of: {currentUser?.codeUsed} friends 👭</Text>
+				
+				</View>
 					<View style={socialStyles.leaderboardHeader}>
+					
 						<Text style={socialStyles.sectionTitle}>Leaderboard</Text>
 						<View style={socialStyles.toggleContainer}>
 							<Text style={socialStyles.toggleLabel}>Show Friends Only</Text>
