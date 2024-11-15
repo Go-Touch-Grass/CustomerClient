@@ -156,3 +156,21 @@ export const updateXP = async (xpAmount: number): Promise<XPUpdateResponse> => {
     throw error;
   }
 };
+
+export const customerCashback = async(quantity : number): Promise<void> => {
+  const token = await getToken();
+  if (!token) {
+    throw new Error('No token found');
+  }
+
+  try {
+    const response = await axiosInstance.post('/auth/customers/customercashback', 
+      {quantity}, 
+    {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};

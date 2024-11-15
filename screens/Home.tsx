@@ -13,7 +13,7 @@ import { removeToken } from '../utils/asyncStorage';
 import { useTranslation } from 'react-i18next';
 import { getAvatarByCustomerId, getAvatarByBusinessRegistrationId, getAvatarByOutletId } from '../api/avatarApi';
 import { AvatarInfo } from '../api/businessApi';
-import { getUserInfo } from '../api/userApi';
+import { customerCashback, getUserInfo } from '../api/userApi';
 import { HomeScreenAvatarStyles } from '../styles/HomeScreenAvatarStyles';
 import { BusinessAvatarShopboxStyles } from '../styles/BusinessAvatarShopboxStyles';
 import { DeviceMotion } from 'expo-sensors';
@@ -24,7 +24,7 @@ import { GEOAPIFY_API_KEY } from '@env';
 import { Voucher, getAllVouchers, purchaseVouchers, startGroupPurchase } from '../api/voucherApi';
 import { useIsFocused } from '@react-navigation/native';
 import { IP_ADDRESS } from '@env';
-import { activateXpDoubler, awardXP, XP_REWARDS } from '../utils/xpRewards';
+import { activateXpDoubler, awardXP, showXPAlert, XP_REWARDS } from '../utils/xpRewards';
 import { FontAwesome } from '@expo/vector-icons';
 
 interface GeocodeResult {
@@ -62,7 +62,7 @@ const Home: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [xpDoublerTimeLeft, setXpDoublerTimeLeft] = useState<number | null>(null);
   const [isTimerModalVisible, setIsTimerModalVisible] = useState(false);
-
+  
   useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -93,6 +93,18 @@ const Home: React.FC = () => {
     fetchAvatarDetails();
     fetchSubscriptions();
   }, []);
+
+  /* const debounce = <T extends (...args: any[]) => void>(func: T, delay: number) => {
+    let timeout: NodeJS.Timeout;
+    return (...args: Parameters<T>) => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func(...args), delay);
+    };
+  };
+  
+  const updateUserLocation = debounce((newLocation) => {
+    setUserLocation(newLocation);
+  }, 500); */
 
   const fetchSubscriptions = async () => {
     try {
@@ -617,9 +629,7 @@ const Home: React.FC = () => {
                   style={BusinessAvatarShopboxStyles.voucherItem}
                 >
                   <Image
-                    // source={voucher.voucherImage ? { uri: `http://192.168.222.142:8080/${voucher.voucherImage}` } : require('../assets/noimage.jpg')}
                     source={voucher.voucherImage ? { uri: `http://${IP_ADDRESS}:8080/${voucher.voucherImage}` } : require('../assets/noimage.jpg')}
-                    //source={voucher.voucherImage ? { uri: `http://localhost:8080/${voucher.voucherImage}` } : require('../assets/noimage.jpg')}
                     style={BusinessAvatarShopboxStyles.voucherImage}
                   />
                   <View style={BusinessAvatarShopboxStyles.voucherDetails}>
@@ -707,19 +717,23 @@ const Home: React.FC = () => {
                       for (let i = 0; i < quantity; i++) {
                         await purchaseVouchers(String(selectedVoucher.listing_id));
                       }
+                      customerCashback(1);
                       handleActivateXpDoubler();
                       const xpResult = await awardXP(XP_REWARDS.PURCHASE_VOUCHER);
-                      setSuccessMessage(`Your Voucher has been added to your Inventory! (${xpResult.xpGained} XP earned)`);
+                      setSuccessMessage(`Your Voucher has been added to your Inventory! You have earned 1 Gem as cashback!`);
+                      showXPAlert(xpResult);
                       setTimerMessage(true);
-                      setTimeout(() => setTimerMessage(false), 7000);
+                      setTimeout(() => setTimerMessage(false), 10000);
                       setModalVisible(false);
                     } else {
                       await purchaseVouchers(String(selectedVoucher.listing_id));
+                      customerCashback(1);
                       handleActivateXpDoubler();
                       const xpResult = await awardXP(XP_REWARDS.PURCHASE_VOUCHER);
-                      setSuccessMessage(`Your Voucher has been added to your Inventory! (${xpResult.xpGained} XP earned)`);
+                      setSuccessMessage(`Your Voucher has been added to your Inventory! You have earned 1 Gem as cashback!`);
+                      showXPAlert(xpResult);
                       setTimerMessage(true);
-                      setTimeout(() => setTimerMessage(false), 7000);
+                      setTimeout(() => setTimerMessage(false), 10000);
                       setModalVisible(false);
                     }
                   } catch (error) {
@@ -751,7 +765,7 @@ const Home: React.FC = () => {
     if (successMessage) {
       const timer = setTimeout(() => {
         setSuccessMessage('');
-      }, 3000); // Change this duration as needed (3000ms = 3 seconds)
+      }, 8000); 
 
       return () => clearTimeout(timer); // Cleanup the timer
     }
@@ -760,7 +774,7 @@ const Home: React.FC = () => {
   const styles = HomeScreenAvatarStyles(avatarSize);
 
   const renderAvatarMarker = () => {
-    if (!avatar || !userLocation) return null;
+    if (!avatar || !userLocation || !region) return null;
 
     const combinedRotation = direction + (mapHeading * (Math.PI / 180));
 
