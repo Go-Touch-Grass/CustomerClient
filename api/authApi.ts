@@ -22,9 +22,9 @@ export const loginUser = async (login: string, password: string) => {
   }
 };
 
-export const registerUser = async (fullName: string, username: string, email: string, password: string) => {
+export const registerUser = async (fullName: string, username: string, email: string, password: string, referralCode: string) => {
   try {
-    const response = await axiosInstance.post('auth/register', { fullName, username, email, password });
+    const response = await axiosInstance.post('auth/register', { fullName, username, email, password, referral_code: referralCode });
     return response.data;
   } catch (error) {
     throw error;

@@ -1,4 +1,4 @@
-import { updateXP } from '../api/userApi';
+import { customerCashback, updateXP } from '../api/userApi';
 import { Alert } from 'react-native';
 
 export const XP_REWARDS = {
@@ -57,9 +57,11 @@ export const awardXP = async (amount: number): Promise<XPUpdateResult> => {
 
 export const showXPAlert = (xpResult: XPUpdateResult) => {
     if (xpResult.leveledUp) {
+        customerCashback(3);
         Alert.alert(
             '⬆️ Level Up!',
-            `🎉 Congratulations!\nYou've reached level ${xpResult.currentLevel}! 🌟`,
+            `🎉 Congratulations!\nYou've reached level ${xpResult.currentLevel}! 🌟\n💎 You earned 3 Gems as a reward for levelling up! 💎`,
+            
             [{ text: 'Awesome!' }]
         );
     } else {

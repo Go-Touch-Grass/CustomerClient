@@ -17,12 +17,14 @@ const SignUp: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [referralCode, setReferralCode] = useState('');
   const [errors, setErrors] = useState({
     fullName: '',
     username: '',
     email: '',
     password: '',
     confirmPassword: '',
+    referralCode: '',
     general: '',
   });
 
@@ -67,7 +69,7 @@ const SignUp: React.FC = () => {
   const handleSignUp = async () => {
     if (validateInputs()) {
       try {
-        const response = await registerUser(fullName, username, email, password);
+        const response = await registerUser(fullName, username, email, password, referralCode);
         if (response.customer_account && response.token) {
           await storeToken(response.token);
           navigation.replace('verifyOTP', { userId: response.customer_account.id });
@@ -77,6 +79,7 @@ const SignUp: React.FC = () => {
         }
       } catch (error) {
         if (axios.isAxiosError(error)) {
+          console.log(error)
           setErrors({
             ...errors,
             general: error.response?.data?.message || 'An unexpected error occurred. Please try again later.',
@@ -178,6 +181,18 @@ const SignUp: React.FC = () => {
                   secureTextEntry
                 />
                 {errors.confirmPassword ? <Text style={signUpStyles.errorText}>{errors.confirmPassword}</Text> : null}
+              
+                <TextInput
+                  style={signUpStyles.input}
+                  placeholder="Referral Code (if any)"
+                  value={referralCode}
+                  onChangeText={(text) => {
+                    setReferralCode(text);
+                    setErrors({ ...errors, referralCode: '' });
+                  }}
+                  maxLength={8}
+                />
+                {errors.referralCode ? <Text style={signUpStyles.errorText}>{errors.referralCode}</Text> : null}
               </View>
 
               <TouchableOpacity style={signUpStyles.button} onPress={handleSignUp}>

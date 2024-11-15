@@ -10,6 +10,8 @@ interface UserInfo {
   currentLevel: number;
   xpForNextLevel: number;
   xpProgress: number;
+  referral_code: string;
+	code_used: number;
 }
 
 export interface XPUpdateResponse {
@@ -150,6 +152,24 @@ export const updateXP = async (xpAmount: number): Promise<XPUpdateResponse> => {
       }
     );
     return response.data.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const customerCashback = async(quantity : number): Promise<void> => {
+  const token = await getToken();
+  if (!token) {
+    throw new Error('No token found');
+  }
+
+  try {
+    const response = await axiosInstance.post('/auth/customers/customercashback', 
+      {quantity}, 
+    {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data;
   } catch (error) {
     throw error;
   }
