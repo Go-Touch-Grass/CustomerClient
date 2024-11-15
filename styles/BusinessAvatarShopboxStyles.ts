@@ -110,7 +110,8 @@ export const BusinessAvatarShopboxStyles = StyleSheet.create({
         borderRadius: 5,
         alignItems: 'center',
         justifyContent: 'center',
-        marginLeft: 22
+        marginLeft: 22,
+        marginTop: 12
 
     },
     groupButtonText: {
