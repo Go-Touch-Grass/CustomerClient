@@ -347,8 +347,8 @@ const Home: React.FC = () => {
   const centerOnUserLocation = async () => {
     if (userLocation) {
       const newRegion = {
-        latitude: 1.374996062398145,//userLocation.coords.latitude,
-        longitude: 103.95815594284734,//userLocation.coords.longitude,
+        latitude: userLocation.coords.latitude,
+        longitude: userLocation.coords.longitude,
         latitudeDelta: 0.00415,
         longitudeDelta: 0.00415,
       };
