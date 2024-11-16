@@ -782,6 +782,7 @@ const Home: React.FC = () => {
             vouchers={vouchers}
             onClose={() => setIsShopOpen(false)}
             navigation={navigation}
+            onReturn={() => setShowActionPanel(true)}
           />
         )}
       </StyledContainer>

@@ -15,9 +15,10 @@ interface ShopPanelProps {
     vouchers: Voucher[];
     onClose: () => void;
     navigation: any;
+    onReturn?: () => void;
 }
 
-const ShopPanel: React.FC<ShopPanelProps> = ({ selectedBranch, vouchers, onClose, navigation }) => {
+const ShopPanel: React.FC<ShopPanelProps> = ({ selectedBranch, vouchers, onClose, navigation, onReturn }) => {
     const { t } = useTranslation();
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedVoucher, setSelectedVoucher] = useState<Voucher>();
@@ -49,6 +50,7 @@ const ShopPanel: React.FC<ShopPanelProps> = ({ selectedBranch, vouchers, onClose
             friction: 8
         }).start(() => {
             onClose();
+            if (onReturn) onReturn();
         });
     };
 

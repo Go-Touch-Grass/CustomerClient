@@ -1,25 +1,25 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, Animated, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../styles/commonStyles';
 import { AvatarActionPanelStyles } from '../styles/AvatarActionPanelStyles';
 import { BranchInfo } from '../api/businessApi';
+import ChatScreen from '../screens/ChatScreen';
 
 interface AvatarActionPanelProps {
     selectedBranch: BranchInfo;
     onClose: () => void;
     onShopPress: () => void;
-    onChatPress: () => void;
 }
 
 const AvatarActionPanel: React.FC<AvatarActionPanelProps> = ({ 
     selectedBranch, 
     onClose, 
-    onShopPress,
-    onChatPress 
+    onShopPress 
 }) => {
     const slideAnim = React.useRef(new Animated.Value(0)).current;
     const { height } = Dimensions.get('window');
+    const [showChat, setShowChat] = useState(false);
 
     const entityName = selectedBranch.entityType === 'Business_register_business'
         ? selectedBranch.entityName
@@ -45,6 +45,24 @@ const AvatarActionPanel: React.FC<AvatarActionPanelProps> = ({
         });
     };
 
+    const handleChatPress = () => {
+        if (selectedBranch?.avatar?.id) {
+            setShowChat(true);
+        }
+    };
+
+    if (showChat && selectedBranch?.avatar?.id) {
+        return (
+            <ChatScreen
+                branchName={entityName}
+                locationDescription="Default location description"
+                onClose={() => setShowChat(false)}
+                onShopPress={onShopPress}
+                avatarId={selectedBranch.avatar.id}
+            />
+        );
+    }
+
     return (
         <Animated.View style={[
             AvatarActionPanelStyles.container,
@@ -61,13 +79,13 @@ const AvatarActionPanel: React.FC<AvatarActionPanelProps> = ({
 
             <TouchableOpacity onPress={handleClose} style={AvatarActionPanelStyles.backButton}>
                 <Ionicons name="arrow-back" size={24} color={Colors.primary} />
-                <Text style={AvatarActionPanelStyles.backButtonText}>Back</Text>
+                <Text style={AvatarActionPanelStyles.backButtonText}>Close</Text>
             </TouchableOpacity>
 
             <View style={AvatarActionPanelStyles.buttonContainer}>
                 <TouchableOpacity 
                     style={AvatarActionPanelStyles.actionButton}
-                    onPress={onChatPress}
+                    onPress={handleChatPress}
                 >
                     <Ionicons name="chatbubble-outline" size={24} color={Colors.white} />
                     <Text style={AvatarActionPanelStyles.buttonText}>Chat</Text>
