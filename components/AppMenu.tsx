@@ -89,9 +89,9 @@ const AppMenu: React.FC<AppMenuProps> = ({ visible, menuAnimation, toggleMenu, n
           <TouchableOpacity style={homeStyles.menuItem} onPress={navigateToViewVouchers}>
             <Text style={homeStyles.menuItemText}>{t('Voucher Inventory')}</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={homeStyles.menuItem} onPress={navigateToTempViewAllVouchers}>
+          {/* <TouchableOpacity style={homeStyles.menuItem} onPress={navigateToTempViewAllVouchers}>
             <Text style={homeStyles.menuItemText}>{t('All Group Buy vouchers')}</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           <TouchableOpacity style={homeStyles.menuItem} onPress={navigateToViewGroupPurchaseStatus}>
             <Text style={homeStyles.menuItemText}>{t('Group purchase status')}</Text>
           </TouchableOpacity>

@@ -86,17 +86,20 @@ export const BusinessAvatarShopboxStyles = StyleSheet.create({
     },
     groupPurchaseContainer: {
         flexDirection: 'row', // To align button at the bottom right
-        justifyContent: 'flex-end', // Align button to the right
-
+        justifyContent: 'space-between', // Changed to space-between for better spacing
+        alignItems: 'center', // Center items vertically
+        width: '100%', // Ensure container takes full width
+        marginTop: 5, // Add some spacing from price
     },
     groupInfoContainer: {
-        flexDirection: 'column', // Stack items vertically
-        marginRight: 10, // Space between info and button
+        flexDirection: 'column',
+        flex: 1, // Allow container to take available space
+        marginRight: 10,
     },
     groupInfoText: {
-        fontSize: 14,
+        fontSize: 12, // Reduced font size
         color: '#888',
-        marginBottom: 5, // Add space between lines
+        marginBottom: 2, // Reduced space between lines
     },
 
     groupInfo: {
@@ -106,20 +109,17 @@ export const BusinessAvatarShopboxStyles = StyleSheet.create({
     groupButton: {
         paddingVertical: 5,
         paddingHorizontal: 10,
-        backgroundColor: '#FF4500', // Orange color for group purchase button
+        backgroundColor: '#FF4500',
         borderRadius: 5,
         alignItems: 'center',
         justifyContent: 'center',
-        marginLeft: 22,
-        marginTop: 12
-
+        minWidth: 80, // Set minimum width for button
     },
     groupButtonText: {
         color: '#fff',
         fontWeight: 'bold',
         fontSize: 12,
-        maxWidth: 80,
-        flexShrink: 1, // Allow text to shrink if it overflows
+        textAlign: 'center', // Ensure text is centered
     },
 
     shopBox: {
@@ -307,5 +307,70 @@ export const BusinessAvatarShopboxStyles = StyleSheet.create({
         top: 50,
         right: 10,
         borderRadius: 25,
+    },
+    timerMessageContainer: {
+        position: 'absolute',
+        bottom: 20,
+        left: 20,
+        right: 20,
+        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+        padding: 10,
+        borderRadius: 5,
+        alignItems: 'center',
+    },
+    timerMessageText: {
+        color: 'white',
+        fontSize: 14,
+        textAlign: 'center',
+    },
+    timerContainer: {
+        position: 'absolute',
+        top: 10,
+        right: 10,
+        zIndex: 1,
+    },
+    timerModalOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 1000,
+    },
+    timerModalContainer: {
+        backgroundColor: 'white',
+        padding: 20,
+        borderRadius: 10,
+        alignItems: 'center',
+        width: '80%',
+        maxWidth: 300,
+        elevation: 5,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        zIndex: 1001,
+    },
+    timerModalTitle: {
+        fontSize: 18,
+        marginBottom: 10,
+    },
+    timerModalTime: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        marginBottom: 15,
+    },
+    timerModalCloseButton: {
+        marginTop: 10,
+    },
+    timerModalCloseText: {
+        color: 'green',
+        fontSize: 16,
     },
 });

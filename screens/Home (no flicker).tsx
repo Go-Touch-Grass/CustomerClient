@@ -631,37 +631,8 @@ const Home: React.FC = () => {
 
   const styles = HomeScreenAvatarStyles(avatarSize);
 
-  const subscribeToDeviceMotion = () => {
-    const subscription = DeviceMotion.addListener(({ rotation }) => {
-      if (rotation) {
-        setDirection(rotation.alpha + 1.39626);
-      }
-    });
-
-    DeviceMotion.setUpdateInterval(100);
-    return () => {
-      subscription.remove(); // Clean up the listener
-    };
-  };
-
-  useEffect(() => {
-    const unsubscribe = subscribeToDeviceMotion();
-    return () => {
-      unsubscribe();
-    };
-  }, []);
-
-  const updateMapHeading = async () => {
-    if (mapRef.current) {
-      const camera: Camera = await mapRef.current.getCamera();
-      setMapHeading(camera.heading || 0);
-    }
-  };
-
   const renderAvatarMarker = () => {
     if (!avatar || !userLocation) return null;
-
-    const combinedRotation = direction + (mapHeading * (Math.PI / 180));
 
     return (
       <Marker
@@ -669,26 +640,12 @@ const Home: React.FC = () => {
           latitude: userLocation.coords.latitude,
           longitude: userLocation.coords.longitude,
         }}
-        anchor={{ x: 0.5, y: 0.5 }}
       >
         <View style={styles.avatarContainer}>
           {avatar.base && <Image source={{ uri: avatar.base.filepath }} style={styles.base} />}
           {avatar.hat && <Image source={{ uri: avatar.hat.filepath }} style={styles.hat} />}
           {avatar.shirt && <Image source={{ uri: avatar.shirt.filepath }} style={styles.upperWear} />}
           {avatar.bottom && <Image source={{ uri: avatar.bottom.filepath }} style={styles.lowerWear} />}
-
-          {/* Direction Indicator */}
-          <View style={{
-            position: 'absolute',
-            bottom: avatarSize * -0.65,
-            left: '50%',
-            transform: [
-              { translateX: -15 },
-              { rotate: `${-combinedRotation}rad` }
-            ],
-          }}>
-            <Ionicons name="arrow-up-circle" size={30} color="blue" />
-          </View>
         </View>
       </Marker>
     );
@@ -764,7 +721,6 @@ const Home: React.FC = () => {
               region={region}
               onRegionChangeComplete={(newRegion) => {
                 setRegion(newRegion);
-                updateMapHeading();
               }} 
             >
               {isLoading ? (

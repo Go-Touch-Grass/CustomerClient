@@ -13,7 +13,7 @@ import { Share } from 'react-native';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 
 const EditAvatar = () => {
-  const avatarRef = useRef<View>(null); // ref for sharing of avatar image
+  const avatarRef = useRef<View | null>(null);
   const [avatar, setAvatar] = useState<AvatarInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -146,26 +146,28 @@ const EditAvatar = () => {
   };
 
   const handleShareAvatar = async () => {
-    if (!avatarRef.current) return;
-    console.log('Sharing avatar...');
+    if (!avatarRef.current) {
+      console.log('Avatar ref is null');
+      return;
+    }
+    
     try {
-      // Delay to ensure the view is fully rendered
-      //await new Promise((resolve) => setTimeout(resolve, 500));
-
-      // Capture the avatar view and save it as a png file
-      const result = await captureRef(avatarRef);
-      console.log('Captured avatar:', result);
-      // Share the captured image
-
+      // Add a small delay to ensure view is rendered
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      
+      const result = await captureRef(avatarRef, {
+        format: 'png',
+        quality: 1,
+      });
+      
       await Sharing.shareAsync(result, {
         mimeType: 'image/png',
         dialogTitle: 'Share Your Avatar',
         UTI: 'public.png',
       });
-
     } catch (error) {
       console.error('Error sharing avatar:', error);
-      Alert.alert('Error', 'Failed to share avatar.');
+      Alert.alert('Error', 'Failed to share avatar');
     }
   };
 
@@ -174,7 +176,11 @@ const EditAvatar = () => {
       <Text style={CreateAvatarStyles.title}>Edit Your Avatar</Text>
 
       {/* TEST capture for sharing - works */}
-      <View ref={avatarRef} style={CreateAvatarStyles.avatarContainer}>
+      <View 
+        ref={avatarRef} 
+        collapsable={false}
+        style={CreateAvatarStyles.avatarContainer}
+      >
         <View style={CreateAvatarStyles.backgroundTextContainer}>
           <Text style={CreateAvatarStyles.backgroundText}>
             Go-Touch-Grass
@@ -187,7 +193,6 @@ const EditAvatar = () => {
         {avatar?.shirt && <Image source={{ uri: avatar.shirt.filepath }} style={CreateAvatarStyles.upperWear} />}
         {avatar?.bottom && <Image source={{ uri: avatar.bottom.filepath }} style={CreateAvatarStyles.lowerWear} />}
       </View>
-
 
       {/* ORIGINAL METHOD 
       <View style={CreateAvatarStyles.avatarContainer}>

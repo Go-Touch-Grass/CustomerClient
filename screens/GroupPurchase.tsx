@@ -7,6 +7,8 @@ import { socialStyles } from '../styles/SocialStyles';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { awardXP, XP_REWARDS, showXPAlert } from '../utils/xpRewards';
 import { IP_ADDRESS } from '@env';
+import { groupPurchaseStyles } from '../styles/GroupPurchaseStyles';
+import { Colors } from '../styles/commonStyles';
 
 // Define the type for route params
 interface GroupPurchaseRouteParams {
@@ -136,16 +138,16 @@ const GroupPurchase = () => {
     const renderGroupItem = (group: GroupPurchase) => {
         const isGroupFull = group.current_size >= group.group_size; // Check if the group is full
         return (
-            <View style={[styles.groupItem, styles.shadow]}>
-                <View style={styles.groupHeader}>
-                    <Text style={styles.groupTitle}>{group.voucher.name}</Text>
+            <View style={[groupPurchaseStyles.groupItem, groupPurchaseStyles.shadow]}>
+                <View style={groupPurchaseStyles.groupHeader}>
+                    <Text style={groupPurchaseStyles.groupTitle}>{group.voucher.name}</Text>
                     <MaterialIcons name="groups" size={24} color="#4caf50" />
                 </View>
-                <Text style={styles.infoText}>Group Number: {group.id}</Text>
+                <Text style={groupPurchaseStyles.infoText}>Group Number: {group.id}</Text>
 
                 {/* Display group status with color and icon */}
-                <View style={styles.statusContainer}>
-                    <Text style={[styles.groupStatus, isGroupFull ? styles.fullStatus : styles.notFullStatus]}>
+                <View style={groupPurchaseStyles.statusContainer}>
+                    <Text style={[groupPurchaseStyles.groupStatus, isGroupFull ? groupPurchaseStyles.fullStatus : groupPurchaseStyles.notFullStatus]}>
                         {isGroupFull ? 'Full' : 'Not Full'}
                     </Text>
                     <Ionicons
@@ -156,18 +158,18 @@ const GroupPurchase = () => {
                     />
                 </View>
 
-                <View style={styles.statusContainer}>
+                <View style={groupPurchaseStyles.statusContainer}>
                     {/* 
                     <Text style={[styles.groupStatus, group.groupStatus === 'completed' ? styles.completedStatus : styles.pendingStatus]}>
                         {group.groupStatus.toUpperCase()}
                     </Text>
                     */}
-                    <Text style={[styles.paymentStatus, group.paymentStatus === 'completed' ? styles.completedPayment : styles.pendingPayment]}>
+                    <Text style={[groupPurchaseStyles.paymentStatus, group.paymentStatus === 'completed' ? groupPurchaseStyles.completedPayment : groupPurchaseStyles.pendingPayment]}>
                         Payment: {group.paymentStatus.toUpperCase()}
                     </Text>
                 </View>
-                <View style={styles.progressContainer}>
-                    <Text style={styles.infoText}>{group.current_size}/{group.group_size} participants</Text>
+                <View style={groupPurchaseStyles.progressContainer}>
+                    <Text style={groupPurchaseStyles.infoText}>{group.current_size}/{group.group_size} participants</Text>
                 </View>
             </View>
         );
@@ -200,25 +202,30 @@ const GroupPurchase = () => {
 
 
     return (
-        <View style={styles.container}>
-            <TouchableOpacity style={socialStyles.backButton} onPress={() => navigation.goBack()}>
-                <Ionicons name="arrow-back" style={socialStyles.backIcon} />
-            </TouchableOpacity>
-            <Text style={styles.headerText}>Group Purchase Status</Text>
+        <View style={groupPurchaseStyles.container}>
+            <View style={groupPurchaseStyles.headerContainer}>
+                <TouchableOpacity 
+                    style={groupPurchaseStyles.backButton}
+                    onPress={() => navigation.goBack()}
+                >
+                    <Ionicons name="arrow-back" size={24} color={Colors.green} />
+                </TouchableOpacity>
+                <Text style={groupPurchaseStyles.headerText}>Group Purchase Status</Text>
+            </View>
 
             {/* If no groupPurchaseId was passed, show the input field */}
             {!initialGroupPurchaseId && (
                 <>
-                    <Text style={styles.label}>Enter Group ID to Check Status:</Text>
+                    <Text style={groupPurchaseStyles.label}>Enter Group ID to Check Status:</Text>
                     <TextInput
                         value={groupPurchaseId}
                         onChangeText={setGroupPurchaseId}
-                        style={styles.input}
+                        style={groupPurchaseStyles.input}
                         placeholder="Enter Group ID"
                         keyboardType="numeric"
                     />
-                    <TouchableOpacity onPress={fetchGroupStatus} style={styles.checkButton}>
-                        <Text style={styles.buttonText}>Check Status</Text>
+                    <TouchableOpacity onPress={fetchGroupStatus} style={groupPurchaseStyles.checkButton}>
+                        <Text style={groupPurchaseStyles.buttonText}>Check Status</Text>
                     </TouchableOpacity>
                 </>
             )}
@@ -228,11 +235,11 @@ const GroupPurchase = () => {
 
             {loading && <ActivityIndicator size="large" color="#0000ff" />}
 
-            {error && <Text style={styles.error}>{error}</Text>}
+            {error && <Text style={groupPurchaseStyles.error}>{error}</Text>}
 
             {groupStatus && (
                 <>
-                    <Text style={styles.infoText}>
+                    <Text style={groupPurchaseStyles.infoText}>
                         Group Progress: {groupStatus.current_size}/{groupStatus.group_size}
                     </Text>
 
@@ -274,7 +281,10 @@ const GroupPurchase = () => {
                     style={[styles.toggleButton, viewMode === 'created' && styles.activeButton]}
                     onPress={() => setViewMode('created')}
                 >
-                    <Text style={[styles.buttonText, { color: viewMode === 'created' ? '#fff' : '#000' }]}>
+                    <Text style={[
+                        groupPurchaseStyles.toggleButtonText,
+                        viewMode === 'created' && groupPurchaseStyles.activeButtonText
+                    ]}>
                         Created Groups
                     </Text>
                 </TouchableOpacity>
@@ -344,7 +354,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     activeButton: {
-        backgroundColor: '#007BFF',
+        backgroundColor: Colors.green,
     },
 
     shadow: {

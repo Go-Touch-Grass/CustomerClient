@@ -71,7 +71,6 @@ const TempViewAllVouchers: React.FC = () => {
 
                 {item.voucherImage && (
                     <Image source={{ uri: `http://${IP_ADDRESS}:8080/${item.voucherImage}` }} style={styles.voucherImage} />
-                    //<Image source={{ uri: `http://192.168.1.115:8080/${item.voucherImage}` }} style={styles.voucherImage} />
                 )}
                 <Text style={styles.voucherName}>{`Voucher ${index + 1}: ${item.name || 'No Name'}`}</Text>
                 {isExpanded && (
