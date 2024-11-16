@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, FlatList, ActivityIndicator, StyleSheet, TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 import axiosInstance from '../api/authApi';
 import { getToken } from '../utils/asyncStorage';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { StyledContainer, InnerContainer, PageTitle } from '../styles/commonStyles';
 
 interface Transaction {
   transaction_id: number;
@@ -12,6 +16,7 @@ interface Transaction {
 }
 
 const Transactions: React.FC = () => {
+  const navigation = useNavigation<StackNavigationProp<any>>();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -49,37 +54,46 @@ const Transactions: React.FC = () => {
     </View>
   );
 
+  const handleBack = () => {
+    navigation.goBack();
+  };
+
   if (loading) {
     return <ActivityIndicator size="large" color="#0000ff" style={styles.loader} />;
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Transactions</Text>
-      {transactions.length > 0 ? (
-        <FlatList
-          data={transactions}
-          renderItem={renderTransactionItem}
-          keyExtractor={(item) => item.transaction_id.toString()}
-        />
-      ) : (
-        <Text style={styles.noDataText}>No transactions found.</Text>
-      )}
-    </View>
+    <StyledContainer>
+      <TouchableOpacity style={styles.backButton} onPress={handleBack}>
+        <Ionicons name="arrow-back" style={styles.backIcon} />
+      </TouchableOpacity>
+      <InnerContainer>
+        <PageTitle>Transactions</PageTitle>
+        {transactions.length > 0 ? (
+          <FlatList
+            data={transactions}
+            renderItem={renderTransactionItem}
+            keyExtractor={(item) => item.transaction_id.toString()}
+          />
+        ) : (
+          <Text style={styles.noDataText}>No transactions found.</Text>
+        )}
+      </InnerContainer>
+    </StyledContainer>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: '#f5f5f5',
+  backButton: {
+    position: 'absolute',
+    top: 40,
+    left: 20,
+    zIndex: 1,
+    padding: 10,
   },
-  header: {
+  backIcon: {
+    color: '#4CAF50',
     fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    textAlign: 'center',
   },
   transactionItem: {
     backgroundColor: '#fff',
