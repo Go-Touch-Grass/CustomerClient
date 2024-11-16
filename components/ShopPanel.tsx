@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Modal, TextInput, Image } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Modal, TextInput, Image, Animated, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../styles/commonStyles';
 import { BusinessAvatarShopboxStyles } from '../styles/BusinessAvatarShopboxStyles';
@@ -25,6 +25,8 @@ const ShopPanel: React.FC<ShopPanelProps> = ({ selectedBranch, vouchers, onClose
     const [successMessage, setSuccessMessage] = useState('');
     const [timerMessage, setTimerMessage] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const slideAnim = React.useRef(new Animated.Value(0)).current;
+    const { height } = Dimensions.get('window');
 
     const entityName = selectedBranch.entityType === 'Business_register_business'
         ? selectedBranch.entityName
@@ -39,6 +41,17 @@ const ShopPanel: React.FC<ShopPanelProps> = ({ selectedBranch, vouchers, onClose
         }
     };
 
+    const handleClose = () => {
+        Animated.spring(slideAnim, {
+            toValue: 0,
+            useNativeDriver: true,
+            tension: 50,
+            friction: 8
+        }).start(() => {
+            onClose();
+        });
+    };
+
     useEffect(() => {
         if (successMessage) {
             const timer = setTimeout(() => {
@@ -49,11 +62,30 @@ const ShopPanel: React.FC<ShopPanelProps> = ({ selectedBranch, vouchers, onClose
         }
     }, [successMessage]);
 
+    useEffect(() => {
+        Animated.spring(slideAnim, {
+            toValue: 1,
+            useNativeDriver: true,
+            tension: 50,
+            friction: 8
+        }).start();
+    }, []);
+
     return (
-        <View style={BusinessAvatarShopboxStyles.shopBox}>
+        <Animated.View style={[
+            BusinessAvatarShopboxStyles.shopBox,
+            {
+                transform: [{
+                    translateY: slideAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [height * 0.7, 0]
+                    })
+                }]
+            }
+        ]}>
             <Text style={BusinessAvatarShopboxStyles.shopTitle}>{`${entityName}'s Shop`}</Text>
 
-            <TouchableOpacity onPress={onClose} style={BusinessAvatarShopboxStyles.backButton}>
+            <TouchableOpacity onPress={handleClose} style={BusinessAvatarShopboxStyles.backButton}>
                 <Ionicons name="arrow-back" size={24} color={Colors.primary} />
                 <Text style={BusinessAvatarShopboxStyles.backButtonText}>{t('Back')}</Text>
             </TouchableOpacity>
@@ -201,7 +233,7 @@ const ShopPanel: React.FC<ShopPanelProps> = ({ selectedBranch, vouchers, onClose
                     <Text style={BusinessAvatarShopboxStyles.successMessageText}>{successMessage}</Text>
                 </View>
             )}
-        </View>
+        </Animated.View>
     );
 };
 
