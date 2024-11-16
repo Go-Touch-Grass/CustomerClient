@@ -98,6 +98,9 @@ const AppMenu: React.FC<AppMenuProps> = ({ visible, menuAnimation, toggleMenu, n
           <TouchableOpacity style={homeStyles.menuItem} onPress={navigateToJoinGroupPurchase}>
             <Text style={homeStyles.menuItemText}>{t('Join group purchase')}</Text>
           </TouchableOpacity>
+          <TouchableOpacity style={homeStyles.menuItem} onPress={() => navigateTo('Transactions')}>
+            <Text style={homeStyles.menuItemText}>{t('Transactions')}</Text>
+          </TouchableOpacity>
           <TouchableOpacity style={homeStyles.menuItem} onPress={handleLogout}>
             <Text style={homeStyles.menuItemText}>{t('logout')}</Text>
           </TouchableOpacity>
