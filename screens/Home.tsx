@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, TouchableOpacity, Text, Animated, TouchableWithoutFeedback, Image, ActivityIndicator, ScrollView, Modal, Button, TextInput } from 'react-native';
+import { View, TouchableOpacity, Text, Animated, TouchableWithoutFeedback, Image, ActivityIndicator, ScrollView, Modal, FlatList, TextInput } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import MapView, { Region, Marker, Camera } from 'react-native-maps';
@@ -26,11 +26,13 @@ import { useIsFocused } from '@react-navigation/native';
 import { IP_ADDRESS } from '@env';
 import { activateXpDoubler, awardXP, showXPAlert, XP_REWARDS } from '../utils/xpRewards';
 import { FontAwesome } from '@expo/vector-icons';
+import SearchBar  from '../components/SearchBar'
 
 interface GeocodeResult {
   latitude: number;
   longitude: number;
 }
+
 const RADIUS_THRESHOLD = 500; // in meters
 
 const Home: React.FC = () => {
@@ -62,7 +64,7 @@ const Home: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [xpDoublerTimeLeft, setXpDoublerTimeLeft] = useState<number | null>(null);
   const [isTimerModalVisible, setIsTimerModalVisible] = useState(false);
-  
+
   useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -70,8 +72,9 @@ const Home: React.FC = () => {
         console.log('Permission to access location was denied');
         return;
       }
-
+ 
       let location = await Location.getCurrentPositionAsync({});
+      
       const initialRegion = {
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
@@ -86,25 +89,61 @@ const Home: React.FC = () => {
         { accuracy: Location.Accuracy.BestForNavigation, timeInterval: 1000, distanceInterval: 1 },
         (newLocation) => {
           setUserLocation(newLocation);
+          setRegion({
+            latitude: newLocation.coords.latitude,
+            longitude: newLocation.coords.longitude,
+            latitudeDelta: 0.00415,
+            longitudeDelta: 0.00415,
+          });
         },
-      );
+      ); 
     })();
 
     fetchAvatarDetails();
     fetchSubscriptions();
-  }, []);
-
-  /* const debounce = <T extends (...args: any[]) => void>(func: T, delay: number) => {
-    let timeout: NodeJS.Timeout;
-    return (...args: Parameters<T>) => {
-      clearTimeout(timeout);
-      timeout = setTimeout(() => func(...args), delay);
+  }, []); 
+  /* useEffect(() => {
+    const initialRegion = {
+      latitude: 1.374996062398145,
+      longitude: 103.95815594284734,
+      latitudeDelta: 0.00415,
+      longitudeDelta: 0.00415,
     };
-  };
+    setRegion(initialRegion);
+
+    // Set user location based on the hardcoded coordinates
+    setUserLocation({
+      coords: {
+        latitude: 1.374996062398145,
+        longitude: 103.95815594284734,
+        altitude: null,
+        accuracy: null,
+        altitudeAccuracy: null,
+        heading: null,
+        speed: null,
+      },
+      timestamp: Date.now(),
+    });
+
+    fetchAvatarDetails();
+    fetchSubscriptions();
+  }, []); */
   
-  const updateUserLocation = debounce((newLocation) => {
-    setUserLocation(newLocation);
-  }, 500); */
+  const handleBranchSelect = (branch: BranchInfo) => {
+    const { coordinates } = branch;
+    if (coordinates) {
+      const { latitude, longitude } = coordinates;
+      mapRef.current?.animateToRegion({
+        latitude,
+        longitude,
+        latitudeDelta: 0.005,
+        longitudeDelta: 0.005,
+      });
+      setSelectedBranchId(branch.entityType === 'Business_register_business' ? String(branch.registrationId) : String(branch.outletId));
+      setLabelVisible(true);
+      setTimeout(() => setLabelVisible(false), 3000);
+    }
+  };
 
   const fetchSubscriptions = async () => {
     try {
@@ -168,15 +207,6 @@ const Home: React.FC = () => {
         } catch (error) {
           console.error(`Error fetching avatar for subscription ${subscription.subscriptionId}:`, error);
         }
-
-
-        return {
-          ...subscription,
-          branch: {
-            ...branch,
-            coordinates, // Add the coordinates to the branch even if avatar fetching fails
-          },
-        };
       }));
 
       setSubscriptions(subscriptionsWithAvatars as SubscriptionInfo[]); // Store updated subscriptions in state
@@ -325,11 +355,10 @@ const Home: React.FC = () => {
       setRegion(newRegion);
       mapRef.current?.animateToRegion(newRegion, 1000);
 
-      // Fetch updated subscriptions
       await fetchSubscriptions();
     }
   };
-
+  
   const menuTranslateY = menuAnimation.interpolate({
     inputRange: [0, 1],
     outputRange: [-50, 0],
@@ -518,7 +547,7 @@ const Home: React.FC = () => {
         <Marker
           coordinate={{ latitude, longitude }}
           onPress={() => handleMarkerPress(branch)}
-        >
+        > 
           <View style={styles.avatarContainer}>
             {avatar.base && <Image source={{ uri: avatar.base.filepath }} style={styles.base} />}
             {avatar.hat && <Image source={{ uri: avatar.hat.filepath }} style={styles.hat} />}
@@ -774,7 +803,7 @@ const Home: React.FC = () => {
   const styles = HomeScreenAvatarStyles(avatarSize);
 
   const renderAvatarMarker = () => {
-    if (!avatar || !userLocation || !region) return null;
+    if (!avatar || !userLocation) return null;
 
     const combinedRotation = direction + (mapHeading * (Math.PI / 180));
 
@@ -811,7 +840,7 @@ const Home: React.FC = () => {
 
 
 
-  return (
+return (
     <TouchableWithoutFeedback onPress={() => menuVisible && toggleMenu(false)}>
       <StyledContainer>
         {menuVisible && (
@@ -819,12 +848,14 @@ const Home: React.FC = () => {
             <View style={homeStyles.overlay} />
           </TouchableWithoutFeedback>
         )}
+        
+        {/* Menu Button */}
         <View style={homeStyles.menuContainer}>
           <TouchableOpacity style={homeStyles.menuButton} onPress={handleMenuPress}>
             <Ionicons name="menu" size={24} color={Colors.white} />
           </TouchableOpacity>
         </View>
-
+        
         {/* Double XP Timer */}
         <View style = {homeStyles.timer}>
           {xpDoublerTimeLeft !== null && (
@@ -868,7 +899,7 @@ const Home: React.FC = () => {
               onRegionChangeComplete={(newRegion) => {
                 setRegion(newRegion);
                 updateMapHeading();
-              }}
+              }} 
             >
               {isLoading ? (
                 <ActivityIndicator size="large" color="#00AB41" />
@@ -880,6 +911,10 @@ const Home: React.FC = () => {
               )}
             </MapView>
           )}
+          {/* Search Bar */}
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+            <SearchBar subscriptions={subscriptions} onBranchSelect={handleBranchSelect} />
+          </View>
           <TouchableOpacity style={homeStyles.centerButton} onPress={centerOnUserLocation}>
             <Ionicons name="locate" size={24} color="black" />
           </TouchableOpacity>

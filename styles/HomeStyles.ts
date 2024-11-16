@@ -24,6 +24,7 @@ export const homeStyles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 3.84,
         elevation: 5,
+        marginLeft: -10,
     },
     menuButtonText: {
         color: 'white',
@@ -163,4 +164,38 @@ export const homeStyles = StyleSheet.create({
         color: '#90EE90',
         fontSize: 16,
     },
+    searchContainer: {
+        flexDirection: 'row', // Align horizontally
+        alignItems: 'center',  // Vertically center the input
+        paddingHorizontal: 10, // Space around the container
+        width: '100%',  // Ensure it takes up full width
+      },
+      searchInput: {
+        flex: 1,  // Ensure it takes up all available space
+        height: 40,
+        borderColor: '#ccc',
+        borderWidth: 1,
+        borderRadius: 5,
+        paddingHorizontal: 10,
+        fontSize: 16,
+      },
+    listItem: {
+        padding: 15,
+        borderBottomWidth: 1,
+        borderColor: '#eee',
+      },
+      branchName: {
+        fontSize: 18,
+        fontWeight: 'bold',
+      },
+      branchDetails: {
+        fontSize: 14,
+        color: '#888',
+      },
+      noResultsText: {
+        fontSize: 16,
+        textAlign: 'center',
+        marginTop: 20,
+        color: '#888',
+      },
 });
