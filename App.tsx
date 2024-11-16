@@ -36,7 +36,7 @@ const Stack = createStackNavigator();
 import Store from './screens/Store';
 import ViewVoucherInventory from './screens/ViewVoucherInventory';
 
-
+import Transactions from './screens/Transactions';
 
 
 
@@ -105,7 +105,7 @@ const App: React.FC = () => {
             <React.Fragment>
               <Stack.Screen name="JoinGroupPurchase" component={JoinGroupPurchase} />
             </React.Fragment>
-
+            <Stack.Screen name="Transactions" component={Transactions} />
           </Stack.Navigator>
         </NavigationContainer>
       </I18nextProvider>
