@@ -28,6 +28,7 @@ import { activateXpDoubler, awardXP, showXPAlert, XP_REWARDS } from '../utils/xp
 import { FontAwesome } from '@expo/vector-icons';
 import SearchBar  from '../components/SearchBar'
 import ShopPanel from '../components/ShopPanel';
+import AvatarActionPanel from '../components/AvatarActionPanel';
 
 interface GeocodeResult {
   latitude: number;
@@ -65,6 +66,7 @@ const Home: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [xpDoublerTimeLeft, setXpDoublerTimeLeft] = useState<number | null>(null);
   const [isTimerModalVisible, setIsTimerModalVisible] = useState(false);
+  const [showActionPanel, setShowActionPanel] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -496,7 +498,7 @@ const Home: React.FC = () => {
 
         if (distanceToAvatar <= RADIUS_THRESHOLD && !isRoaming) {
           setSelectedBranch(targetBranch);
-          setIsShopOpen(true);
+          setShowActionPanel(true);
         } else if (isRoaming) {
           const roamingCoordinates = calculateRoamingCoordinates(
             latitude,
@@ -665,9 +667,19 @@ const Home: React.FC = () => {
     );
   };
 
+  const handleChatPress = () => {
+    // Handle chat functionality
+    console.log('Chat pressed');
+    setShowActionPanel(false);
+    // Navigate to chat or open chat modal
+  };
 
+  const handleShopPress = () => {
+    setShowActionPanel(false);
+    setIsShopOpen(true);
+  };
 
-return (
+  return (
     <TouchableWithoutFeedback onPress={() => menuVisible && toggleMenu(false)}>
       <StyledContainer>
         {menuVisible && (
@@ -756,6 +768,14 @@ return (
             </View>
           )}
         </View>
+        {showActionPanel && selectedBranch && (
+          <AvatarActionPanel
+            selectedBranch={selectedBranch}
+            onClose={() => setShowActionPanel(false)}
+            onShopPress={handleShopPress}
+            onChatPress={handleChatPress}
+          />
+        )}
         {isShopOpen && (
           <ShopPanel
             selectedBranch={selectedBranch!}
