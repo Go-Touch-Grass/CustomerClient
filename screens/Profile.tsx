@@ -21,6 +21,8 @@ interface UserInfo {
   current_level: number;
   xp_for_next_level: number;
   xp_progress: number;
+
+  gem_balance: number;
 }
 
 const Profile: React.FC = () => {
@@ -61,6 +63,29 @@ const Profile: React.FC = () => {
     navigation.navigate('EditProfile', { userInfo });
   };
 
+  const handleDeleteAccount = async () => {
+    Alert.alert('Delete Account', 'Are you sure you want to delete your account? This action cannot be undone.', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await deleteAccount();
+            await removeToken();
+            navigation.replace('Login');
+          } catch (error: any) {
+            Alert.alert('Error', error.response?.data?.message || 'Failed to delete account');
+          }
+        },
+      },
+    ]);
+  };
+
+  const navigateToStore = () => {
+    navigation.navigate('Store');
+  };
+
   const handleChangePassword = () => {
     navigation.navigate('ChangePassword');
   };
@@ -91,12 +116,13 @@ const Profile: React.FC = () => {
                 {t('level')}: {userInfo.currentLevel}
               </Text>
               <Text style={profileStyles.infoText}>
-                {' '}
                 {t('exp-needed-for-next-level')}: {userInfo.xpForNextLevel}
               </Text>
               <Text style={profileStyles.infoText}>
                 {t('exp-earned-in-current-level')} : {userInfo.xpProgress}
               </Text>
+
+              <Text style={profileStyles.infoText}>Gem Balance : {userInfo.gem_balance}</Text>
             </View>
             <View style={profileStyles.progressContainer}>
               <Text style={profileStyles.progressText}>{t('level-progress')}</Text>
@@ -114,6 +140,11 @@ const Profile: React.FC = () => {
             </View>
           </>
         )}
+
+        <TouchableOpacity style={profileStyles.button} onPress={navigateToStore}>
+          <Text style={profileStyles.buttonText}>Store</Text>
+        </TouchableOpacity>
+
         <TouchableOpacity style={profileStyles.button} onPress={handleEditProfile}>
           <Text style={profileStyles.buttonText}>{t('edit-profile')}</Text>
         </TouchableOpacity>
