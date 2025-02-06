@@ -1,6 +1,5 @@
-
 import { useEffect, useState } from "react";
-import { getToken, removeToken } from "../utils/asyncStorage";
+import { getToken, removeToken, storeToken } from "../utils/asyncStorage";
 import axiosInstance from '../api/authApi';
 import { getUserInfo } from '../api/userApi';
 import { useNavigation } from '@react-navigation/native';
@@ -42,14 +41,19 @@ const VerifyOTP = () => {
     };
 
     const handleOTPSubmit = async () => {
-
         try {
             const response = await axiosInstance.post('/auth/verifyOtp', { otp, userId });
 
             if (response.status === 200) {
                 setSuccess('OTP verified successfully!');
-                await removeToken(); // Remove the OTP token if verified
-                navigation.replace('Login');// Redirect to Login for manual login
+                // Store the session token
+                // if (response.data && response.data.token) {
+                    // await storeToken(response.data.token);
+                    // await removeToken(); // Remove the OTP token if verified
+                    navigation.replace('CreateAvatar');
+                // } else {
+                    // setError('No session token received after OTP verification.');
+                // }
             } else {
                 setError('Invalid OTP.');
             }
